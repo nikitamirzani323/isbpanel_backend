@@ -97,23 +97,49 @@
     async function handleSave() {
         let flag = true
         let msg = ""
-        if(pasaran_nama == ""){
-            flag = false
-            msg = "The Pasaran is required"
+        if(sData == "New"){
+            if(idrecord == ""){
+                flag = false
+                msg += "The Code is required\n"
+            }
+            if(pasaran_nama == ""){
+                flag = false
+                msg += "The Pasaran is required\n"
+            }
+            if(pasaran_url == ""){
+                flag = false
+                msg += "The URL is required\n"
+            }
+            if(pasaran_diundi == ""){
+                flag = false
+                msg += "The Hari diundi is required\n"
+            }
+            if(pasaran_jamopen == ""){
+                flag = false
+                msg += "The Jam open is required\n"
+            }
+        }else{
+            if(pasaran_nama == ""){
+                flag = false
+                msg += "The Pasaran is required\n"
+            }
+            if(pasaran_url == ""){
+                flag = false
+                msg += "The URL is required\n"
+            }
+            if(pasaran_diundi == ""){
+                flag = false
+                msg += "The Hari diundi is required\n"
+            }
+            if(pasaran_jamopen == ""){
+                flag = false
+                msg += "The Jam open is required\n"
+            }
         }
-        if(pasaran_url == ""){
-            flag = false
-            msg = "The URL is required"
-        }
-        if(pasaran_diundi == ""){
-            flag = false
-            msg = "The Hari diundi is required"
-        }
-        if(pasaran_jamopen == ""){
-            flag = false
-            msg = "The Jam open is required"
-        }
+        
         if(flag){
+            css_loader = "display: inline-block;";
+            msgloader = "Sending...";
             const res = await fetch("/api/pasaransave", {
                 method: "POST",
                 headers: {
@@ -134,8 +160,7 @@
             });
             const json = await res.json();
             if (json.status == 200) {
-                
-
+                clearField()
                 msgloader = json.message;
                 myModal_newentry.hide()
                 RefreshHalaman()
@@ -156,11 +181,11 @@
         let msg = ""
         if(tanggal_keluaran == ""){
             flag = false
-            msg = "The Tanggal is required"
+            msg += "The Tanggal is required\n"
         }
         if(nomor_keluaran == ""){
             flag = false
-            msg = "The Nomor is required"
+            msg += "The Nomor is required\n"
         }
         if(flag){
             css_loader = "display: inline-block;";
@@ -241,15 +266,15 @@
         let msg = ""
         if(tanggal_prediksi == ""){
             flag = false
-            msg = "The Tanggal is required"
+            msg += "The Tanggal is required\n";
         }
         if(bbfs_prediksi == ""){
             flag = false
-            msg = "The BBFS is required"
+            msg += "The BBFS is required\n";
         }
         if(nomor_prediksi == ""){
             flag = false
-            msg = "The Nomor is required"
+            msg += "The Nomor is required\n";
         }
         if(flag){
             css_loader = "display: inline-block;";
@@ -262,7 +287,7 @@
                 },
                 body: JSON.stringify({
                     sdata: sData,
-                    page:"KELUARAN-SAVE",
+                    page:"PREDIKSI-SAVE",
                     pasaran_id: idrecord,
                     prediksi_tanggal: tanggal_prediksi,
                     Prediksi_bbfs: bbfs_prediksi,
@@ -445,7 +470,6 @@
             if(parseInt(temp) <65 || parseInt(temp)>90){
                 idrecord = ""
             }
-            console.log(temp)
         }
     }
     const handleKeyboard_format = () => {
@@ -595,68 +619,80 @@
 
 <Modal
 	modal_id="modalentry"
-	modal_size="modal-dialog-centered"
+	modal_size="modal-dialog-centered modal-lg"
 	modal_title="{title_page+"/"+sData}"
     modal_footer_css="padding:5px;"
 	modal_footer={true}>
 	<slot:template slot="body">
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">Code</label>
-			<Input
-                bind:value={idrecord}
-                on:keyup={handleKeyboard_formatstring}
-                minlength=2
-                maxlength=4
-                type="text"
-                placeholder="Code"/>
-		</div>
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">Pasaran</label>
-			<Input
-                bind:value={pasaran_nama}
-                type="text"
-                placeholder="Pasaran"/>
-		</div>
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">URL</label>
-			<Input
-                bind:value={pasaran_url}
-                type="text"
-                placeholder="URL"/>
-		</div>
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">Hari diundi</label>
-			<Input
-                bind:value={pasaran_diundi}
-                type="text"
-                placeholder="Hari diundi"/>
-		</div>
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">JADWAL</label>
-			<Input
-                bind:value={pasaran_jamopen}
-                on:keyup={handleKeyboard_format}
-                style="text-align:center;"
-                type="text"
-                placeholder="Jadwal"/>
-		</div>
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">Display</label>
-			<Input
-                bind:value={pasaran_display}
-                on:keyup={handleKeyboard_format}
-                type="text"
-                style="text-align:right;"
-                placeholder="Display"/>
-		</div>
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">Status</label>
-			<select 
-                class="form-control"
-                bind:value={pasaran_status}>
-                <option value="Y">SHOW</option>
-            </select>
-		</div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">Code</label>
+                    <Input
+                        bind:value={idrecord}
+                        on:keyup={handleKeyboard_formatstring}
+                        class="required"
+                        minlength=2
+                        maxlength=4
+                        type="text"
+                        placeholder="Code"/>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">Pasaran</label>
+                    <Input
+                        bind:value={pasaran_nama}
+                        class="required"
+                        type="text"
+                        placeholder="Pasaran"/>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">URL</label>
+                    <Input
+                        bind:value={pasaran_url}
+                        class="required"
+                        type="text"
+                        placeholder="URL"/>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">Hari diundi</label>
+                    <Input
+                        bind:value={pasaran_diundi}
+                        class="required"
+                        type="text"
+                        placeholder="Hari diundi"/>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">JADWAL</label>
+                    <Input
+                        bind:value={pasaran_jamopen}
+                        on:keyup={handleKeyboard_format}
+                        class="required"
+                        style="text-align:center;"
+                        type="text"
+                        placeholder="Jadwal"/>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">Display</label>
+                    <Input
+                        bind:value={pasaran_display}
+                        on:keyup={handleKeyboard_format}
+                        class="required"
+                        type="text"
+                        style="text-align:right;"
+                        placeholder="Display"/>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">Status</label>
+                    <select 
+                        class="form-control required"
+                        bind:value={pasaran_status}>
+                        <option value="Y">SHOW</option>
+                    </select>
+                </div>
+            </div>
+        </div>
 	</slot:template>
 	<slot:template slot="footer">
         <Button
@@ -671,58 +707,69 @@
 
 <Modal
 	modal_id="modalentryedit"
-	modal_size="modal-dialog-centered"
+	modal_size="modal-dialog-centered modal-lg"
 	modal_title="{title_page+"/"+sData}"
     modal_footer_css="padding:5px;"
 	modal_footer={true}>
 	<slot:template slot="body">
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">Pasaran</label>
-			<Input
-                bind:value={pasaran_nama}
-                type="text"
-                placeholder="Pasaran"/>
-		</div>
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">URL</label>
-			<Input
-                bind:value={pasaran_url}
-                type="text"
-                placeholder="URL"/>
-		</div>
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">Hari diundi</label>
-			<Input
-                bind:value={pasaran_diundi}
-                type="text"
-                placeholder="Hari diundi"/>
-		</div>
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">JADWAL</label>
-			<Input
-                bind:value={pasaran_jamopen}
-                on:keyup={handleKeyboard_format}
-                style="text-align:center;"
-                type="text"
-                placeholder="Jadwal"/>
-		</div>
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">Display</label>
-			<Input
-                bind:value={pasaran_display}
-                on:keyup={handleKeyboard_format}
-                type="text"
-                style="text-align:right;"
-                placeholder="Display"/>
-		</div>
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">Status</label>
-			<select 
-                class="form-control"
-                bind:value={pasaran_status}>
-                <option value="Y">SHOW</option>
-            </select>
-		</div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">Pasaran</label>
+                    <Input
+                        bind:value={pasaran_nama}
+                        class="required"
+                        type="text"
+                        placeholder="Pasaran"/>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">URL</label>
+                    <Input
+                        bind:value={pasaran_url}
+                        class="required"
+                        type="text"
+                        placeholder="URL"/>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">Hari diundi</label>
+                    <Input
+                        bind:value={pasaran_diundi}
+                        class="required"
+                        type="text"
+                        placeholder="Hari diundi"/>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">JADWAL</label>
+                    <Input
+                        bind:value={pasaran_jamopen}
+                        on:keyup={handleKeyboard_format}
+                        class="required"
+                        style="text-align:center;"
+                        type="text"
+                        placeholder="Jadwal"/>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">Display</label>
+                    <Input
+                        bind:value={pasaran_display}
+                        on:keyup={handleKeyboard_format}
+                        class="required"
+                        type="text"
+                        style="text-align:right;"
+                        placeholder="Display"/>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">Status</label>
+                    <select 
+                        class="form-control required"
+                        bind:value={pasaran_status}>
+                        <option value="Y">SHOW</option>
+                    </select>
+                </div>
+            </div>
+        </div>
 	</slot:template>
     <slot:template slot="footer">
         <Button
@@ -792,6 +839,7 @@
             <label for="exampleForm" class="form-label">Tanggal</label>
 			<Input
                 bind:value={tanggal_keluaran}
+                class="required"
                 type="date"
                 name="date"
                 id="exampleDate"
@@ -803,6 +851,7 @@
 			<Input
                 bind:value={nomor_keluaran}
                 on:keyup={handleKeyboard_format}
+                class="required"
                 minlength=4
                 maxlength=4
                 type="text"
@@ -876,6 +925,7 @@
             <label for="exampleForm" class="form-label">Tanggal</label>
 			<Input
                 bind:value={tanggal_prediksi}
+                class="required"
                 type="date"
                 name="date"
                 id="exampleDate"
@@ -888,6 +938,7 @@
                 <Input
                     bind:value={bbfs_prediksi}
                     on:keyup={handleKeyboard_format}
+                    class="required"
                     minlength=6
                     maxlength=6
                     type="text"
@@ -904,6 +955,7 @@
             <Input
                     bind:value={nomor_prediksi}
                     on:keyup={handleKeyboard_format}
+                    class="required"
                     minlength=6
                     maxlength=6
                     type="text"
