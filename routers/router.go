@@ -20,6 +20,21 @@ func Init() *fiber.App {
 		ByteRange: true,
 		Browse:    true,
 	})
+	app.Get("/ipaddress", func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"status":      fiber.StatusOK,
+			"message":     "Success",
+			"record":      "data",
+			"BASEURL":     c.BaseURL(),
+			"HOSTNAME":    c.Hostname(),
+			"IP":          c.IP(),
+			"IPS":         c.IPs(),
+			"OriginalURL": c.OriginalURL(),
+			"Path":        c.Path(),
+			"Protocol":    c.Protocol(),
+			"Subdomain":   c.Subdomains(),
+		})
+	})
 	app.Get("/dashboard", monitor.New())
 
 	app.Post("/api/login", controllers.CheckLogin)
