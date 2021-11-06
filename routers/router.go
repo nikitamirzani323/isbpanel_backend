@@ -35,6 +35,7 @@ func Init() *fiber.App {
 	app.Post("/api/pasaransave", middleware.JWTProtected(), controllers.Pasaransave)
 	app.Post("/api/keluaran", middleware.JWTProtected(), controllers.Keluaranhome)
 	app.Post("/api/keluaransave", middleware.JWTProtected(), controllers.Keluaransave)
+	app.Post("/api/keluarandelete", middleware.JWTProtected(), controllers.Keluarandelete)
 
 	return app
 }

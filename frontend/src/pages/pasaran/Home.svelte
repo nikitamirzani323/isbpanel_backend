@@ -54,7 +54,7 @@
         myModal_newentry.show();
     };
     const RemoveKeluaran = (e) => {
-        alert(e)
+        handleDeleteKeluaran(e)
     };
     const ShowKeluaran = (e,nama) => {
         sData = "Edit"
@@ -145,7 +145,7 @@
                 },
                 body: JSON.stringify({
                     sdata: sData,
-                    page:"PASARAN-SAVE",
+                    page:"KELUARAN-SAVE",
                     pasaran_id: idrecord,
                     keluaran_tanggal: tanggal_keluaran,
                     keluaran_nomor: nomor_keluaran,
@@ -154,7 +154,46 @@
             const json = await res.json();
             if (json.status == 200) {
                 call_keluaran()
+                RefreshHalaman()
                 nomor_keluaran = "";
+                msgloader = json.message;
+            } else if(json.status == 403){
+                alert(json.message)
+            } else {
+                msgloader = json.message;
+            }
+            setTimeout(function () {
+                css_loader = "display: none;";
+            }, 1000);
+        }else{
+            alert(msg)
+        }
+    }
+    async function handleDeleteKeluaran(e) {
+        let flag = true
+        let msg = ""
+        if(e == ""){
+            flag = false
+            msg = "The Keluaran is required"
+        }
+        if(flag){
+            css_loader = "display: inline-block;";
+            msgloader = "Sending...";
+            const res = await fetch("/api/keluarandelete", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + token,
+                },
+                body: JSON.stringify({
+                    page:"KELUARAN-DELETE",
+                    pasaran_id: idrecord,
+                    keluaran_id: e,
+                }),
+            });
+            const json = await res.json();
+            if (json.status == 200) {
+                call_keluaran()
                 msgloader = json.message;
             } else if(json.status == 403){
                 alert(json.message)
@@ -268,9 +307,9 @@
                                     <th NOWRAP width="1%" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">CODE</th>
                                     <th NOWRAP width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">PASARAN</th>
                                     <th NOWRAP width="20%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">HARI DIUNDI</th>
-                                    <th NOWRAP width="20%" style="text-align: center;vertical-align: top;font-weight:bold;font-size: {table_header_font};">JADWAL</th>
-                                    <th NOWRAP width="20%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">KELUARAN</th>
-                                    <th NOWRAP width="20%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">PREDIKSI</th>
+                                    <th NOWRAP width="10%" style="text-align: center;vertical-align: top;font-weight:bold;font-size: {table_header_font};">JADWAL</th>
+                                    <th NOWRAP width="10%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">KELUARAN</th>
+                                    <th NOWRAP width="10%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">PREDIKSI</th>
                                 </tr>
                             </thead>
                             {#if totalrecord > 0}
@@ -305,7 +344,7 @@
                                         </td>
                                         <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.pasaran_diundi}</td>
                                         <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.pasaran_jamjadwal}</td>
-                                        <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};"></td>
+                                        <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.pasaran_keluaran}</td>
                                         <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};"></td>
                                     </tr>
                                 {/each}

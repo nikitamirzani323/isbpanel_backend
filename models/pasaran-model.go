@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"database/sql"
 	"log"
 	"strconv"
 	"time"
@@ -52,11 +53,30 @@ func Fetch_pasaranHome() (helpers.Response, error) {
 		if updatepasarantogel_db != "" {
 			update = updatepasarantogel_db + ", " + updatedatepasarantogel_db
 		}
+
+		var (
+			datekeluaran_db, nomorkeluaran_db string
+		)
+		sql_selectpasaran := `SELECT 
+			datekeluaran , nomorkeluaran
+			FROM ` + configs.DB_tbl_trx_keluaran + ` 
+			WHERE idpasarantogel = ? 
+			ORDER BY datekeluaran DESC LIMIT 1
+		`
+		row_keluaran := con.QueryRowContext(ctx, sql_selectpasaran, idpasarantogel_db)
+		switch e_keluaran := row_keluaran.Scan(&datekeluaran_db, &nomorkeluaran_db); e_keluaran {
+		case sql.ErrNoRows:
+		case nil:
+		default:
+			helpers.ErrorCheck(e_keluaran)
+		}
+
 		obj.Pasaran_id = idpasarantogel_db
 		obj.Pasaran_name = nmpasarantogel_db
 		obj.Pasaran_url = urlpasaran_db
 		obj.Pasaran_diundi = pasarandiundi_db
 		obj.Pasaran_jamjadwal = jamjadwal_db
+		obj.Pasaran_keluaran = datekeluaran_db + " - " + nomorkeluaran_db
 		obj.Pasaran_create = create
 		obj.Pasaran_update = update
 		arraobj = append(arraobj, obj)
@@ -246,6 +266,52 @@ func Save_keluaran(admin, idpasaran, tanggal, nomor string) (helpers.Response, e
 		}
 	} else {
 		msg = "Duplicate Entry"
+	}
+
+	if flag {
+		res.Status = fiber.StatusOK
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	} else {
+		res.Status = fiber.StatusBadRequest
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	}
+
+	return res, nil
+}
+func Delete_keluaran(admin, idpasaran string, idtrxkeluaran int) (helpers.Response, error) {
+	var res helpers.Response
+	msg := "Failed"
+	con := db.CreateCon()
+	ctx := context.Background()
+	render_page := time.Now()
+	flag := false
+
+	flag = CheckDB(configs.DB_tbl_trx_keluaran, "idtrxkeluaran", strconv.Itoa(idtrxkeluaran))
+	if flag {
+		sql_delete := `
+			DELETE FROM
+			` + configs.DB_tbl_trx_keluaran + ` 
+			WHERE idtrxkeluaran=? AND idpasarantogel=? 
+		`
+		stmt_delete, e_delete := con.PrepareContext(ctx, sql_delete)
+		helpers.ErrorCheck(e_delete)
+		defer stmt_delete.Close()
+		rec_delete, e_delete := stmt_delete.ExecContext(ctx, idtrxkeluaran, idpasaran)
+
+		helpers.ErrorCheck(e_delete)
+		delete, e := rec_delete.RowsAffected()
+		helpers.ErrorCheck(e)
+		if delete > 0 {
+			flag = true
+			msg = "Succes"
+			log.Println("Data Berhasil di delete")
+		}
+	} else {
+		msg = "Data Not Found"
 	}
 
 	if flag {

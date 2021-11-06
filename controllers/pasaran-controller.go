@@ -30,6 +30,7 @@ func Pasaranhome(c *fiber.Ctx) error {
 		pasaran_url, _ := jsonparser.GetString(value, "pasaran_url")
 		pasaran_diundi, _ := jsonparser.GetString(value, "pasaran_diundi")
 		pasaran_jamjadwal, _ := jsonparser.GetString(value, "pasaran_jamjadwal")
+		pasaran_keluaran, _ := jsonparser.GetString(value, "pasaran_keluaran")
 		pasaran_create, _ := jsonparser.GetString(value, "pasaran_create")
 		pasaran_update, _ := jsonparser.GetString(value, "pasaran_update")
 
@@ -38,6 +39,7 @@ func Pasaranhome(c *fiber.Ctx) error {
 		obj.Pasaran_url = pasaran_url
 		obj.Pasaran_diundi = pasaran_diundi
 		obj.Pasaran_jamjadwal = pasaran_jamjadwal
+		obj.Pasaran_keluaran = pasaran_keluaran
 		obj.Pasaran_create = pasaran_create
 		obj.Pasaran_update = pasaran_update
 		arraobj = append(arraobj, obj)
@@ -231,7 +233,58 @@ func Keluaransave(c *fiber.Ctx) error {
 			"record":  nil,
 		})
 	}
+	val_pasaran := helpers.DeleteRedis(Field_home_redis)
 	val_keluaran := helpers.DeleteRedis(Field_keluaran_redis + "_" + client.Pasaran_id)
+	log.Printf("Redis Delete BACKEND PASARAN : %d", val_pasaran)
+	log.Printf("Redis Delete BACKEND KELUARAN : %d", val_keluaran)
+	return c.JSON(result)
+}
+func Keluarandelete(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_keluarandelete)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+	user := c.Locals("jwt").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	temp_decp := helpers.Decryption(name)
+	client_admin, _ := helpers.Parsing_Decry(temp_decp, "==")
+
+	result, err := models.Delete_keluaran(client_admin, client.Pasaran_id, client.Keluaran_id)
+	if err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+	val_pasaran := helpers.DeleteRedis(Field_home_redis)
+	val_keluaran := helpers.DeleteRedis(Field_keluaran_redis + "_" + client.Pasaran_id)
+	log.Printf("Redis Delete BACKEND PASARAN : %d", val_pasaran)
 	log.Printf("Redis Delete BACKEND KELUARAN : %d", val_keluaran)
 	return c.JSON(result)
 }
