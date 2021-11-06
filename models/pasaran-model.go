@@ -71,12 +71,30 @@ func Fetch_pasaranHome() (helpers.Response, error) {
 			helpers.ErrorCheck(e_keluaran)
 		}
 
+		var (
+			dateprediksi_db, bbfsprediksi_db, nomorprediksi_db string
+		)
+		sql_selectprediksi := `SELECT 
+			dateprediksi , bbfsprediksi, nomorprediksi
+			FROM ` + configs.DB_tbl_trx_prediksi + ` 
+			WHERE idpasarantogel = ? 
+			ORDER BY dateprediksi DESC LIMIT 1
+		`
+		row_prediksi := con.QueryRowContext(ctx, sql_selectprediksi, idpasarantogel_db)
+		switch e_prediksi := row_prediksi.Scan(&dateprediksi_db, &bbfsprediksi_db, &nomorprediksi_db); e_prediksi {
+		case sql.ErrNoRows:
+		case nil:
+		default:
+			helpers.ErrorCheck(e_prediksi)
+		}
+
 		obj.Pasaran_id = idpasarantogel_db
 		obj.Pasaran_name = nmpasarantogel_db
 		obj.Pasaran_url = urlpasaran_db
 		obj.Pasaran_diundi = pasarandiundi_db
 		obj.Pasaran_jamjadwal = jamjadwal_db
 		obj.Pasaran_keluaran = datekeluaran_db + " - " + nomorkeluaran_db
+		obj.Pasaran_prediksi = dateprediksi_db + " - " + bbfsprediksi_db + " - " + nomorprediksi_db
 		obj.Pasaran_create = create
 		obj.Pasaran_update = update
 		arraobj = append(arraobj, obj)
@@ -231,7 +249,7 @@ func Save_keluaran(admin, idpasaran, tanggal, nomor string) (helpers.Response, e
 	render_page := time.Now()
 	flag := false
 
-	flag = CheckDB(configs.DB_tbl_trx_keluaran, "datekeluaran", tanggal)
+	flag = CheckDBTwoField(configs.DB_tbl_trx_keluaran, "datekeluaran", tanggal, "idpasarantogel", idpasaran)
 	if !flag {
 		sql_insert := `
 			insert into
@@ -301,6 +319,155 @@ func Delete_keluaran(admin, idpasaran string, idtrxkeluaran int) (helpers.Respon
 		helpers.ErrorCheck(e_delete)
 		defer stmt_delete.Close()
 		rec_delete, e_delete := stmt_delete.ExecContext(ctx, idtrxkeluaran, idpasaran)
+
+		helpers.ErrorCheck(e_delete)
+		delete, e := rec_delete.RowsAffected()
+		helpers.ErrorCheck(e)
+		if delete > 0 {
+			flag = true
+			msg = "Succes"
+			log.Println("Data Berhasil di delete")
+		}
+	} else {
+		msg = "Data Not Found"
+	}
+
+	if flag {
+		res.Status = fiber.StatusOK
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	} else {
+		res.Status = fiber.StatusBadRequest
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	}
+
+	return res, nil
+}
+func Fetch_prediksi(idpasaran string) (helpers.Response, error) {
+	var obj entities.Model_prediksi
+	var arraobj []entities.Model_prediksi
+	var res helpers.Response
+	msg := "Data Not Found"
+	con := db.CreateCon()
+	ctx := context.Background()
+	start := time.Now()
+
+	sql_select := `SELECT 
+			idprediksi, dateprediksi, 
+			bbfsprediksi , nomorprediksi
+			FROM ` + configs.DB_tbl_trx_prediksi + ` 
+			WHERE idpasarantogel=? 
+			ORDER BY dateprediksi DESC LIMIT 181  
+		`
+
+	row, err := con.QueryContext(ctx, sql_select, idpasaran)
+	helpers.ErrorCheck(err)
+	for row.Next() {
+		var (
+			idprediksi_db                                      int
+			dateprediksi_db, bbfsprediksi_db, nomorprediksi_db string
+		)
+
+		err = row.Scan(&idprediksi_db, &dateprediksi_db, &bbfsprediksi_db, &nomorprediksi_db)
+
+		helpers.ErrorCheck(err)
+
+		obj.Prediksi_id = idprediksi_db
+		obj.Prediksi_tanggal = dateprediksi_db
+		obj.Prediksi_bbfs = bbfsprediksi_db
+		obj.Prediksi_nomor = nomorprediksi_db
+		arraobj = append(arraobj, obj)
+		msg = "Success"
+	}
+	defer row.Close()
+
+	res.Status = fiber.StatusOK
+	res.Message = msg
+	res.Record = arraobj
+	res.Time = time.Since(start).String()
+
+	return res, nil
+}
+func Save_prediksi(admin, idpasaran, tanggal, bbfs, nomor string) (helpers.Response, error) {
+	var res helpers.Response
+	msg := "Failed"
+	con := db.CreateCon()
+	ctx := context.Background()
+	tglnow, _ := goment.New()
+	render_page := time.Now()
+	flag := false
+
+	flag = CheckDBTwoField(configs.DB_tbl_trx_prediksi, "dateprediksi", tanggal, "idpasarantogel", idpasaran)
+	if !flag {
+		sql_insert := `
+			insert into
+			` + configs.DB_tbl_trx_prediksi + ` (
+				idprediksi  , idpasarantogel, dateprediksi, bbfsprediksi, nomorprediksi, 
+				createprediksi, createdateprediksi
+			) values (
+				? ,?, ?, ?, ?,
+				?, ?
+			)
+		`
+		stmt_insert, e_insert := con.PrepareContext(ctx, sql_insert)
+		helpers.ErrorCheck(e_insert)
+		defer stmt_insert.Close()
+		field_column := configs.DB_tbl_trx_prediksi + tglnow.Format("YYYY")
+		idrecord_counter := Get_counter(field_column)
+		res_newrecord, e_newrecord := stmt_insert.ExecContext(
+			ctx,
+			tglnow.Format("YY")+strconv.Itoa(idrecord_counter),
+			idpasaran, tanggal, bbfs, nomor,
+			admin,
+			tglnow.Format("YYYY-MM-DD HH:mm:ss"))
+		helpers.ErrorCheck(e_newrecord)
+		insert, e := res_newrecord.RowsAffected()
+		helpers.ErrorCheck(e)
+		if insert > 0 {
+			flag = true
+			msg = "Succes"
+			log.Println("Data Berhasil di save")
+		}
+	} else {
+		msg = "Duplicate Entry"
+	}
+
+	if flag {
+		res.Status = fiber.StatusOK
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	} else {
+		res.Status = fiber.StatusBadRequest
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	}
+
+	return res, nil
+}
+func Delete_prediksi(admin, idpasaran string, idprediksi int) (helpers.Response, error) {
+	var res helpers.Response
+	msg := "Failed"
+	con := db.CreateCon()
+	ctx := context.Background()
+	render_page := time.Now()
+	flag := false
+
+	flag = CheckDB(configs.DB_tbl_trx_prediksi, "idprediksi ", strconv.Itoa(idprediksi))
+	if flag {
+		sql_delete := `
+			DELETE FROM
+			` + configs.DB_tbl_trx_prediksi + ` 
+			WHERE idprediksi =? AND idpasarantogel=? 
+		`
+		stmt_delete, e_delete := con.PrepareContext(ctx, sql_delete)
+		helpers.ErrorCheck(e_delete)
+		defer stmt_delete.Close()
+		rec_delete, e_delete := stmt_delete.ExecContext(ctx, idprediksi, idpasaran)
 
 		helpers.ErrorCheck(e_delete)
 		delete, e := rec_delete.RowsAffected()

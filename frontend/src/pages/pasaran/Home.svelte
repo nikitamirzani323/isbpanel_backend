@@ -15,6 +15,7 @@
 	export let totalrecord = 0
     let dispatch = createEventDispatcher();
     let listKeluaran = []
+    let listPrediksi = []
 	let title_page = "PASARAN"
     let sData = "";
     let myModal_newentry = "";
@@ -24,6 +25,9 @@
     let pasaran_jamopen ="";
     let tanggal_keluaran ="";
     let nomor_keluaran ="";
+    let tanggal_prediksi ="";
+    let bbfs_prediksi ="";
+    let nomor_prediksi ="";
     let idrecord = "";
     let record = ""
     let record_message = ""
@@ -56,6 +60,9 @@
     const RemoveKeluaran = (e) => {
         handleDeleteKeluaran(e)
     };
+    const RemovePrediksi = (e) => {
+        handleDeletePrediksi(e)
+    };
     const ShowKeluaran = (e,nama) => {
         sData = "Edit"
         idrecord = e
@@ -64,8 +71,20 @@
         myModal_newentry.show();
         call_keluaran()
     };
+    const ShowPrediksi = (e,nama) => {
+        sData = "Edit"
+        idrecord = e
+        pasaran_nama = nama
+        myModal_newentry = new bootstrap.Modal(document.getElementById("modallistprediksi"));
+        myModal_newentry.show();
+        call_prediksi()
+    };
     const ShowNewKeluaran = () => {
         myModal_newentry = new bootstrap.Modal(document.getElementById("modalentrykeluaran"));
+        myModal_newentry.show();
+    };
+    const ShowNewPrediksi= () => {
+        myModal_newentry = new bootstrap.Modal(document.getElementById("modalentryprediksi"));
         myModal_newentry.show();
     };
     async function handleSave() {
@@ -194,6 +213,98 @@
             const json = await res.json();
             if (json.status == 200) {
                 call_keluaran()
+                RefreshHalaman()
+                msgloader = json.message;
+            } else if(json.status == 403){
+                alert(json.message)
+            } else {
+                msgloader = json.message;
+            }
+            setTimeout(function () {
+                css_loader = "display: none;";
+            }, 1000);
+        }else{
+            alert(msg)
+        }
+    }
+    async function handleSavePrediksi() {
+        let flag = true
+        let msg = ""
+        if(tanggal_prediksi == ""){
+            flag = false
+            msg = "The Tanggal is required"
+        }
+        if(bbfs_prediksi == ""){
+            flag = false
+            msg = "The BBFS is required"
+        }
+        if(nomor_prediksi == ""){
+            flag = false
+            msg = "The Nomor is required"
+        }
+        if(flag){
+            css_loader = "display: inline-block;";
+            msgloader = "Sending...";
+            const res = await fetch("/api/prediksisave", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + token,
+                },
+                body: JSON.stringify({
+                    sdata: sData,
+                    page:"KELUARAN-SAVE",
+                    pasaran_id: idrecord,
+                    prediksi_tanggal: tanggal_prediksi,
+                    Prediksi_bbfs: bbfs_prediksi,
+                    Prediksi_nomor: nomor_prediksi,
+                }),
+            });
+            const json = await res.json();
+            if (json.status == 200) {
+                call_prediksi()
+                RefreshHalaman()
+                nomor_prediksi = "";
+                bbfs_prediksi = "";
+                msgloader = json.message;
+            } else if(json.status == 403){
+                alert(json.message)
+            } else {
+                msgloader = json.message;
+            }
+            setTimeout(function () {
+                css_loader = "display: none;";
+            }, 1000);
+        }else{
+            alert(msg)
+        }
+    }
+    async function handleDeletePrediksi(e) {
+        let flag = true
+        let msg = ""
+        if(e == ""){
+            flag = false
+            msg = "The Prediksi is required"
+        }
+        if(flag){
+            css_loader = "display: inline-block;";
+            msgloader = "Sending...";
+            const res = await fetch("/api/prediksidelete", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + token,
+                },
+                body: JSON.stringify({
+                    page:"PREDIKSI-DELETE",
+                    pasaran_id: idrecord,
+                    prediksi_id: e,
+                }),
+            });
+            const json = await res.json();
+            if (json.status == 200) {
+                call_prediksi()
+                RefreshHalaman()
                 msgloader = json.message;
             } else if(json.status == 403){
                 alert(json.message)
@@ -246,6 +357,45 @@
             css_loader = "display: none;";
         }, 1000);
     }
+    async function call_prediksi() {
+        listPrediksi = []
+        css_loader = "display: inline-block;";
+        msgloader = "Fetching...";
+        const res = await fetch("/api/prediksi", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token,
+            },
+            body: JSON.stringify({
+                page:"PASARAN-SAVE",
+                pasaran_id: idrecord,
+            }),
+        });
+        const json = await res.json();
+        if (json.status == 200) {
+            record = json.record;
+            record_message = json.message;
+            if (record != null) {
+                totalrecord_keluaran = record.length;
+                for (var i = 0; i < record.length; i++) {
+                    listPrediksi = [
+                        ...listPrediksi,
+                        {
+                            prediksi_id: record[i]["prediksi_id"],
+                            prediksi_tanggal: record[i]["prediksi_tanggal"],
+                            prediksi_bbfs: record[i]["prediksi_bbfs"],
+                            prediksi_nomor: record[i]["prediksi_nomor"]
+                        },
+                    ];
+                }
+            }
+        } 
+        msgloader = json.message;
+        setTimeout(function () {
+            css_loader = "display: none;";
+        }, 1000);
+    }
     function clearField(){
         pasaran_nama = "";
         pasaran_diundi ="";
@@ -262,6 +412,12 @@
             case "SAVE_KELUARAN":
                 handleSaveKeluaran();
                 break;
+            case "NEW_PREDIKSI":
+                ShowNewPrediksi();
+                break;
+            case "SAVE_PREDIKSI":
+                handleSavePrediksi();
+                break;
             case "REFRESH":
                 RefreshHalaman();break;
             case "SAVE":
@@ -276,7 +432,36 @@
 				nomor_keluaran = "";
 			}
 		}
-       
+        for (let i = 0; i < nomor_prediksi.length; i++) {
+			numbera = parseInt(nomor_prediksi[i]);
+			if (isNaN(numbera)) {
+				nomor_prediksi = "";
+			}
+		}
+        for (let i = 0; i < bbfs_prediksi.length; i++) {
+			numbera = parseInt(bbfs_prediksi[i]);
+			if (isNaN(numbera)) {
+				bbfs_prediksi = "";
+			}
+		}
+    }
+    function generate(){
+        let numbergenerate = (Math.floor(Math.random() * 1000000) + 1000000).toString().substring(1);
+        let temp_array = []
+        let temp2_array = []
+        let temp3 = ""
+        bbfs_prediksi = numbergenerate
+        for(let i = 0;i<bbfs_prediksi.length;i++){
+            temp_array.push(bbfs_prediksi[i])
+        }
+        temp2_array = shuffle(temp_array)
+        for(let i=0;i<4;i++){
+            temp3 += temp2_array[i]
+        }
+        nomor_prediksi = temp3
+    }
+    function shuffle(array) {
+        return array.sort(() => Math.random() - 0.5);
     }
 </script>
 <div id="loader" style="margin-left:50%;{css_loader}">
@@ -345,7 +530,7 @@
                                         <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.pasaran_diundi}</td>
                                         <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.pasaran_jamjadwal}</td>
                                         <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.pasaran_keluaran}</td>
-                                        <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};"></td>
+                                        <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.pasaran_prediksi}</td>
                                     </tr>
                                 {/each}
                             </tbody>
@@ -520,6 +705,106 @@
         <Button
             on:click={callFunction}
             button_function="SAVE_KELUARAN"
+            button_title="Save"
+            button_css="btn-warning"/>
+	</slot:template>
+</Modal>
+
+<Modal
+	modal_id="modallistprediksi"
+	modal_size="modal-dialog-centered"
+	modal_title="Prediksi : {pasaran_nama}"
+    modal_body_css="padding:5px;margin:0px;height:500px;overflow-y: scroll;"
+    modal_footer_css="padding:5px;"
+	modal_footer={true}>
+	<slot:template slot="body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th NOWRAP width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">&nbsp;</th>
+                    <th NOWRAP width="*" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">DATE</th>
+                    <th NOWRAP width="20%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">BBFS</th>
+                    <th NOWRAP width="20%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NOMOR</th>
+                </tr>
+            </thead>
+            <tbody>
+                {#each listPrediksi as rec}
+                <tr>
+                    <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
+                        <i 
+                            on:click={() => {
+                                RemovePrediksi(rec.prediksi_id);
+                            }} 
+                            class="bi bi-trash"></i>
+                    </td>
+                    <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.prediksi_tanggal}</td>
+                    <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.prediksi_bbfs}</td>
+                    <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.prediksi_nomor}</td>
+                </tr>
+                {/each}
+                
+            </tbody>
+        </table>
+        
+	</slot:template>
+    <slot:template slot="footer">
+        <Button
+            on:click={callFunction}
+            button_function="NEW_PREDIKSI"
+            button_title="New"
+            button_css="btn-primary"/>
+	</slot:template>
+</Modal>
+
+<Modal
+	modal_id="modalentryprediksi"
+	modal_size="modal-dialog-centered"
+	modal_title="Prediksi {pasaran_nama +"/"+sData}"
+    modal_footer_css="padding:5px;"
+	modal_footer={true}>
+	<slot:template slot="body">
+        <div class="mb-3">
+            <label for="exampleForm" class="form-label">Tanggal</label>
+			<Input
+                bind:value={tanggal_prediksi}
+                type="date"
+                name="date"
+                id="exampleDate"
+                data-date-format="dd-mm-yyyy"
+                placeholder="date placeholder"/>
+		</div>
+        <div class="mb-3">
+            <label for="exampleForm" class="form-label">BBFS</label>
+            <div class="input-group mb-3">
+                <Input
+                    bind:value={bbfs_prediksi}
+                    on:keyup={handleKeyboard_format}
+                    minlength=6
+                    maxlength=6
+                    type="text"
+                    placeholder="Nomor BBFS"/>
+                <button
+                    on:click={() => {
+                        generate();
+                    }}  
+                    type="button" class="btn btn-info">Generate</button>
+            </div>
+		</div>
+        <div class="mb-3">
+            <label for="exampleForm" class="form-label">Nomor</label>
+            <Input
+                    bind:value={nomor_prediksi}
+                    on:keyup={handleKeyboard_format}
+                    minlength=6
+                    maxlength=6
+                    type="text"
+                    placeholder="Nomor Prediksi"/>
+		</div>
+	</slot:template>
+    <slot:template slot="footer">
+        <Button
+            on:click={callFunction}
+            button_function="SAVE_PREDIKSI"
             button_title="Save"
             button_css="btn-warning"/>
 	</slot:template>

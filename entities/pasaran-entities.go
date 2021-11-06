@@ -7,6 +7,7 @@ type Model_pasaran struct {
 	Pasaran_diundi    string `json:"pasaran_diundi"`
 	Pasaran_jamjadwal string `json:"pasaran_jamjadwal"`
 	Pasaran_keluaran  string `json:"pasaran_keluaran"`
+	Pasaran_prediksi  string `json:"pasaran_prediksi"`
 	Pasaran_create    string `json:"pasaran_create"`
 	Pasaran_update    string `json:"pasaran_update"`
 }
@@ -15,6 +16,12 @@ type Model_keluaran struct {
 	Keluaran_tanggal string `json:"keluaran_tanggal"`
 	Keluaran_periode string `json:"keluaran_periode"`
 	Keluaran_nomor   string `json:"keluaran_nomor"`
+}
+type Model_prediksi struct {
+	Prediksi_id      int    `json:"prediksi_id"`
+	Prediksi_tanggal string `json:"prediksi_tanggal"`
+	Prediksi_bbfs    string `json:"prediksi_bbfs"`
+	Prediksi_nomor   string `json:"prediksi_nomor"`
 }
 type Controller_pasaransave struct {
 	Sdata             string `json:"sdata" validate:"required"`
@@ -40,4 +47,17 @@ type Controller_keluarandelete struct {
 	Page        string `json:"page" validate:"required"`
 	Pasaran_id  string `json:"pasaran_id"`
 	Keluaran_id int    `json:"keluaran_id"`
+}
+type Controller_prediksisave struct {
+	Sdata            string `json:"sdata" validate:"required"`
+	Page             string `json:"page" validate:"required"`
+	Pasaran_id       string `json:"pasaran_id"`
+	Prediksi_tanggal string `json:"prediksi_tanggal"`
+	Prediksi_bbfs    string `json:"prediksi_bbfs"`
+	Prediksi_nomor   string `json:"prediksi_nomor"`
+}
+type Controller_prediksidelete struct {
+	Page        string `json:"page" validate:"required"`
+	Pasaran_id  string `json:"pasaran_id"`
+	Prediksi_id int    `json:"prediksi_id"`
 }

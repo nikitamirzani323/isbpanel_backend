@@ -63,6 +63,7 @@
                             pasaran_diundi: record[i]["pasaran_diundi"],
                             pasaran_jamjadwal: record[i]["pasaran_jamjadwal"],
                             pasaran_keluaran: record[i]["pasaran_keluaran"],
+                            pasaran_prediksi: record[i]["pasaran_prediksi"],
                             pasaran_create: record[i]["pasaran_create"],
                             pasaran_update: record[i]["pasaran_update"],
                         },
