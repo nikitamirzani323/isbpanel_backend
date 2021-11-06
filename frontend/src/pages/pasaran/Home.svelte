@@ -23,6 +23,8 @@
     let pasaran_url ="";
     let pasaran_diundi ="";
     let pasaran_jamopen ="";
+    let pasaran_display =0;
+    let pasaran_status ="";
     let tanggal_keluaran ="";
     let nomor_keluaran ="";
     let tanggal_prediksi ="";
@@ -47,13 +49,18 @@
     const RefreshHalaman = () => {
         dispatch("handleRefreshData", "call");
     };
-    const EditData = (e,nama,url, diundi,jamopen) => {
+    const EditData = (e,nama,url, diundi,jamopen,display,status) => {
         sData = "Edit"
         idrecord = e
         pasaran_nama = nama;
         pasaran_url = url;
         pasaran_diundi = diundi;
         pasaran_jamopen = jamopen;
+        pasaran_display = display;
+        if(status == "SHOW"){
+            status = "Y"
+        }
+        pasaran_status = status;
         myModal_newentry = new bootstrap.Modal(document.getElementById("modalentryedit"));
         myModal_newentry.show();
     };
@@ -121,6 +128,8 @@
                     pasaran_url: pasaran_url,
                     pasaran_diundi: pasaran_diundi,
                     pasaran_jamjadwal: pasaran_jamopen,
+                    pasaran_display: parseInt(pasaran_display),
+                    pasaran_status: pasaran_status,
                 }),
             });
             const json = await res.json();
@@ -397,9 +406,12 @@
         }, 1000);
     }
     function clearField(){
+        idrecord = "";
         pasaran_nama = "";
         pasaran_diundi ="";
         pasaran_jamopen ="";
+        pasaran_display =0;
+        pasaran_status ="";
     }
     function callFunction(event){
         switch(event.detail){
@@ -424,8 +436,35 @@
                 handleSubmit();break;
         }
     }
+    const handleKeyboard_formatstring = () => {
+        let text = idrecord;
+        idrecord = text.toUpperCase()
+        let temp="";
+        for (let i = 0; i < idrecord.length; i++) {
+            temp = idrecord.charCodeAt(idrecord[i])
+            if(parseInt(temp) <65 || parseInt(temp)>90){
+                idrecord = ""
+            }
+            console.log(temp)
+        }
+    }
     const handleKeyboard_format = () => {
 		let numbera;
+        
+        for (let i = 0; i < pasaran_jamopen.length; i++) {
+            numbera = parseInt(pasaran_jamopen[i]);
+            if (isNaN(numbera)) {
+                if (pasaran_jamopen[i] != ":") {
+                    pasaran_jamopen = "";
+                }
+            }
+        }
+        for (let i = 0; i < pasaran_display.length; i++) {
+			numbera = parseInt(pasaran_display[i]);
+			if (isNaN(numbera)) {
+				pasaran_display = "";
+			}
+		}
 		for (let i = 0; i < nomor_keluaran.length; i++) {
 			numbera = parseInt(nomor_keluaran[i]);
 			if (isNaN(numbera)) {
@@ -488,7 +527,8 @@
                             <thead>
                                 <tr>
                                     <th NOWRAP width="1%" style="text-align: center;vertical-align: top;" colspan="3">&nbsp;</th>
-                                    <th NOWRAP width="1%" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NO</th>
+                                    <th NOWRAP width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NO</th>
+                                    <th NOWRAP width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">STATUS</th>
                                     <th NOWRAP width="1%" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">CODE</th>
                                     <th NOWRAP width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">PASARAN</th>
                                     <th NOWRAP width="20%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">HARI DIUNDI</th>
@@ -504,7 +544,7 @@
                                         <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
                                             <i 
                                                 on:click={() => {
-                                                    EditData(rec.pasaran_id, rec.pasaran_name, rec.pasaran_url, rec.pasaran_diundi, rec.pasaran_jamjadwal);
+                                                    EditData(rec.pasaran_id, rec.pasaran_name, rec.pasaran_url, rec.pasaran_diundi, rec.pasaran_jamjadwal,rec.pasaran_display,rec.pasaran_status);
                                                 }} 
                                                 class="bi bi-pencil"></i>
                                         </td>
@@ -523,6 +563,7 @@
                                                 class="bi bi-file-binary"></i>
                                         </td>
                                         <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.pasaran_no}</td>
+                                        <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};{rec.pasaran_statuscss}">{rec.pasaran_status}</td>
                                         <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.pasaran_id}</td>
                                         <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
                                             <a href="{rec.pasaran_url}" target="_blank">{rec.pasaran_name}</a>
@@ -537,7 +578,7 @@
                             {:else}
                             <tbody>
                                 <tr>
-                                    <td colspan="10">
+                                    <td colspan="20">
                                         <center>
                                             <Loader />
                                         </center>
@@ -560,11 +601,61 @@
 	modal_footer={true}>
 	<slot:template slot="body">
         <div class="mb-3">
-            <label for="exampleForm" class="form-label">Date</label>
+            <label for="exampleForm" class="form-label">Code</label>
+			<Input
+                bind:value={idrecord}
+                on:keyup={handleKeyboard_formatstring}
+                minlength=2
+                maxlength=4
+                type="text"
+                placeholder="Code"/>
+		</div>
+        <div class="mb-3">
+            <label for="exampleForm" class="form-label">Pasaran</label>
 			<Input
                 bind:value={pasaran_nama}
                 type="text"
                 placeholder="Pasaran"/>
+		</div>
+        <div class="mb-3">
+            <label for="exampleForm" class="form-label">URL</label>
+			<Input
+                bind:value={pasaran_url}
+                type="text"
+                placeholder="URL"/>
+		</div>
+        <div class="mb-3">
+            <label for="exampleForm" class="form-label">Hari diundi</label>
+			<Input
+                bind:value={pasaran_diundi}
+                type="text"
+                placeholder="Hari diundi"/>
+		</div>
+        <div class="mb-3">
+            <label for="exampleForm" class="form-label">JADWAL</label>
+			<Input
+                bind:value={pasaran_jamopen}
+                on:keyup={handleKeyboard_format}
+                style="text-align:center;"
+                type="text"
+                placeholder="Jadwal"/>
+		</div>
+        <div class="mb-3">
+            <label for="exampleForm" class="form-label">Display</label>
+			<Input
+                bind:value={pasaran_display}
+                on:keyup={handleKeyboard_format}
+                type="text"
+                style="text-align:right;"
+                placeholder="Display"/>
+		</div>
+        <div class="mb-3">
+            <label for="exampleForm" class="form-label">Status</label>
+			<select 
+                class="form-control"
+                bind:value={pasaran_status}>
+                <option value="Y">SHOW</option>
+            </select>
 		</div>
 	</slot:template>
 	<slot:template slot="footer">
@@ -610,10 +701,28 @@
             <label for="exampleForm" class="form-label">JADWAL</label>
 			<Input
                 bind:value={pasaran_jamopen}
+                on:keyup={handleKeyboard_format}
+                style="text-align:center;"
                 type="text"
                 placeholder="Jadwal"/>
 		</div>
-        
+        <div class="mb-3">
+            <label for="exampleForm" class="form-label">Display</label>
+			<Input
+                bind:value={pasaran_display}
+                on:keyup={handleKeyboard_format}
+                type="text"
+                style="text-align:right;"
+                placeholder="Display"/>
+		</div>
+        <div class="mb-3">
+            <label for="exampleForm" class="form-label">Status</label>
+			<select 
+                class="form-control"
+                bind:value={pasaran_status}>
+                <option value="Y">SHOW</option>
+            </select>
+		</div>
 	</slot:template>
     <slot:template slot="footer">
         <Button

@@ -31,6 +31,9 @@ func Pasaranhome(c *fiber.Ctx) error {
 		pasaran_url, _ := jsonparser.GetString(value, "pasaran_url")
 		pasaran_diundi, _ := jsonparser.GetString(value, "pasaran_diundi")
 		pasaran_jamjadwal, _ := jsonparser.GetString(value, "pasaran_jamjadwal")
+		pasaran_display, _ := jsonparser.GetInt(value, "pasaran_display")
+		pasaran_status, _ := jsonparser.GetString(value, "pasaran_status")
+		pasaran_statuscss, _ := jsonparser.GetString(value, "pasaran_statuscss")
 		pasaran_keluaran, _ := jsonparser.GetString(value, "pasaran_keluaran")
 		pasaran_prediksi, _ := jsonparser.GetString(value, "pasaran_prediksi")
 		pasaran_create, _ := jsonparser.GetString(value, "pasaran_create")
@@ -41,6 +44,9 @@ func Pasaranhome(c *fiber.Ctx) error {
 		obj.Pasaran_url = pasaran_url
 		obj.Pasaran_diundi = pasaran_diundi
 		obj.Pasaran_jamjadwal = pasaran_jamjadwal
+		obj.Pasaran_display = int(pasaran_display)
+		obj.Pasaran_status = pasaran_status
+		obj.Pasaran_statuscss = pasaran_statuscss
 		obj.Pasaran_keluaran = pasaran_keluaran
 		obj.Pasaran_prediksi = pasaran_prediksi
 		obj.Pasaran_create = pasaran_create
@@ -107,7 +113,7 @@ func Pasaransave(c *fiber.Ctx) error {
 	result, err := models.Save_pasaran(
 		client_admin,
 		client.Pasaran_id, client.Pasaran_name, client.Pasaran_url,
-		client.Pasaran_diundi, client.Pasaran_jamjadwal, client.Sdata)
+		client.Pasaran_diundi, client.Pasaran_jamjadwal, client.Pasaran_status, client.Sdata, client.Pasaran_display)
 	if err != nil {
 		c.Status(fiber.StatusBadRequest)
 		return c.JSON(fiber.Map{

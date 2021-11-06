@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -26,25 +27,28 @@ func Fetch_pasaranHome() (helpers.Response, error) {
 
 	sql_select := `SELECT 
 			idpasarantogel , nmpasarantogel, 
-			urlpasaran , pasarandiundi, jamjadwal, 
+			urlpasaran , pasarandiundi, jamjadwal, displaypasaran, statuspasaran, 
 			createpasarantogel, COALESCE(createdatepasarantogel,""), updatepasarantogel, COALESCE(updatedatepasarantogel,"")  
 			FROM ` + configs.DB_tbl_mst_pasaran + ` 
-			ORDER BY nmpasarantogel DESC 
+			ORDER BY displaypasaran ASC  
 		`
 
 	row, err := con.QueryContext(ctx, sql_select)
 	helpers.ErrorCheck(err)
 	for row.Next() {
 		var (
-			idpasarantogel_db, nmpasarantogel_db, urlpasaran_db, pasarandiundi_db, jamjadwal_db                string
-			createpasarantogel_db, createdatepasarantogel_db, updatepasarantogel_db, updatedatepasarantogel_db string
+			displaypasaran_db                                                                                     int
+			idpasarantogel_db, nmpasarantogel_db, urlpasaran_db, pasarandiundi_db, jamjadwal_db, statuspasaran_db string
+			createpasarantogel_db, createdatepasarantogel_db, updatepasarantogel_db, updatedatepasarantogel_db    string
 		)
 
 		err = row.Scan(
-			&idpasarantogel_db, &nmpasarantogel_db, &urlpasaran_db, &pasarandiundi_db, &jamjadwal_db,
+			&idpasarantogel_db, &nmpasarantogel_db, &urlpasaran_db, &pasarandiundi_db, &jamjadwal_db, &displaypasaran_db, &statuspasaran_db,
 			&createpasarantogel_db, &createdatepasarantogel_db, &updatepasarantogel_db, &updatedatepasarantogel_db)
 
 		helpers.ErrorCheck(err)
+		statuspasaran := "HIDE"
+		statuspasarancss := configs.STATUS_CANCEL
 		create := ""
 		update := ""
 		if createpasarantogel_db != "" {
@@ -52,6 +56,10 @@ func Fetch_pasaranHome() (helpers.Response, error) {
 		}
 		if updatepasarantogel_db != "" {
 			update = updatepasarantogel_db + ", " + updatedatepasarantogel_db
+		}
+		if statuspasaran_db == "Y" {
+			statuspasaran = "SHOW"
+			statuspasarancss = configs.STATUS_RUNNING
 		}
 
 		var (
@@ -93,6 +101,9 @@ func Fetch_pasaranHome() (helpers.Response, error) {
 		obj.Pasaran_url = urlpasaran_db
 		obj.Pasaran_diundi = pasarandiundi_db
 		obj.Pasaran_jamjadwal = jamjadwal_db
+		obj.Pasaran_display = displaypasaran_db
+		obj.Pasaran_status = statuspasaran
+		obj.Pasaran_statuscss = statuspasarancss
 		obj.Pasaran_keluaran = datekeluaran_db + " - " + nomorkeluaran_db
 		obj.Pasaran_prediksi = dateprediksi_db + " - " + bbfsprediksi_db + " - " + nomorprediksi_db
 		obj.Pasaran_create = create
@@ -109,7 +120,7 @@ func Fetch_pasaranHome() (helpers.Response, error) {
 
 	return res, nil
 }
-func Save_pasaran(admin, idrecord, nmpasarantogel, urlpasaran, pasarandiundi, jamjadwal, sData string) (helpers.Response, error) {
+func Save_pasaran(admin, idrecord, nmpasarantogel, urlpasaran, pasarandiundi, jamjadwal, status, sData string, display int) (helpers.Response, error) {
 	var res helpers.Response
 	msg := "Failed"
 	con := db.CreateCon()
@@ -124,10 +135,10 @@ func Save_pasaran(admin, idrecord, nmpasarantogel, urlpasaran, pasarandiundi, ja
 			sql_insert := `
 				insert into
 				` + configs.DB_tbl_mst_pasaran + ` (
-					idpasarantogel , nmpasarantogel, urlpasaran, pasarandiundi, jamjadwal 
+					idpasarantogel , nmpasarantogel, urlpasaran, pasarandiundi, jamjadwal, displaypasaran, statuspasaran, 
 					createpasarantogel, createdatepasarantogel
 				) values (
-					? ,?, ?, ?, ?,
+					? ,?, ?, ?, ?, ?, ?,
 					?, ?
 				)
 			`
@@ -136,7 +147,7 @@ func Save_pasaran(admin, idrecord, nmpasarantogel, urlpasaran, pasarandiundi, ja
 			defer stmt_insert.Close()
 			res_newrecord, e_newrecord := stmt_insert.ExecContext(
 				ctx,
-				idrecord, nmpasarantogel, urlpasaran, pasarandiundi, jamjadwal,
+				strings.ToUpper(idrecord), nmpasarantogel, urlpasaran, pasarandiundi, jamjadwal, display, status,
 				admin,
 				tglnow.Format("YYYY-MM-DD HH:mm:ss"))
 			helpers.ErrorCheck(e_newrecord)
@@ -154,7 +165,7 @@ func Save_pasaran(admin, idrecord, nmpasarantogel, urlpasaran, pasarandiundi, ja
 		sql_update := `
 				UPDATE 
 				` + configs.DB_tbl_mst_pasaran + `  
-				SET nmpasarantogel=?,urlpasaran=?,pasarandiundi=?, jamjadwal=?, 
+				SET nmpasarantogel=?,urlpasaran=?,pasarandiundi=?, jamjadwal=?, displaypasaran=?, statuspasaran=?,
 				updatepasarantogel=?, updatedatepasarantogel=? 
 				WHERE idpasarantogel =? 
 			`
@@ -162,7 +173,7 @@ func Save_pasaran(admin, idrecord, nmpasarantogel, urlpasaran, pasarandiundi, ja
 		helpers.ErrorCheck(e)
 		rec_record, e_record := stmt_record.ExecContext(
 			ctx,
-			nmpasarantogel, urlpasaran, pasarandiundi, jamjadwal,
+			nmpasarantogel, urlpasaran, pasarandiundi, jamjadwal, display, status,
 			admin,
 			tglnow.Format("YYYY-MM-DD HH:mm:ss"),
 			idrecord)

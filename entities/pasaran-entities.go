@@ -6,6 +6,9 @@ type Model_pasaran struct {
 	Pasaran_url       string `json:"pasaran_url"`
 	Pasaran_diundi    string `json:"pasaran_diundi"`
 	Pasaran_jamjadwal string `json:"pasaran_jamjadwal"`
+	Pasaran_display   int    `json:"pasaran_display"`
+	Pasaran_status    string `json:"pasaran_status"`
+	Pasaran_statuscss string `json:"pasaran_statuscss"`
 	Pasaran_keluaran  string `json:"pasaran_keluaran"`
 	Pasaran_prediksi  string `json:"pasaran_prediksi"`
 	Pasaran_create    string `json:"pasaran_create"`
@@ -27,10 +30,12 @@ type Controller_pasaransave struct {
 	Sdata             string `json:"sdata" validate:"required"`
 	Page              string `json:"page" validate:"required"`
 	Pasaran_id        string `json:"pasaran_id"`
-	Pasaran_name      string `json:"pasaran_name"`
-	Pasaran_url       string `json:"pasaran_url"`
-	Pasaran_diundi    string `json:"pasaran_diundi"`
-	Pasaran_jamjadwal string `json:"pasaran_jamjadwal"`
+	Pasaran_name      string `json:"pasaran_name" validate:"required"`
+	Pasaran_url       string `json:"pasaran_url" validate:"required"`
+	Pasaran_diundi    string `json:"pasaran_diundi" validate:"required"`
+	Pasaran_jamjadwal string `json:"pasaran_jamjadwal" validate:"required"`
+	Pasaran_display   int    `json:"pasaran_display" validate:"required"`
+	Pasaran_status    string `json:"pasaran_status" `
 }
 type Controller_keluaran struct {
 	Page       string `json:"page" validate:"required"`
