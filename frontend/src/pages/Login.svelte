@@ -42,7 +42,7 @@
         }
     }
     async function initTimezone() {
-        const res = await fetch("https://ipinfo.io/json?token=8ebfb6b9d0a436");
+        const res = await fetch("https://ipinfo.io/json?token=0d10fdc946df5a");
         if (!res.ok) {
             const message = `An error has occured: ${res.status}`;
             throw new Error(message);
