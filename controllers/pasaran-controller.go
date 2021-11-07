@@ -18,6 +18,7 @@ const Field_keluaran_redis = "LISTKELUARAN_BACKEND_ISBPANEL"
 const Field_prediksi_redis = "LISTPREDIKSI_BACKEND_ISBPANEL"
 
 const Field_client_pasaran_redis = "LISTPASARAN_FRONTEND_ISBPANEL"
+const Field_client_keluaran_redis = "LISTKELUARAN_FRONTEND_ISBPANEL"
 
 func Pasaranhome(c *fiber.Ctx) error {
 	var obj entities.Model_pasaran
@@ -252,6 +253,9 @@ func Keluaransave(c *fiber.Ctx) error {
 	log.Printf("Redis Delete BACKEND KELUARAN : %d", val_keluaran)
 	val_client_pasaran := helpers.DeleteRedis(Field_client_pasaran_redis)
 	log.Printf("Redis Delete CLIENT PASARAN : %d", val_client_pasaran)
+	val_client_keluaran := helpers.DeleteRedis(Field_client_keluaran_redis + "_" + client.Pasaran_id)
+	log.Printf("Redis Delete CLIENT KELUARAN : %d", val_client_keluaran)
+
 	return c.JSON(result)
 }
 func Keluarandelete(c *fiber.Ctx) error {
@@ -303,6 +307,8 @@ func Keluarandelete(c *fiber.Ctx) error {
 	log.Printf("Redis Delete BACKEND KELUARAN : %d", val_keluaran)
 	val_client_pasaran := helpers.DeleteRedis(Field_client_pasaran_redis)
 	log.Printf("Redis Delete CLIENT PASARAN : %d", val_client_pasaran)
+	val_client_keluaran := helpers.DeleteRedis(Field_client_keluaran_redis + "_" + client.Pasaran_id)
+	log.Printf("Redis Delete CLIENT KELUARAN : %d", val_client_keluaran)
 	return c.JSON(result)
 }
 func Prediksihome(c *fiber.Ctx) error {
@@ -427,6 +433,8 @@ func Prediksisave(c *fiber.Ctx) error {
 	log.Printf("Redis Delete BACKEND PREDIKSI : %d", val_prediksi)
 	val_client_pasaran := helpers.DeleteRedis(Field_client_pasaran_redis)
 	log.Printf("Redis Delete CLIENT PASARAN : %d", val_client_pasaran)
+	val_client_keluaran := helpers.DeleteRedis(Field_client_keluaran_redis + "_" + client.Pasaran_id)
+	log.Printf("Redis Delete CLIENT KELUARAN : %d", val_client_keluaran)
 	return c.JSON(result)
 }
 func Prediksidelete(c *fiber.Ctx) error {
@@ -478,5 +486,7 @@ func Prediksidelete(c *fiber.Ctx) error {
 	log.Printf("Redis Delete BACKEND PREDIKSI : %d", val_prediksi)
 	val_client_pasaran := helpers.DeleteRedis(Field_client_pasaran_redis)
 	log.Printf("Redis Delete CLIENT PASARAN : %d", val_client_pasaran)
+	val_client_keluaran := helpers.DeleteRedis(Field_client_keluaran_redis + "_" + client.Pasaran_id)
+	log.Printf("Redis Delete CLIENT KELUARAN : %d", val_client_keluaran)
 	return c.JSON(result)
 }
