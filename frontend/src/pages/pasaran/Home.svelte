@@ -8,9 +8,9 @@
     import { createEventDispatcher } from "svelte";
 
     
-	export let table_header_font
-	export let table_body_font
-	export let token
+	export let table_header_font = ""
+	export let table_body_font = ""
+	export let token = ""
 	export let listHome = []
 	export let totalrecord = 0
     let dispatch = createEventDispatcher();

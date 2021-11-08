@@ -66,23 +66,10 @@
                             </li>
                         </ul>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a
-                            class="nav-link dropdown-toggle"
-                            id="navbarDropdown"
-                            role="button"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false" style="font-size: 13px;">
-                            MOVIE
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li>
-                                <a class="dropdown-item" use:link href="/news" style="font-size: 13px;">NEWS</a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" use:link href="/categorynews" style="font-size: 13px;">CATEGORY NEWS</a>
-                            </li>
-                        </ul>
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" use:link href="/news" style="font-size: 13px;"
+                        >NEWS</a
+                        >
                     </li>
                     <li class="nav-item dropdown">
                         <a

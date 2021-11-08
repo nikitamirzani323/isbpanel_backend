@@ -3,7 +3,7 @@
    
     
     export let table_header_font = "";
-	export let table_body_font = "";
+    export let table_body_font = "";
     
     let token = localStorage.getItem("token");
     let akses_page = true;
@@ -21,7 +21,7 @@
                 Authorization: "Bearer " + token,
             },
             body: JSON.stringify({
-                page: "PASARAN-VIEW",
+                page: "NEWS-VIEW",
             }),
         });
         const json = await res.json();
@@ -35,7 +35,7 @@
         }
     }
     async function initHome() {
-        const res = await fetch("/api/pasaran", {
+        const res = await fetch("/api/news", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -56,19 +56,14 @@
                     listHome = [
                         ...listHome,
                         {
-                            pasaran_no: no,
-                            pasaran_id: record[i]["pasaran_id"],
-                            pasaran_name: record[i]["pasaran_name"],
-                            pasaran_url: record[i]["pasaran_url"],
-                            pasaran_diundi: record[i]["pasaran_diundi"],
-                            pasaran_jamjadwal: record[i]["pasaran_jamjadwal"],
-                            pasaran_display: record[i]["pasaran_display"],
-                            pasaran_status: record[i]["pasaran_status"],
-                            pasaran_statuscss: record[i]["pasaran_statuscss"],
-                            pasaran_keluaran: record[i]["pasaran_keluaran"],
-                            pasaran_prediksi: record[i]["pasaran_prediksi"],
-                            pasaran_create: record[i]["pasaran_create"],
-                            pasaran_update: record[i]["pasaran_update"],
+                            news_no: no,
+                            news_id: record[i]["news_id"],
+                            news_title: record[i]["news_title"],
+                            news_descp: record[i]["news_descp"],
+                            news_url: record[i]["news_url"],
+                            news_image: record[i]["news_image"],
+                            news_create: record[i]["news_create"],
+                            news_update: record[i]["news_update"],
                         },
                     ];
                 }
@@ -81,25 +76,9 @@
         localStorage.clear();
         window.location.href = "/";
     }
-    const handleEditData = (e) => {
-        admin_username = e.detail.e;
-        sData = "Edit";
-        alert(admin_username)
-        // editAdmin(admin_username);
-    };
-    const handleRefreshData = (e) => {
-        listHome = [];
-        totalrecord = 0;
-        setTimeout(function () {
-            initHome();
-        }, 500);
-    };
     initapp()
 </script>
-
 <Home
-    on:handleEditData={handleEditData}
-    on:handleRefreshData={handleRefreshData}
     {token}
     {table_header_font}
     {table_body_font}
