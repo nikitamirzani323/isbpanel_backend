@@ -4,13 +4,14 @@
     import Loader from "../../components/Loader.svelte";
 	import Button from "../../components/Button.svelte";
 	import Modal from "../../components/Modal.svelte";
+    import { createEventDispatcher } from "svelte";
 
     export let table_header_font = ""
 	export let table_body_font = ""
 	export let token = ""
 	export let listHome = []
 	export let totalrecord = 0
-
+    let dispatch = createEventDispatcher();
     let title_page = "NEWS"
     let sData = "";
     let myModal = "";
@@ -24,7 +25,9 @@
     let css_loader = "display: none;";
     let msgloader = "";
 
-    
+    const RefreshHalaman = () => {
+        dispatch("handleRefreshData", "call");
+    };
     const ShowFormNewsFetch = () => {
         sData = "Edit"
         myModal = new bootstrap.Modal(document.getElementById("modalfetchnew"));
@@ -68,6 +71,77 @@
         
        
         
+    }
+    async function handleSave(news_title,news_description,news_url,news_image) {
+        let flag = true
+        let msg = ""
+        css_loader = "display: inline-block;";
+        msgloader = "Sending...";
+        const res = await fetch("/api/newssave", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token,
+            },
+            body: JSON.stringify({
+                sdata: sData,
+                page:"NEWS-SAVE",
+                news_title: news_title,
+                news_descp: news_description,
+                news_url: news_url,
+                news_image: news_image,
+            }),
+        });
+        const json = await res.json();
+        if (json.status == 200) {
+            msgloader = json.message;
+            myModal.hide()
+            RefreshHalaman()
+        } else if(json.status == 403){
+            alert(json.message)
+        } else {
+            msgloader = json.message;
+        }
+        setTimeout(function () {
+            css_loader = "display: none;";
+        }, 1000);
+    }
+    async function handleDeleteNews(e) {
+        let flag = true
+        let msg = ""
+        if(e == ""){
+            flag = false
+            msg = "The News is required"
+        }
+        if(flag){
+            css_loader = "display: inline-block;";
+            msgloader = "Sending...";
+            const res = await fetch("/api/newsdelete", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + token,
+                },
+                body: JSON.stringify({
+                    page:"NEWS-DELETE",
+                    news_id: parseInt(e),
+                }),
+            });
+            const json = await res.json();
+            if (json.status == 200) {
+                RefreshHalaman()
+                msgloader = json.message;
+            } else if(json.status == 403){
+                alert(json.message)
+            } else {
+                msgloader = json.message;
+            }
+            setTimeout(function () {
+                css_loader = "display: none;";
+            }, 1000);
+        }else{
+            alert(msg)
+        }
     }
     function callFunction(event){
         switch(event.detail){
@@ -128,7 +202,7 @@
                                         <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
                                             <i 
                                                 on:click={() => {
-                                                    saveData(rec.news_title,rec.news_description,rec.news_url,rec.news_urlToImage);
+                                                    handleSave(rec.news_title,rec.news_description,rec.news_url,rec.news_urlToImage);
                                                 }} 
                                                 class="bi bi-save"></i>
                                         </td>
@@ -183,11 +257,11 @@
                                         <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
                                             <i 
                                                 on:click={() => {
-                                                    EditData(rec.pasaran_id, rec.pasaran_name, rec.pasaran_url, rec.pasaran_diundi, rec.pasaran_jamjadwal,rec.pasaran_display,rec.pasaran_status);
+                                                    handleDeleteNews(rec.news_id);
                                                 }} 
-                                                class="bi bi-pencil"></i>
+                                                class="bi bi-trash"></i>
                                         </td>
-                                        <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.pasaran_no}</td>
+                                        <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.news_no}</td>
                                         <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
                                             <a href="{rec.news_url}" target="_blank">{rec.news_title}</a><br>
                                             <img width="100" src="{rec.news_image}" class="img-thumbnail" alt="...">

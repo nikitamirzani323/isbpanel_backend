@@ -76,9 +76,17 @@
         localStorage.clear();
         window.location.href = "/";
     }
+    const handleRefreshData = (e) => {
+        listHome = [];
+        totalrecord = 0;
+        setTimeout(function () {
+            initHome();
+        }, 500);
+    };
     initapp()
 </script>
 <Home
+    on:handleRefreshData={handleRefreshData}
     {token}
     {table_header_font}
     {table_body_font}

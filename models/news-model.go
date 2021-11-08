@@ -2,6 +2,8 @@ package models
 
 import (
 	"context"
+	"log"
+	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -9,6 +11,7 @@ import (
 	"github.com/nikitamirzani323/isbpanel_backend/db"
 	"github.com/nikitamirzani323/isbpanel_backend/entities"
 	"github.com/nikitamirzani323/isbpanel_backend/helpers"
+	"github.com/nleeper/goment"
 )
 
 func Fetch_newsHome() (helpers.Response, error) {
@@ -25,7 +28,7 @@ func Fetch_newsHome() (helpers.Response, error) {
 			url_news , img_news, 
 			createnews, COALESCE(createdatenews,""), updatenews, COALESCE(updatedatenews,"")  
 			FROM ` + configs.DB_tbl_trx_news + ` 
-			ORDER BY idnews DESC  
+			ORDER BY idnews DESC  LIMIT 100 
 		`
 
 	row, err := con.QueryContext(ctx, sql_select)
@@ -67,6 +70,105 @@ func Fetch_newsHome() (helpers.Response, error) {
 	res.Message = msg
 	res.Record = arraobj
 	res.Time = time.Since(start).String()
+
+	return res, nil
+}
+func Save_news(admin, title, descp, url, image string) (helpers.Response, error) {
+	var res helpers.Response
+	msg := "Failed"
+	con := db.CreateCon()
+	ctx := context.Background()
+	tglnow, _ := goment.New()
+	render_page := time.Now()
+	flag := false
+
+	sql_insert := `
+		insert into
+		` + configs.DB_tbl_trx_news + ` (
+			idnews , title_news, descp_news, url_news, img_news, 
+			createnews, createdatenews
+		) values (
+			? ,?, ?, ?, ?,
+			?, ?
+		)
+	`
+	stmt_insert, e_insert := con.PrepareContext(ctx, sql_insert)
+	helpers.ErrorCheck(e_insert)
+	defer stmt_insert.Close()
+	field_column := configs.DB_tbl_trx_news + tglnow.Format("YYYY")
+	idrecord_counter := Get_counter(field_column)
+	res_newrecord, e_newrecord := stmt_insert.ExecContext(
+		ctx,
+		tglnow.Format("YY")+strconv.Itoa(idrecord_counter),
+		title, descp, url, image,
+		admin,
+		tglnow.Format("YYYY-MM-DD HH:mm:ss"))
+	helpers.ErrorCheck(e_newrecord)
+	insert, e := res_newrecord.RowsAffected()
+	helpers.ErrorCheck(e)
+	if insert > 0 {
+		flag = true
+		msg = "Succes"
+		log.Println("Data Berhasil di save")
+	}
+
+	if flag {
+		res.Status = fiber.StatusOK
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	} else {
+		res.Status = fiber.StatusBadRequest
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	}
+
+	return res, nil
+}
+func Delete_news(admin string, idnews int) (helpers.Response, error) {
+	var res helpers.Response
+	msg := "Failed"
+	con := db.CreateCon()
+	ctx := context.Background()
+	render_page := time.Now()
+	flag := false
+
+	flag = CheckDB(configs.DB_tbl_trx_news, "idnews", strconv.Itoa(idnews))
+	if flag {
+		sql_delete := `
+			DELETE FROM
+			` + configs.DB_tbl_trx_news + ` 
+			WHERE idnews=? 
+		`
+		stmt_delete, e_delete := con.PrepareContext(ctx, sql_delete)
+		helpers.ErrorCheck(e_delete)
+		defer stmt_delete.Close()
+		rec_delete, e_delete := stmt_delete.ExecContext(ctx, idnews)
+
+		helpers.ErrorCheck(e_delete)
+		delete, e := rec_delete.RowsAffected()
+		helpers.ErrorCheck(e)
+		if delete > 0 {
+			flag = true
+			msg = "Succes"
+			log.Println("Data Berhasil di delete")
+		}
+	} else {
+		msg = "Data Not Found"
+	}
+
+	if flag {
+		res.Status = fiber.StatusOK
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	} else {
+		res.Status = fiber.StatusBadRequest
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	}
 
 	return res, nil
 }
