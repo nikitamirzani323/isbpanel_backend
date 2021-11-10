@@ -5,6 +5,7 @@ const (
 	DB_tbl_admin        string = "tbl_admin"
 	DB_tbl_admingroup   string = "tbl_admingroup"
 	DB_tbl_mst_version  string = "tbl_mst_version"
+	DB_tbl_mst_category string = "tbl_mst_categorynews"
 	DB_tbl_mst_pasaran  string = "tbl_mst_pasaran_togel"
 	DB_tbl_trx_keluaran string = "tbl_trx_keluaran"
 	DB_tbl_trx_prediksi string = "tbl_trx_prediksi"

@@ -58,6 +58,7 @@
                         {
                             news_no: no,
                             news_id: record[i]["news_id"],
+                            news_category: record[i]["news_category"],
                             news_title: record[i]["news_title"],
                             news_descp: record[i]["news_descp"],
                             news_url: record[i]["news_url"],
