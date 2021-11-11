@@ -84,6 +84,9 @@
                             <li>
                                 <a class="dropdown-item" use:link href="/pasaran" style="font-size: 13px;">PASARAN</a>
                             </li>
+                            <li>
+                                <a class="dropdown-item" use:link href="/tafsir-mimpi" style="font-size: 13px;">TAFSIR MIMPI</a>
+                            </li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">

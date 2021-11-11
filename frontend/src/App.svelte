@@ -6,6 +6,7 @@
 	import Admin from "./pages/admin/Admin.svelte";
 	import Adminrule from "./pages/adminrule/Adminrule.svelte";
 	import Pasaran from "./pages/pasaran/Pasaran.svelte";
+	import Tafsirmimpi from "./pages/tafsirmimpi/Tafsirmimpi.svelte";
 	import News from "./pages/news/News.svelte";
 	import Login from "./pages/Login.svelte";
 	import NotFound from "./pages/NotFound.svelte";
@@ -33,6 +34,13 @@
 			}),
 			"/pasaran": wrap({
 				component: Pasaran,
+				props: {
+					table_header_font: table_header_font,
+					table_body_font: table_body_font,
+				},
+			}),
+			"/tafsir-mimpi": wrap({
+				component: Tafsirmimpi,
 				props: {
 					table_header_font: table_header_font,
 					table_body_font: table_body_font,

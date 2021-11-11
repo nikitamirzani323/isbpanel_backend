@@ -56,6 +56,9 @@ func Init() *fiber.App {
 	app.Post("/api/prediksisave", middleware.JWTProtected(), controllers.Prediksisave)
 	app.Post("/api/prediksidelete", middleware.JWTProtected(), controllers.Prediksidelete)
 
+	app.Post("/api/tafsirmimpi", middleware.JWTProtected(), controllers.Tafsirmimpihome)
+	app.Post("/api/tafsirmimpisave", middleware.JWTProtected(), controllers.Tafsirmimpisave)
+
 	app.Post("/api/news", middleware.JWTProtected(), controllers.Newshome)
 	app.Post("/api/newssave", middleware.JWTProtected(), controllers.Newssave)
 	app.Post("/api/newsdelete", middleware.JWTProtected(), controllers.Newsdelete)
