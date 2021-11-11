@@ -18,16 +18,48 @@ const Fieldcategory_home_redis = "LISTCATEGORY_BACKEND_ISBPANEL"
 const Fieldnews_client_home_redis = "LISTNEWS_FRONTEND_ISBPANEL"
 
 func Newshome(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_news)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+	if client.News_search != "" {
+		val_tafsirmimpi := helpers.DeleteRedis(Fieldnews_home_redis + "_" + client.News_search)
+		log.Printf("Redis Delete BACKEND NEWS : %d", val_tafsirmimpi)
+	}
 	var obj entities.Model_news
 	var arraobj []entities.Model_news
 	render_page := time.Now()
-	resultredis, flag := helpers.GetRedis(Fieldnews_home_redis)
+	resultredis, flag := helpers.GetRedis(Fieldnews_home_redis + "_" + client.News_search)
 	jsonredis := []byte(resultredis)
 	message_RD, _ := jsonparser.GetString(jsonredis, "message")
 	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
 	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		news_id, _ := jsonparser.GetInt(value, "news_id")
 		news_title, _ := jsonparser.GetString(value, "news_title")
+		news_idcategory, _ := jsonparser.GetInt(value, "news_idcategory")
 		news_category, _ := jsonparser.GetString(value, "news_category")
 		news_descp, _ := jsonparser.GetString(value, "news_descp")
 		news_url, _ := jsonparser.GetString(value, "news_url")
@@ -36,6 +68,7 @@ func Newshome(c *fiber.Ctx) error {
 		news_update, _ := jsonparser.GetString(value, "news_update")
 
 		obj.News_id = int(news_id)
+		obj.News_idcategory = int(news_idcategory)
 		obj.News_category = news_category
 		obj.News_title = news_title
 		obj.News_descp = news_descp
@@ -46,7 +79,7 @@ func Newshome(c *fiber.Ctx) error {
 		arraobj = append(arraobj, obj)
 	})
 	if !flag {
-		result, err := models.Fetch_newsHome()
+		result, err := models.Fetch_newsHome(client.News_search)
 		if err != nil {
 			c.Status(fiber.StatusBadRequest)
 			return c.JSON(fiber.Map{
@@ -55,7 +88,7 @@ func Newshome(c *fiber.Ctx) error {
 				"record":  nil,
 			})
 		}
-		helpers.SetRedis(Fieldnews_home_redis, result, 0)
+		helpers.SetRedis(Fieldnews_home_redis+"_"+client.News_search, result, 5*time.Minute)
 		log.Println("NEWS MYSQL")
 		return c.JSON(result)
 	} else {

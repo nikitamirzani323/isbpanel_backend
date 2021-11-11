@@ -9,6 +9,7 @@
     let akses_page = true;
     let listHome = [];
     let sData = "";
+    let search = "";
     let record = "";
     let record_message = "";
     let totalrecord = 0;
@@ -31,10 +32,11 @@
             alert(json.message);
             akses_page = false;
         } else {
-            initHome();
+            initHome("");
         }
     }
-    async function initHome() {
+    async function initHome(e) {
+        listHome = [];
         const res = await fetch("/api/news", {
             method: "POST",
             headers: {
@@ -42,6 +44,7 @@
                 Authorization: "Bearer " + token,
             },
             body: JSON.stringify({
+                news_search: e
             }),
         });
         const json = await res.json();
@@ -58,6 +61,7 @@
                         {
                             news_no: no,
                             news_id: record[i]["news_id"],
+                            news_idcategory: record[i]["news_idcategory"],
                             news_category: record[i]["news_category"],
                             news_title: record[i]["news_title"],
                             news_descp: record[i]["news_descp"],
@@ -84,9 +88,14 @@
             initHome();
         }, 500);
     };
+    const handleNews = (e) => {
+        search = e.detail.searchNews;
+        initHome(search)
+   };
     initapp()
 </script>
 <Home
+    on:handleNews={handleNews}
     on:handleRefreshData={handleRefreshData}
     {token}
     {table_header_font}

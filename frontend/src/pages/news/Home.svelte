@@ -35,10 +35,24 @@
     let news_field_category = "";
     let news_field_url = "";
     let news_field_image = "";
+    let searchNews = "";
+    let filterNews = "";
 
     let css_loader = "display: none;";
     let msgloader = "";
 
+    $: {
+        if (searchNews) {
+            filterNews = listHome.filter(
+                (item) =>
+                    item.news_title
+                        .toLowerCase()
+                        .includes(searchNews.toLowerCase())
+            );
+        } else {
+            filterNews = [...listHome];
+        }
+    }
     const RefreshHalaman = () => {
         dispatch("handleRefreshData", "call");
     };
@@ -72,7 +86,7 @@
         news_field_idrecord = parseInt(id);
         news_field_title = title;
         news_field_descp = descp;
-        news_field_category = category;
+        news_field_category = parseInt(category);
         news_field_url = url;
         news_field_image = image;
         call_category()
@@ -346,6 +360,17 @@
         category_field_display = 0;
         category_field_status = "";
     }
+    const handleKeyboard_checkenter = (e) => {
+        let keyCode = e.which || e.keyCode;
+        if (keyCode === 13) {
+                filterNews = [];
+                listHome = [];
+                const news = {
+                    searchNews,
+                };
+                dispatch("handleNews", news);
+        }  
+    };
 </script>
 
 <div id="loader" style="margin-left:50%;{css_loader}">
@@ -421,8 +446,21 @@
                 button_css="btn-primary"/>
             
             <Panel
+                card_search={true}
                 card_title="{title_page}"
                 card_footer={totalrecord}>
+                <slot:template slot="card-search">
+                    <div class="col-lg-12" style="padding: 5px;">
+                        <input
+                            bind:value={searchNews}
+                            on:keypress={handleKeyboard_checkenter}
+                            type="text"
+                            class="form-control"
+                            placeholder="Search News"
+                            aria-label="Search"
+                        />
+                    </div>
+                </slot:template>
                 <slot:template slot="card-body">
                         <table class="table table-striped table-hover">
                             <thead>
@@ -434,12 +472,12 @@
                             </thead>
                             {#if totalrecord > 0}
                             <tbody>
-                                {#each listHome as rec }
+                                {#each filterNews as rec }
                                     <tr>
                                         <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
                                             <i 
                                                 on:click={() => {
-                                                    handleEditNews(rec.news_id);
+                                                    ShowFormNews("Edit",rec.news_id,rec.news_idcategory,rec.news_title,rec.news_descp,rec.news_url,rec.news_image)
                                                 }} 
                                                 class="bi bi-pencil"></i>
                                         </td>
@@ -551,12 +589,26 @@
                 placeholder="News Title"/>
 		</div>
         <div class="mb-3">
+            <label for="exampleForm" class="form-label">Deskripsi</label>
+            <textarea
+                style="height: 100px;resize: none;" 
+                bind:value={news_field_descp} class="form-control required"></textarea>
+        </div>
+        <div class="mb-3">
             <label for="exampleForm" class="form-label">Url Image</label>
 			<Input
                 bind:value={news_field_image}
                 class="required"
                 type="text"
-                placeholder="News Title"/>
+                placeholder="News Image"/>
+		</div>
+        <div class="mb-3">
+            <label for="exampleForm" class="form-label">Url</label>
+			<Input
+                bind:value={news_field_url}
+                class="required"
+                type="text"
+                placeholder="News URL"/>
 		</div>
 	</slot:template>
 	<slot:template slot="footer">

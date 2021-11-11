@@ -1,14 +1,15 @@
 package entities
 
 type Model_news struct {
-	News_id       int    `json:"news_id"`
-	News_category string `json:"news_category"`
-	News_title    string `json:"news_title"`
-	News_descp    string `json:"news_descp"`
-	News_url      string `json:"news_url"`
-	News_image    string `json:"news_image"`
-	News_create   string `json:"news_create"`
-	News_update   string `json:"news_update"`
+	News_id         int    `json:"news_id"`
+	News_idcategory int    `json:"news_idcategory"`
+	News_category   string `json:"news_category"`
+	News_title      string `json:"news_title"`
+	News_descp      string `json:"news_descp"`
+	News_url        string `json:"news_url"`
+	News_image      string `json:"news_image"`
+	News_create     string `json:"news_create"`
+	News_update     string `json:"news_update"`
 }
 type Model_category struct {
 	Category_id        int    `json:"category_id"`
@@ -20,6 +21,9 @@ type Model_category struct {
 	Category_update    string `json:"category_update"`
 }
 
+type Controller_news struct {
+	News_search string `json:"news_search"`
+}
 type Controller_newssave struct {
 	Page          string `json:"page" validate:"required"`
 	Sdata         string `json:"sdata" validate:"required"`

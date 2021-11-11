@@ -14,7 +14,7 @@ import (
 	"github.com/nleeper/goment"
 )
 
-func Fetch_newsHome() (helpers.Response, error) {
+func Fetch_newsHome(search string) (helpers.Response, error) {
 	var obj entities.Model_news
 	var arraobj []entities.Model_news
 	var res helpers.Response
@@ -23,26 +23,33 @@ func Fetch_newsHome() (helpers.Response, error) {
 	ctx := context.Background()
 	start := time.Now()
 
-	sql_select := `SELECT 
-			A.idnews , A.title_news, A.descp_news, 
-			A.url_news , A.img_news, B.nmcatenews, 
-			A.createnews, COALESCE(A.createdatenews,""), A.updatenews, COALESCE(A.updatedatenews,"")  
-			FROM ` + configs.DB_tbl_trx_news + ` as A  
-			JOIN ` + configs.DB_tbl_mst_category + ` as B ON B.idcatenews = A.idcatenews 
-			ORDER BY A.idnews DESC  LIMIT 100 
-		`
+	sql_select := ""
+	sql_select += ""
+	sql_select += "SELECT "
+	sql_select += "A.idnews , A.title_news, A.descp_news, "
+	sql_select += "A.url_news , A.img_news, B.nmcatenews, A.idcatenews, "
+	sql_select += "A.createnews, COALESCE(A.createdatenews,''), A.updatenews, COALESCE(A.updatedatenews,'') "
+	sql_select += "FROM " + configs.DB_tbl_trx_news + " as A "
+	sql_select += "JOIN " + configs.DB_tbl_mst_category + " as B ON B.idcatenews = A.idcatenews "
+	if search == "" {
+		sql_select += "ORDER BY A.idnews DESC  LIMIT 500  "
+	} else {
+		sql_select += "WHERE title_news LIKE '%" + search + "%' "
+		sql_select += "OR title_news LIKE '%" + search + "%' "
+		sql_select += "ORDER BY A.idnews DESC  LIMIT 500  "
+	}
 
 	row, err := con.QueryContext(ctx, sql_select)
 	helpers.ErrorCheck(err)
 	for row.Next() {
 		var (
-			idnews_db                                                             int
+			idnews_db, idcatenews_db                                              int
 			title_news_db, descp_news_db, url_news_db, img_news_db, nmcatenews_db string
 			createnews_db, createdatenews_db, updatenews_db, updatedatenews_db    string
 		)
 
 		err = row.Scan(
-			&idnews_db, &title_news_db, &descp_news_db, &url_news_db, &img_news_db, &nmcatenews_db,
+			&idnews_db, &title_news_db, &descp_news_db, &url_news_db, &img_news_db, &nmcatenews_db, &idcatenews_db,
 			&createnews_db, &createdatenews_db, &updatenews_db, &updatedatenews_db)
 
 		helpers.ErrorCheck(err)
@@ -56,6 +63,7 @@ func Fetch_newsHome() (helpers.Response, error) {
 		}
 
 		obj.News_id = idnews_db
+		obj.News_idcategory = idcatenews_db
 		obj.News_category = nmcatenews_db
 		obj.News_title = title_news_db
 		obj.News_descp = descp_news_db

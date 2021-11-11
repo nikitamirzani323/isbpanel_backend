@@ -187,16 +187,16 @@
         }
     }
     const handleKeyboard_checkenter = (e) => {
-      let keyCode = e.which || e.keyCode;
-      if (keyCode === 13) {
-            filterTafsirMimpi = [];
-            listHome = [];
-            const tafsir = {
-                searchTafsirMimpi,
-            };
-            dispatch("handleTafsirMimpi", tafsir);
-      }  
-  };
+        let keyCode = e.which || e.keyCode;
+        if (keyCode === 13) {
+                filterTafsirMimpi = [];
+                listHome = [];
+                const tafsir = {
+                    searchTafsirMimpi,
+                };
+                dispatch("handleTafsirMimpi", tafsir);
+        }  
+    };
 </script>
 <div id="loader" style="margin-left:50%;{css_loader}">
     {msgloader}
