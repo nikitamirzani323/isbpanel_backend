@@ -146,7 +146,7 @@ func Newssave(c *fiber.Ctx) error {
 			"record":  nil,
 		})
 	}
-	val_news := helpers.DeleteRedis(Fieldnews_home_redis)
+	val_news := helpers.DeleteRedis(Fieldnews_home_redis + "_")
 	log.Printf("Redis Delete BACKEND NEWS : %d", val_news)
 	val_client_news := helpers.DeleteRedis(Fieldnews_client_home_redis)
 	log.Printf("Redis Delete CLIENT NEWS : %d", val_client_news)
