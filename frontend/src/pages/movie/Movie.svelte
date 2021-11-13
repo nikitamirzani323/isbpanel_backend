@@ -21,7 +21,7 @@
                 Authorization: "Bearer " + token,
             },
             body: JSON.stringify({
-                page: "NEWS-VIEW",
+                page: "MOVIE-VIEW",
             }),
         });
         const json = await res.json();
@@ -36,14 +36,14 @@
     }
     async function initHome(e) {
         listHome = [];
-        const res = await fetch("/api/news", {
+        const res = await fetch("/api/movie", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 Authorization: "Bearer " + token,
             },
             body: JSON.stringify({
-                news_search: e
+                movie_search: e
             }),
         });
         const json = await res.json();
@@ -58,16 +58,18 @@
                     listHome = [
                         ...listHome,
                         {
-                            news_no: no,
-                            news_id: record[i]["news_id"],
-                            news_idcategory: record[i]["news_idcategory"],
-                            news_category: record[i]["news_category"],
-                            news_title: record[i]["news_title"],
-                            news_descp: record[i]["news_descp"],
-                            news_url: record[i]["news_url"],
-                            news_image: record[i]["news_image"],
-                            news_create: record[i]["news_create"],
-                            news_update: record[i]["news_update"],
+                            movie_no: no,
+                            movie_id: record[i]["movie_id"],
+                            movie_type: record[i]["movie_type"].toUpperCase(),
+                            movie_title: record[i]["movie_title"],
+                            movie_descp: record[i]["movie_descp"],
+                            movie_year: record[i]["movie_year"],
+                            movie_rating: record[i]["movie_rating"],
+                            movie_imdb: record[i]["movie_imdb"],
+                            movie_view: record[i]["movie_view"],
+                            movie_status: record[i]["movie_status"],
+                            movie_create: record[i]["movie_create"],
+                            movie_update: record[i]["movie_update"],
                         },
                     ];
                 }

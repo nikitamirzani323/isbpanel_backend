@@ -8,6 +8,7 @@
 	import Pasaran from "./pages/pasaran/Pasaran.svelte";
 	import Tafsirmimpi from "./pages/tafsirmimpi/Tafsirmimpi.svelte";
 	import News from "./pages/news/News.svelte";
+	import Movie from "./pages/movie/Movie.svelte";
 	import Login from "./pages/Login.svelte";
 	import NotFound from "./pages/NotFound.svelte";
 	export let table_header_font;
@@ -31,6 +32,13 @@
 					table_body_font: table_body_font,
 				},
 				component: Dashboard,
+			}),
+			"/movie": wrap({
+				component: Movie,
+				props: {
+					table_header_font: table_header_font,
+					table_body_font: table_body_font,
+				},
 			}),
 			"/pasaran": wrap({
 				component: Pasaran,
