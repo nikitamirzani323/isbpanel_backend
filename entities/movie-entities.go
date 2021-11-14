@@ -19,7 +19,26 @@ type Model_movie struct {
 type Model_moviegenre struct {
 	Moviegenre_name string `json:"moviegenre_name"`
 }
+type Model_genre struct {
+	Genre_id      int    `json:"genre_id"`
+	Genre_name    string `json:"genre_name"`
+	Genre_display int    `json:"genre_display"`
+	Genre_create  string `json:"genre_create"`
+	Genre_update  string `json:"genre_update"`
+}
 
 type Controller_movie struct {
 	Movie_search string `json:"movie_search"`
+}
+type Controller_genresave struct {
+	Page          string `json:"page" validate:"required"`
+	Sdata         string `json:"sdata" validate:"required"`
+	Genre_id      int    `json:"genre_id"`
+	Genre_name    string `json:"genre_name" validate:"required"`
+	Genre_display int    `json:"genre_display" validate:"required"`
+}
+type Controller_genredelete struct {
+	Page     string `json:"page" validate:"required"`
+	Sdata    string `json:"sdata" validate:"required"`
+	Genre_id int    `json:"genre_id" validate:"required"`
 }

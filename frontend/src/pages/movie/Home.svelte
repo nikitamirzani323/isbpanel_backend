@@ -5,7 +5,6 @@
 	import Button from "../../components/Button.svelte";
 	import Modal from "../../components/Modal.svelte";
     import { createEventDispatcher } from "svelte";
-import { text } from "svelte/internal";
 
     export let table_header_font = ""
 	export let table_body_font = ""
@@ -19,7 +18,7 @@ import { text } from "svelte/internal";
     let myModal = "";
     
     let listnews = []
-    let listcategory = []
+    let listgenre = []
     let record = ""
     let totalrecordnews = 0
     let totalrecordcategory = 0
@@ -27,10 +26,9 @@ import { text } from "svelte/internal";
     let tanggal_start_newsfetch = "";
     let tanggal_end_newsfetch = "";
     let page_newsfetch = "";
-    let category_field_idrecord = 0;
-    let category_field_name = "";
-    let category_field_display = 0;
-    let category_field_status = "";
+    let genre_field_idrecord = 0;
+    let genre_field_name = "";
+    let genre_field_display = 0;
     let news_field_idrecord = 0;
     let news_field_title = "";
     let news_field_descp = "";
@@ -69,24 +67,23 @@ import { text } from "svelte/internal";
         myModal = new bootstrap.Modal(document.getElementById("modalfetchnew"));
         myModal.show();
     };
-    const ShowCategory = () => {
+    const ShowGenre = () => {
         sData = ""
-        myModal = new bootstrap.Modal(document.getElementById("modalcategory"));
+        myModal = new bootstrap.Modal(document.getElementById("modalgenre"));
         myModal.show();
-        call_category()
+        call_genre()
     };
-    const ShowFormCategory = (e,id,name,display,status) => {
+    const ShowFormGenre = (e,id,name,display) => {
         sData = e
         if(e == "Edit"){
-            category_field_idrecord = parseInt(id);
-            category_field_name = name;
-            category_field_display = parseInt(display);
-            category_field_status = status;
+            genre_field_idrecord = parseInt(id);
+            genre_field_name = name;
+            genre_field_display = parseInt(display);
         }else{
-            clearfield_category()
+            clearfield_genre()
         }
         
-        myModal = new bootstrap.Modal(document.getElementById("modalcrudcategory"));
+        myModal = new bootstrap.Modal(document.getElementById("modalcrudgenre"));
         myModal.show();
     };
     const ShowFormNews = (e,id,category,title,descp,url,image) => {
@@ -140,9 +137,9 @@ import { text } from "svelte/internal";
        
         
     }
-    async function call_category() {
-        listcategory = [];
-        const res = await fetch("/api/categorynews", {
+    async function call_genre() {
+        listgenre = [];
+        const res = await fetch("/api/genremovie", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -159,34 +156,32 @@ import { text } from "svelte/internal";
                 let no = 0
                 for (var i = 0; i < record.length; i++) {
                     no = no + 1;
-                    listcategory = [
-                        ...listcategory,
+                    listgenre = [
+                        ...listgenre,
                         {
-                            category_no: no,
-                            category_id: record[i]["category_id"],
-                            category_name: record[i]["category_name"],
-                            category_display: record[i]["category_display"],
-                            category_status: record[i]["category_status"],
-                            category_statuscss: record[i]["category_statuscss"],
-                            category_create: record[i]["category_create"],
-                            category_update: record[i]["category_update"],
+                            genre_no: no,
+                            genre_id: record[i]["genre_id"],
+                            genre_name: record[i]["genre_name"],
+                            genre_display: record[i]["genre_display"],
+                            genre_create: record[i]["genre_create"],
+                            genre_update: record[i]["genre_update"],
                         },
                     ];
                 }
             }
         } 
     }
-    async function handleSaveCategory() {
+    async function handleSaveGenre() {
         let flag = true
         let msg = ""
         css_loader = "display: inline-block;";
         msgloader = "Sending...";
         if(sData == "New"){
-            if(category_field_name == ""){
+            if(genre_field_name == ""){
                 flag = false
                 msg += "The Name is required\n"
             }
-            if(category_field_display == ""){
+            if(genre_field_display == ""){
                 flag = false
                 msg += "The Display is required\n"
             }
@@ -195,7 +190,7 @@ import { text } from "svelte/internal";
             
             css_loader = "display: inline-block;";
             msgloader = "Sending...";
-            const res = await fetch("/api/categorynewssave", {
+            const res = await fetch("/api/genremoviesave", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -203,19 +198,18 @@ import { text } from "svelte/internal";
                 },
                 body: JSON.stringify({
                     sdata: sData,
-                    page:"CATEGORYNEWS-SAVE",
-                    category_id: parseInt(category_field_idrecord),
-                    category_name: category_field_name.toUpperCase(),
-                    category_status: category_field_status,
-                    category_display: parseInt(category_field_display),
+                    page:"MOVIEGENRE-SAVE",
+                    genre_id: parseInt(genre_field_idrecord),
+                    genre_name: genre_field_name.toUpperCase(),
+                    genre_display: parseInt(genre_field_display),
                 }),
             });
             const json = await res.json();
             if (json.status == 200) {
                 msgloader = json.message;
                 myModal.hide()
-                call_category()
-                clearfield_category()
+                call_genre()
+                clearfield_genre()
             } else if(json.status == 403){
                 alert(json.message)
             } else {
@@ -347,14 +341,14 @@ import { text } from "svelte/internal";
             case "FETCH_NEWS":
                 call_news();
                 break;
-            case "CALL_CATEGORY":
-                ShowCategory();
+            case "CALL_GENRE":
+                ShowGenre();
                 break;
-            case "FORMNEW_CATEGORY":
-                ShowFormCategory("New");
+            case "FORMNEW_GENRE":
+                ShowFormGenre("New");
                 break;
-            case "SAVE_CATEGORY":
-                handleSaveCategory();
+            case "SAVE_GENRE":
+                handleSaveGenre();
                 break;
             case "REFRESH":
                 RefreshHalaman();break;
@@ -362,11 +356,10 @@ import { text } from "svelte/internal";
                 handleSave();break;
         }
     }
-    function clearfield_category(){
-        category_field_idrecord = 0;
-        category_field_name = "";
-        category_field_display = 0;
-        category_field_status = "";
+    function clearfield_genre(){
+        genre_field_idrecord = 0;
+        genre_field_name = "";
+        genre_field_display = 0;
     }
     const handleKeyboard_checkenter = (e) => {
         let keyCode = e.which || e.keyCode;
@@ -394,8 +387,8 @@ import { text } from "svelte/internal";
                 button_css="btn-dark"/>
             <Button
                 on:click={callFunction}
-                button_function="CALL_CATEGORY"
-                button_title="Category"
+                button_function="CALL_GENRE"
+                button_title="Genre"
                 button_css="btn-primary"/>
             <Button
                 on:click={callFunction}
@@ -558,12 +551,12 @@ import { text } from "svelte/internal";
 	modal_footer={true}>
 	<slot:template slot="body">
         <div class="mb-3">
-            <label for="exampleForm" class="form-label">Category</label>
+            <label for="exampleForm" class="form-label">Genre</label>
             <select 
                 bind:value={news_field_category}
                 class="form-control required">
-                {#each listcategory as rec}
-                <option value="{rec.category_id}">{rec.category_name}</option>
+                {#each listgenre as rec}
+                <option value="{rec.genre_id}">{rec.genre_name}</option>
                 {/each}
             </select>
 		</div>
@@ -607,10 +600,10 @@ import { text } from "svelte/internal";
 	</slot:template>
 </Modal>
 <Modal
-	modal_id="modalcategory"
+	modal_id="modalgenre"
 	modal_size="modal-dialog-centered"
-	modal_title="CATEGORY"
-    modal_body_css="height:500px;"
+	modal_title="GENRE"
+    modal_body_css="height:500px; overflow-y: scroll;"
     modal_footer_css="padding:5px;"
 	modal_footer={true}>
 	<slot:template slot="body">
@@ -619,32 +612,30 @@ import { text } from "svelte/internal";
                 <tr>
                     <th width="1%" colspan="2">&nbsp;</th>
                     <th width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NO</th>
-                    <th width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">STATUS</th>
-                    <th width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">CATEGORY</th>
+                    <th width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">GENRE</th>
                     <th width="5%" style="text-align: right;vertical-align: top;font-weight:bold;font-size:{table_header_font};">DISPLAY</th>
                 </tr>
             </thead>
             <tbody>
-                {#each listcategory as rec }
+                {#each listgenre as rec }
                 <tr>
                     <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
                         <i 
                             on:click={() => {
-                                ShowFormCategory("Edit",rec.category_id,rec.category_name,rec.category_display,rec.category_status);
+                                ShowFormGenre("Edit",rec.genre_id,rec.genre_name,rec.genre_display);
                             }} 
                             class="bi bi-pencil"></i>
                     </td>
                     <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
                         <i 
                             on:click={() => {
-                                handleDeleteCategoryNews(rec.category_id);
+                                handleDeleteCategoryNews(rec.genre_id);
                             }} 
                             class="bi bi-trash"></i>
                     </td>
-                    <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.category_no}</td>
-                    <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};{rec.category_statuscss}">{rec.category_status}</td>
-                    <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.category_name}</td>
-                    <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.category_display}</td>
+                    <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.genre_no}</td>
+                    <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.genre_name}</td>
+                    <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.genre_display}</td>
                 </tr>
                 {/each}
                 
@@ -654,15 +645,15 @@ import { text } from "svelte/internal";
 	<slot:template slot="footer">
         <Button
             on:click={callFunction}
-            button_function="FORMNEW_CATEGORY"
+            button_function="FORMNEW_GENRE"
             button_title="New"
             button_css="btn-warning"/>
 	</slot:template>
 </Modal>
 <Modal
-	modal_id="modalcrudcategory"
+	modal_id="modalcrudgenre"
 	modal_size="modal-dialog-centered"
-	modal_title="CATEGORY/{sData}"
+	modal_title="GENRE/{sData}"
     modal_body_css=""
     modal_footer_css="padding:5px;"
 	modal_footer={true}>
@@ -670,35 +661,26 @@ import { text } from "svelte/internal";
         <div class="mb-3">
             <label for="exampleForm" class="form-label">Name</label>
 			<Input
-                bind:value={category_field_name}
+                bind:value={genre_field_name}
                 class="required"
                 type="text"
-                placeholder="Category Name"/>
+                placeholder="Genre Name"/>
 		</div>
         <div class="mb-3">
             <label for="exampleForm" class="form-label">Display</label>
 			<Input
-                bind:value={category_field_display}
+                bind:value={genre_field_display}
                 class="required"
                 maxlength=3
                 type="text"
                 style="text-align:right;"
-                placeholder="Category Display"/>
-		</div>
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">Status</label>
-            <select
-                bind:value={category_field_status} 
-                class="form-control required">
-                <option value="Y">ACTIVE</option>
-                <option value="">DEACTIVE</option>
-            </select>
+                placeholder="Genre Display"/>
 		</div>
 	</slot:template>
 	<slot:template slot="footer">
         <Button
             on:click={callFunction}
-            button_function="SAVE_CATEGORY"
+            button_function="SAVE_GENRE"
             button_title="Save"
             button_css="btn-warning"/>
 	</slot:template>

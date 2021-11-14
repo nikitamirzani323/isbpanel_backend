@@ -7,12 +7,14 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/nikitamirzani323/isbpanel_backend/entities"
 	"github.com/nikitamirzani323/isbpanel_backend/helpers"
 	"github.com/nikitamirzani323/isbpanel_backend/models"
 )
 
 const Fieldmovie_home_redis = "LISTMOVIE_BACKEND_ISBPANEL"
+const Fieldgenre_home_redis = "LISTGENRE_BACKEND_ISBPANEL"
 
 func Moviehome(c *fiber.Ctx) error {
 	var errors []*helpers.ErrorResponse
@@ -119,4 +121,145 @@ func Moviehome(c *fiber.Ctx) error {
 			"time":        time.Since(render_page).String(),
 		})
 	}
+}
+func Genrehome(c *fiber.Ctx) error {
+	var obj entities.Model_genre
+	var arraobj []entities.Model_genre
+	render_page := time.Now()
+	resultredis, flag := helpers.GetRedis(Fieldgenre_home_redis)
+	jsonredis := []byte(resultredis)
+	message_RD, _ := jsonparser.GetString(jsonredis, "message")
+	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
+	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		genre_id, _ := jsonparser.GetInt(value, "genre_id")
+		genre_name, _ := jsonparser.GetString(value, "genre_name")
+		genre_display, _ := jsonparser.GetInt(value, "genre_display")
+		genre_create, _ := jsonparser.GetString(value, "genre_create")
+		genre_update, _ := jsonparser.GetString(value, "genre_update")
+
+		obj.Genre_id = int(genre_id)
+		obj.Genre_name = genre_name
+		obj.Genre_display = int(genre_display)
+		obj.Genre_create = genre_create
+		obj.Genre_update = genre_update
+		arraobj = append(arraobj, obj)
+	})
+	if !flag {
+		result, err := models.Fetch_genre()
+		if err != nil {
+			c.Status(fiber.StatusBadRequest)
+			return c.JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": err.Error(),
+				"record":  nil,
+			})
+		}
+		helpers.SetRedis(Fieldgenre_home_redis, result, 0)
+		log.Println("GENRE MYSQL")
+		return c.JSON(result)
+	} else {
+		log.Println("GENRE CACHE")
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusOK,
+			"message": message_RD,
+			"record":  arraobj,
+			"time":    time.Since(render_page).String(),
+		})
+	}
+}
+func Genresave(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_genresave)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+	user := c.Locals("jwt").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	temp_decp := helpers.Decryption(name)
+	client_admin, _ := helpers.Parsing_Decry(temp_decp, "==")
+
+	result, err := models.Save_genre(
+		client_admin,
+		client.Genre_name, client.Sdata, client.Genre_id, client.Genre_display)
+	if err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+	val_genre := helpers.DeleteRedis(Fieldgenre_home_redis)
+	log.Printf("Redis Delete BACKEND MOVIE GENRE : %d", val_genre)
+	return c.JSON(result)
+}
+func Genredelete(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_genredelete)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+	user := c.Locals("jwt").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	temp_decp := helpers.Decryption(name)
+	client_admin, _ := helpers.Parsing_Decry(temp_decp, "==")
+
+	result, err := models.Delete_genre(client_admin, client.Genre_id)
+	if err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+	val_genre := helpers.DeleteRedis(Fieldgenre_home_redis)
+	log.Printf("Redis Delete BACKEND MOVIE GENRE : %d", val_genre)
+	return c.JSON(result)
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/nikitamirzani323/isbpanel_backend/db"
 	"github.com/nikitamirzani323/isbpanel_backend/entities"
 	"github.com/nikitamirzani323/isbpanel_backend/helpers"
+	"github.com/nleeper/goment"
 )
 
 func Fetch_movieHome(search string) (helpers.Responsemovie, error) {
@@ -132,7 +133,193 @@ func Fetch_movieHome(search string) (helpers.Responsemovie, error) {
 
 	return res, nil
 }
+func Fetch_genre() (helpers.Response, error) {
+	var obj entities.Model_genre
+	var arraobj []entities.Model_genre
+	var res helpers.Response
+	msg := "Data Not Found"
+	con := db.CreateCon()
+	ctx := context.Background()
+	start := time.Now()
 
+	sql_select := `SELECT 
+			idgenre , nmgenre, genredisplay, 
+			creategenre, COALESCE(createdategenre,""), updategenre, COALESCE(updatedategenre,"")  
+			FROM ` + configs.DB_tbl_mst_moviegenre + ` 
+			ORDER BY genredisplay ASC   
+		`
+
+	row, err := con.QueryContext(ctx, sql_select)
+	helpers.ErrorCheck(err)
+	for row.Next() {
+		var (
+			idgenre_db, genredisplay_db                                            int
+			nmgenre_db                                                             string
+			creategenre_db, createdategenre_db, updategenre_db, updatedategenre_db string
+		)
+
+		err = row.Scan(
+			&idgenre_db, &nmgenre_db, &genredisplay_db,
+			&creategenre_db, &createdategenre_db, &updategenre_db, &updatedategenre_db)
+
+		helpers.ErrorCheck(err)
+		create := ""
+		update := ""
+		if creategenre_db != "" {
+			create = creategenre_db + ", " + createdategenre_db
+		}
+		if updategenre_db != "" {
+			update = updategenre_db + ", " + updatedategenre_db
+		}
+
+		obj.Genre_id = idgenre_db
+		obj.Genre_name = nmgenre_db
+		obj.Genre_display = genredisplay_db
+		obj.Genre_create = create
+		obj.Genre_update = update
+		arraobj = append(arraobj, obj)
+		msg = "Success"
+	}
+	defer row.Close()
+
+	res.Status = fiber.StatusOK
+	res.Message = msg
+	res.Record = arraobj
+	res.Time = time.Since(start).String()
+
+	return res, nil
+}
+func Save_genre(admin, name, sdata string, idrecord, display int) (helpers.Response, error) {
+	var res helpers.Response
+	msg := "Failed"
+	con := db.CreateCon()
+	ctx := context.Background()
+	tglnow, _ := goment.New()
+	render_page := time.Now()
+	flag := false
+
+	if sdata == "New" {
+		sql_insert := `
+			insert into
+			` + configs.DB_tbl_mst_moviegenre + ` (
+				idgenre , nmgenre, genredisplay,  
+				creategenre, createdategenre
+			) values (
+				? ,?, ?, 
+				?, ?
+			)
+		`
+		stmt_insert, e_insert := con.PrepareContext(ctx, sql_insert)
+		helpers.ErrorCheck(e_insert)
+		defer stmt_insert.Close()
+		field_column := configs.DB_tbl_mst_moviegenre + tglnow.Format("YYYY")
+		idrecord_counter := Get_counter(field_column)
+		res_newrecord, e_newrecord := stmt_insert.ExecContext(
+			ctx,
+			tglnow.Format("YY")+strconv.Itoa(idrecord_counter),
+			name, display,
+			admin,
+			tglnow.Format("YYYY-MM-DD HH:mm:ss"))
+		helpers.ErrorCheck(e_newrecord)
+		insert, e := res_newrecord.RowsAffected()
+		helpers.ErrorCheck(e)
+		if insert > 0 {
+			flag = true
+			msg = "Succes"
+			log.Println("Data Berhasil di save")
+		}
+	} else {
+		sql_update := `
+			UPDATE 
+			` + configs.DB_tbl_mst_moviegenre + ` 
+			SET nmgenre=?, genredisplay=?, 
+			updategenre=?, updatedategenre=? 
+			WHERE idgenre=? 
+		`
+		stmt_update, e_update := con.PrepareContext(ctx, sql_update)
+		helpers.ErrorCheck(e_update)
+		defer stmt_update.Close()
+		res_newrecord, e_newrecord := stmt_update.ExecContext(
+			ctx,
+			name, display,
+			admin,
+			tglnow.Format("YYYY-MM-DD HH:mm:ss"), idrecord)
+		helpers.ErrorCheck(e_newrecord)
+		update, e := res_newrecord.RowsAffected()
+		helpers.ErrorCheck(e)
+		if update > 0 {
+			flag = true
+			msg = "Succes"
+			log.Println("Data Berhasil di update")
+		}
+	}
+
+	if flag {
+		res.Status = fiber.StatusOK
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	} else {
+		res.Status = fiber.StatusBadRequest
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	}
+
+	return res, nil
+}
+func Delete_genre(admin string, idrecord int) (helpers.Response, error) {
+	var res helpers.Response
+	msg := "Failed"
+	con := db.CreateCon()
+	ctx := context.Background()
+	render_page := time.Now()
+	flag := false
+	flag_movie := false
+
+	flag = CheckDB(configs.DB_tbl_mst_moviegenre, "idgenre", strconv.Itoa(idrecord))
+	flag_movie = CheckDB(configs.DB_tbl_trx_moviegenre, "idgenre", strconv.Itoa(idrecord))
+	if flag {
+		if flag_movie {
+			sql_delete := `
+				DELETE FROM
+				` + configs.DB_tbl_mst_moviegenre + ` 
+				WHERE idgenre=? 
+			`
+			stmt_delete, e_delete := con.PrepareContext(ctx, sql_delete)
+			helpers.ErrorCheck(e_delete)
+			defer stmt_delete.Close()
+			rec_delete, e_delete := stmt_delete.ExecContext(ctx, idrecord)
+
+			helpers.ErrorCheck(e_delete)
+			delete, e := rec_delete.RowsAffected()
+			helpers.ErrorCheck(e)
+			if delete > 0 {
+				flag = true
+				msg = "Succes"
+				log.Println("Data Berhasil di delete")
+			}
+		} else {
+			msg = "Cannot Delete"
+		}
+	} else {
+		msg = "Data Not Found"
+	}
+
+	if flag {
+		res.Status = fiber.StatusOK
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	} else {
+		res.Status = fiber.StatusBadRequest
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	}
+
+	return res, nil
+}
 func _GetMedia(idrecord int) (string, string) {
 	con := db.CreateCon()
 	ctx := context.Background()

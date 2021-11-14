@@ -67,5 +67,8 @@ func Init() *fiber.App {
 	app.Post("/api/categorynewsdelete", middleware.JWTProtected(), controllers.Categorydelete)
 
 	app.Post("/api/movie", middleware.JWTProtected(), controllers.Moviehome)
+	app.Post("/api/genremovie", middleware.JWTProtected(), controllers.Genrehome)
+	app.Post("/api/genremoviesave", middleware.JWTProtected(), controllers.Genresave)
+	app.Post("/api/genremoviedelete", middleware.JWTProtected(), controllers.Genredelete)
 	return app
 }
