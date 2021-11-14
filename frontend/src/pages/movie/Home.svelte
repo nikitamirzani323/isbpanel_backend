@@ -19,7 +19,6 @@
     
     let listnews = []
     let listgenre = []
-    let listsource = []
     let record = ""
     let totalrecordnews = 0
     let totalrecordcategory = 0
@@ -30,10 +29,14 @@
     let genre_field_idrecord = 0;
     let genre_field_name = "";
     let genre_field_display = 0;
+
     let movie_field_idrecord = 0;
     let movie_field_title = "";
     let movie_field_descp = "";
+    let movie_field_urlvideo = "";
     let movie_field_genre = [];
+    let movie_field_source_count = 0;
+    let movie_field_source = [];
     let movie_field_year = 0.0;
     let movie_field_imdb = 0.0;
     let movie_field_image = "";
@@ -41,7 +44,8 @@
     let movie_field_status = "0";
     let searchMovie = "";
     let filterMovie = "";
-
+    let genre_flagclick = false;
+    let genre_css = "";
     let css_loader = "display: none;";
     let msgloader = "";
 
@@ -71,10 +75,17 @@
         myModal = new bootstrap.Modal(document.getElementById("modalfetchnew"));
         myModal.show();
     };
-    const ShowGenre = () => {
+    const ShowGenre = (e) => {
         sData = ""
         myModal = new bootstrap.Modal(document.getElementById("modalgenre"));
         myModal.show();
+        genre_flagclick = e
+        if(genre_flagclick){
+            genre_css = "text-decoration:underline;color:blue;cursor:pointer;"
+        }else{
+            genre_css = "";
+            genre_flagclick = false
+        }
         call_genre()
     };
     const ShowFormGenre = (e,id,name,display) => {
@@ -103,6 +114,10 @@
         }
         
         myModal = new bootstrap.Modal(document.getElementById("modalcrudmovie"));
+        myModal.show();
+    };
+    const ShowFormSource = () => {
+        myModal = new bootstrap.Modal(document.getElementById("modalformsource"));
         myModal.show();
     };
     async function call_news() {
@@ -266,6 +281,43 @@
             css_loader = "display: none;";
         }, 1000);
     }
+    async function handleNewMovieGenre(id,name) {
+        movie_field_genre = [
+            ...movie_field_genre,
+            {
+                movie_genre_id: id,
+                movie_genre_name: name,
+            },
+        ];
+    }
+    async function handleNewMovieSource() {
+        if(movie_field_urlvideo != ""){
+            movie_field_source_count = movie_field_source_count + 1
+            movie_field_source = [
+                ...movie_field_source,
+                {
+                    movie_source_id: parseInt(movie_field_source_count),
+                    movie_source_name: movie_field_urlvideo,
+                },
+            ];
+        }else{
+            alert("The URL Video is required")
+        }
+        movie_field_urlvideo = ""
+    }
+    async function handleDeleteMovieSource(e) {
+        let temp = movie_field_source.filter(item => item.movie_source_id !== parseInt(e))
+        movie_field_source = []
+        for(var i=0;i<temp.length;i++){
+            movie_field_source = [
+                ...movie_field_source,
+                {
+                    movie_source_id: parseInt(temp[i].movie_source_id),
+                    movie_source_name: temp[i].movie_source_name,
+                },
+            ];
+        }
+    }
     async function handleDeleteNews(e) {
         let flag = true
         let msg = ""
@@ -349,7 +401,7 @@
                 call_news();
                 break;
             case "CALL_GENRE":
-                ShowGenre();
+                ShowGenre(false);
                 break;
             case "FORM_MOVIE":
                 ShowFormMovie("New");
@@ -362,16 +414,22 @@
                 break;
             case "REFRESH":
                 RefreshHalaman();break;
-            case "SAVE_NEWS":
-                handleSave();break;
+            case "SAVE_SOURCE":
+                handleNewMovieSource();break;
         }
     }
     function clearfield_movie(){
         movie_field_idrecord = 0;
         movie_field_title = "";
         movie_field_descp = "";
-        movie_field_genre = "";
+        movie_field_urlvideo = "";
+        movie_field_genre = [];
+        movie_field_source = [];
+        movie_field_year = 0.0;
+        movie_field_imdb = 0.0;
         movie_field_image = "";
+        movie_field_cover = "";
+        movie_field_status = "0";
     }
     function clearfield_genre(){
         genre_field_idrecord = 0;
@@ -468,10 +526,10 @@
                                 <tr>
                                     <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
                                         <i 
-                                            on:click={() => {
-                                                ShowFormNews("Edit",rec.news_id,rec.news_idcategory,rec.news_title,rec.news_descp,rec.news_url,rec.news_image)
-                                            }} 
-                                            class="bi bi-pencil"></i>
+                                        on:click={() => {
+                                            ShowFormNews("Edit",rec.news_id,rec.news_idcategory,rec.news_title,rec.news_descp,rec.news_url,rec.news_image)
+                                        }} 
+                                        class="bi bi-pencil"></i>
                                     </td>
                                     <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
                                         <i 
@@ -595,21 +653,40 @@
             </div>
             <div class="col-sm-6">
                 <div class="mb-3">
-                    <label for="exampleForm" class="form-label">Genre - <span style="text-decoration: underline;cursor:pointer;color:blue;">New</span></label>
+                    <label for="exampleForm" class="form-label">Genre - 
+                        <span
+                            on:click={() => {
+                                ShowGenre(true)
+                            }} 
+                            style="text-decoration: underline;cursor:pointer;color:blue;">New</span>
+                </label>
                     <table>
-                        {#each listgenre as rec }
+                        {#each movie_field_genre as rec }
                         <tr>
-                            <td>{rec.name}</td>
+                            <td>{rec.movie_genre_name}</td>
                         </tr>       
                         {/each}
                     </table>
                 </div>
                 <div class="mb-3">
-                    <label for="exampleForm" class="form-label">Source - <span style="text-decoration: underline;cursor:pointer;color:blue;">New</span></label>
+                    <label for="exampleForm" class="form-label">Source - 
+                        <span
+                            on:click={() => {
+                                ShowFormSource()
+                            }}  
+                            style="text-decoration: underline;cursor:pointer;color:blue;">New</span>
+                    </label>
                     <table>
-                        {#each listsource as rec }
+                        {#each movie_field_source as rec }
                         <tr>
-                            <td>{rec.url}</td>
+                            <td style="cursor: pointer;">
+                                <i 
+                                    on:click={() => {
+                                        handleDeleteMovieSource(rec.movie_source_id);
+                                    }} 
+                                    class="bi bi-trash"></i>
+                            </td>
+                            <td>{rec.movie_source_name}</td>
                         </tr>       
                         {/each}
                     </table>
@@ -621,6 +698,31 @@
         <Button
             on:click={callFunction}
             button_function="SAVE_NEWS"
+            button_title="Save"
+            button_css="btn-warning"/>
+	</slot:template>
+</Modal>
+<Modal
+	modal_id="modalformsource"
+	modal_size="modal-dialog-centered"
+	modal_title="Source"
+    modal_body_css=""
+    modal_footer_css="padding:5px;"
+	modal_footer={true}>
+	<slot:template slot="body">
+        <div class="mb-3">
+            <label for="exampleForm" class="form-label">URL Video</label>
+			<Input
+                bind:value={movie_field_urlvideo}
+                class="required"
+                type="text"
+                placeholder="Url VIdeo"/>
+		</div>
+	</slot:template>
+	<slot:template slot="footer">
+        <Button
+            on:click={callFunction}
+            button_function="SAVE_SOURCE"
             button_title="Save"
             button_css="btn-warning"/>
 	</slot:template>
@@ -660,7 +762,15 @@
                             class="bi bi-trash"></i>
                     </td>
                     <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.genre_no}</td>
-                    <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.genre_name}</td>
+                    {#if genre_flagclick == true}
+                        <td 
+                            on:click={() => {
+                                handleNewMovieGenre(rec.genre_id,rec.genre_name);
+                            }} 
+                            NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};{genre_css}">{rec.genre_name}</td>
+                    {:else}
+                        <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};{genre_css}">{rec.genre_name}</td>
+                    {/if}
                     <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.genre_display}</td>
                 </tr>
                 {/each}
