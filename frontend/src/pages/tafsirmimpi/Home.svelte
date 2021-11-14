@@ -231,7 +231,7 @@
                     </div>
                 </slot:template>
                 <slot:template slot="card-body">
-                    <table class="table table-striped table-hover table-sm">
+                    <table class="table table-striped table-hover">
                         <thead>
                             <tr>
                                 <th NOWRAP width="1%" style="text-align: center;vertical-align: top;" >&nbsp;</th>

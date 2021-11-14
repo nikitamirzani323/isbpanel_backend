@@ -5,10 +5,12 @@
 	import Button from "../../components/Button.svelte";
 	import Modal from "../../components/Modal.svelte";
     import { createEventDispatcher } from "svelte";
+import { text } from "svelte/internal";
 
     export let table_header_font = ""
 	export let table_body_font = ""
 	export let token = ""
+	export let listPage = []
 	export let listHome = []
 	export let totalrecord = 0
     let dispatch = createEventDispatcher();
@@ -35,22 +37,28 @@
     let news_field_category = "";
     let news_field_url = "";
     let news_field_image = "";
-    let searchNews = "";
-    let filterNews = "";
+    let searchMovie = "";
+    let filterMovie = "";
 
     let css_loader = "display: none;";
     let msgloader = "";
 
     $: {
-        if (searchNews) {
-            filterNews = listHome.filter(
+        if (searchMovie) {
+            filterMovie = listHome.filter(
                 (item) =>
-                    item.news_title
+                    item.movie_status
                         .toLowerCase()
-                        .includes(searchNews.toLowerCase())
+                        .includes(searchMovie.toLowerCase()) || 
+                    item.movie_title
+                        .toLowerCase()
+                        .includes(searchMovie.toLowerCase()) || 
+                    item.movie_year
+                        .toLowerCase()
+                        .includes(searchMovie.toLowerCase())
             );
         } else {
-            filterNews = [...listHome];
+            filterMovie = [...listHome];
         }
     }
     const RefreshHalaman = () => {
@@ -363,12 +371,12 @@
     const handleKeyboard_checkenter = (e) => {
         let keyCode = e.which || e.keyCode;
         if (keyCode === 13) {
-                filterNews = [];
+                filterMovie = [];
                 listHome = [];
-                const news = {
-                    searchNews,
+                const movie = {
+                    searchMovie,
                 };
-                dispatch("handleNews", news);
+                dispatch("handleMovie", movie);
         }  
     };
 </script>
@@ -399,26 +407,40 @@
                 card_search={true}
                 card_title="{title_page}"
                 card_footer={totalrecord}>
+                <slot:template slot="card-title">
+                    <div class="float-end">
+                        <select
+                            style="text-align: center;" 
+                            class="form-control">
+                            {#each listPage as rec}
+                                <option value="{rec.page_id}">{rec.page_display}</option>
+                            {/each}
+                        </select>
+                    </div>
+                </slot:template>
                 <slot:template slot="card-search">
                     <div class="col-lg-12" style="padding: 5px;">
                         <input
-                            bind:value={searchNews}
+                            bind:value={searchMovie}
                             on:keypress={handleKeyboard_checkenter}
                             type="text"
                             class="form-control"
-                            placeholder="Search News"
+                            placeholder="Search Movie + Tekan Enter"
                             aria-label="Search"
                         />
                     </div>
                 </slot:template>
                 <slot:template slot="card-body">
-                        <table class="table table-striped table-hover table-sm">
+                        <table class="table table-striped table-hover">
                             <thead>
                                 <tr>
                                     <th NOWRAP width="1%" style="text-align: center;vertical-align: top;" colspan="2">&nbsp;</th>
                                     <th NOWRAP width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NO</th>
-                                    <th NOWRAP width="2%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">TYPE</th>
+                                    <th NOWRAP width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">&nbsp;</th>
+                                    <th NOWRAP width="2%" style="text-align: center;vertical-align: top;font-weight:bold;font-size: {table_header_font};">TYPE</th>
                                     <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">YEAR</th>
+                                    <th NOWRAP width="5%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">GENRE</th>
+                                    <th NOWRAP width="2%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">THUMBNAIL</th>
                                     <th NOWRAP width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">MOVIE</th>
                                     <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">IMDB</th>
                                     <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">VIEW</th>
@@ -426,7 +448,7 @@
                             </thead>
                             {#if totalrecord > 0}
                             <tbody>
-                                {#each filterNews as rec }
+                                {#each filterMovie as rec }
                                     <tr>
                                         <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
                                             <i 
@@ -443,8 +465,19 @@
                                                 class="bi bi-trash"></i>
                                         </td>
                                         <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.movie_no}</td>
-                                        <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.movie_type}</td>
+                                        <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};{rec.movie_statuscss}">{rec.movie_status}</td>
+                                        <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">
+                                            <span style="{rec.movie_csstype}padding:5px 10px 5px 10px;">{rec.movie_type}</span>
+                                        </td>
                                         <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.movie_year}</td>
+                                        <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
+                                            {#each rec.movie_genre as rec2}
+                                                {rec2.moviegenre_name}<br>
+                                            {/each}
+                                        </td>
+                                        <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
+                                            <img width="50" class="img-thumbnail" src="{rec.movie_thumbnail}" alt="">
+                                        </td>
                                         <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.movie_title}</td>
                                         <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.movie_imdb}</td>
                                         <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.movie_view}</td>

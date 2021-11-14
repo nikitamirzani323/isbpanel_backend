@@ -1,17 +1,23 @@
 package entities
 
 type Model_movie struct {
-	Movie_id     int     `json:"movie_id"`
-	Movie_type   string  `json:"movie_type"`
-	Movie_title  string  `json:"movie_title"`
-	Movie_descp  string  `json:"movie_descp"`
-	Movie_year   int     `json:"movie_year"`
-	Movie_rating float32 `json:"movie_rating"`
-	Movie_imdb   float32 `json:"movie_imdb"`
-	Movie_view   int     `json:"movie_view"`
-	Movie_status int     `json:"movie_status"`
-	Movie_create string  `json:"movie_create"`
-	Movie_update string  `json:"movie_update"`
+	Movie_id        int         `json:"movie_id"`
+	Movie_type      string      `json:"movie_type"`
+	Movie_title     string      `json:"movie_title"`
+	Movie_descp     string      `json:"movie_descp"`
+	Movie_thumbnail string      `json:"movie_thumbnail"`
+	Movie_year      int         `json:"movie_year"`
+	Movie_rating    float32     `json:"movie_rating"`
+	Movie_imdb      float32     `json:"movie_imdb"`
+	Movie_view      int         `json:"movie_view"`
+	Movie_genre     interface{} `json:"movie_genre"`
+	Movie_status    string      `json:"movie_status"`
+	Movie_statuscss string      `json:"movie_statuscss"`
+	Movie_create    string      `json:"movie_create"`
+	Movie_update    string      `json:"movie_update"`
+}
+type Model_moviegenre struct {
+	Moviegenre_name string `json:"moviegenre_name"`
 }
 
 type Controller_movie struct {

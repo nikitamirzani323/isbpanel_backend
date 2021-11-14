@@ -11,6 +11,7 @@
 </script>
 <div class="card mt-1">
     <div class="card-header">
+        <slot name="card-title" />
         <h5 class="card-title">{card_title}</h5>
     </div>
     {#if card_search}
