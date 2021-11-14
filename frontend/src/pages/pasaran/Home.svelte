@@ -547,7 +547,7 @@
                 card_title="{title_page}"
                 card_footer={totalrecord}>
                 <slot:template slot="card-body">
-                        <table class="table table-striped table-hover">
+                        <table class="table table-striped table-hover table-sm">
                             <thead>
                                 <tr>
                                     <th NOWRAP width="1%" style="text-align: center;vertical-align: top;" colspan="3">&nbsp;</th>
