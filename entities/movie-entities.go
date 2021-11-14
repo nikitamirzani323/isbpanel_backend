@@ -2,6 +2,7 @@ package entities
 
 type Model_movie struct {
 	Movie_id        int         `json:"movie_id"`
+	Movie_date      string      `json:"movie_date"`
 	Movie_type      string      `json:"movie_type"`
 	Movie_title     string      `json:"movie_title"`
 	Movie_descp     string      `json:"movie_descp"`

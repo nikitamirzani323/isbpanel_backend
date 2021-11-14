@@ -19,6 +19,7 @@
     
     let listnews = []
     let listgenre = []
+    let listsource = []
     let record = ""
     let totalrecordnews = 0
     let totalrecordcategory = 0
@@ -29,12 +30,15 @@
     let genre_field_idrecord = 0;
     let genre_field_name = "";
     let genre_field_display = 0;
-    let news_field_idrecord = 0;
-    let news_field_title = "";
-    let news_field_descp = "";
-    let news_field_category = "";
-    let news_field_url = "";
-    let news_field_image = "";
+    let movie_field_idrecord = 0;
+    let movie_field_title = "";
+    let movie_field_descp = "";
+    let movie_field_genre = [];
+    let movie_field_year = 0.0;
+    let movie_field_imdb = 0.0;
+    let movie_field_image = "";
+    let movie_field_cover = "";
+    let movie_field_status = "0";
     let searchMovie = "";
     let filterMovie = "";
 
@@ -86,16 +90,19 @@
         myModal = new bootstrap.Modal(document.getElementById("modalcrudgenre"));
         myModal.show();
     };
-    const ShowFormNews = (e,id,category,title,descp,url,image) => {
+    const ShowFormMovie = (e,id,category,title,descp,url,image) => {
         sData = e
-        news_field_idrecord = parseInt(id);
-        news_field_title = title;
-        news_field_descp = descp;
-        news_field_category = parseInt(category);
-        news_field_url = url;
-        news_field_image = image;
-        call_category()
-        myModal = new bootstrap.Modal(document.getElementById("modalcrudnews"));
+        if(e == "Edit"){
+            movie_field_idrecord = parseInt(id);
+            movie_field_title = title;
+            movie_field_descp = descp;
+            movie_field_genre = parseInt(category);
+            movie_field_image = image;
+        }else{
+            clearfield_movie()
+        }
+        
+        myModal = new bootstrap.Modal(document.getElementById("modalcrudmovie"));
         myModal.show();
     };
     async function call_news() {
@@ -344,6 +351,9 @@
             case "CALL_GENRE":
                 ShowGenre();
                 break;
+            case "FORM_MOVIE":
+                ShowFormMovie("New");
+                break;
             case "FORMNEW_GENRE":
                 ShowFormGenre("New");
                 break;
@@ -355,6 +365,13 @@
             case "SAVE_NEWS":
                 handleSave();break;
         }
+    }
+    function clearfield_movie(){
+        movie_field_idrecord = 0;
+        movie_field_title = "";
+        movie_field_descp = "";
+        movie_field_genre = "";
+        movie_field_image = "";
     }
     function clearfield_genre(){
         genre_field_idrecord = 0;
@@ -382,8 +399,13 @@
         <div class="col-sm-12">
             <Button
                 on:click={callFunction}
-                button_function="NEWS"
-                button_title="New"
+                button_function="FORM_MOVIE"
+                button_title="New Movie"
+                button_css="btn-dark"/>
+            <Button
+                on:click={callFunction}
+                button_function="FORM_SERIES"
+                button_title="New Series"
                 button_css="btn-dark"/>
             <Button
                 on:click={callFunction}
@@ -424,172 +446,176 @@
                     </div>
                 </slot:template>
                 <slot:template slot="card-body">
-                        <table class="table table-striped table-hover">
-                            <thead>
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th NOWRAP width="1%" style="text-align: center;vertical-align: top;" colspan="2">&nbsp;</th>
+                                <th NOWRAP width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NO</th>
+                                <th NOWRAP width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">&nbsp;</th>
+                                <th NOWRAP width="5%" style="text-align: center;vertical-align: top;font-weight:bold;font-size: {table_header_font};">DATE</th>
+                                <th NOWRAP width="2%" style="text-align: center;vertical-align: top;font-weight:bold;font-size: {table_header_font};">TYPE</th>
+                                <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">YEAR</th>
+                                <th NOWRAP width="5%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">GENRE</th>
+                                <th NOWRAP width="2%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">THUMBNAIL</th>
+                                <th NOWRAP width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">MOVIE</th>
+                                <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">IMDB</th>
+                                <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">VIEW</th>
+                            </tr>
+                        </thead>
+                        {#if totalrecord > 0}
+                        <tbody>
+                            {#each filterMovie as rec }
                                 <tr>
-                                    <th NOWRAP width="1%" style="text-align: center;vertical-align: top;" colspan="2">&nbsp;</th>
-                                    <th NOWRAP width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NO</th>
-                                    <th NOWRAP width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">&nbsp;</th>
-                                    <th NOWRAP width="2%" style="text-align: center;vertical-align: top;font-weight:bold;font-size: {table_header_font};">TYPE</th>
-                                    <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">YEAR</th>
-                                    <th NOWRAP width="5%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">GENRE</th>
-                                    <th NOWRAP width="2%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">THUMBNAIL</th>
-                                    <th NOWRAP width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">MOVIE</th>
-                                    <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">IMDB</th>
-                                    <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">VIEW</th>
-                                </tr>
-                            </thead>
-                            {#if totalrecord > 0}
-                            <tbody>
-                                {#each filterMovie as rec }
-                                    <tr>
-                                        <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
-                                            <i 
-                                                on:click={() => {
-                                                    ShowFormNews("Edit",rec.news_id,rec.news_idcategory,rec.news_title,rec.news_descp,rec.news_url,rec.news_image)
-                                                }} 
-                                                class="bi bi-pencil"></i>
-                                        </td>
-                                        <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
-                                            <i 
-                                                on:click={() => {
-                                                    handleDeleteNews(rec.news_id);
-                                                }} 
-                                                class="bi bi-trash"></i>
-                                        </td>
-                                        <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.movie_no}</td>
-                                        <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};{rec.movie_statuscss}">{rec.movie_status}</td>
-                                        <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">
-                                            <span style="{rec.movie_csstype}padding:5px 10px 5px 10px;">{rec.movie_type}</span>
-                                        </td>
-                                        <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.movie_year}</td>
-                                        <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
-                                            {#each rec.movie_genre as rec2}
-                                                {rec2.moviegenre_name}<br>
-                                            {/each}
-                                        </td>
-                                        <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
-                                            <img width="50" class="img-thumbnail" src="{rec.movie_thumbnail}" alt="">
-                                        </td>
-                                        <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.movie_title}</td>
-                                        <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.movie_imdb}</td>
-                                        <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.movie_view}</td>
-                                    </tr>
-                                {/each}
-                            </tbody>
-                            {:else}
-                            <tbody>
-                                <tr>
-                                    <td colspan="20">
-                                        <center>
-                                            <Loader />
-                                        </center>
+                                    <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
+                                        <i 
+                                            on:click={() => {
+                                                ShowFormNews("Edit",rec.news_id,rec.news_idcategory,rec.news_title,rec.news_descp,rec.news_url,rec.news_image)
+                                            }} 
+                                            class="bi bi-pencil"></i>
                                     </td>
+                                    <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
+                                        <i 
+                                            on:click={() => {
+                                                handleDeleteNews(rec.news_id);
+                                            }} 
+                                            class="bi bi-trash"></i>
+                                    </td>
+                                    <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.movie_no}</td>
+                                    <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};{rec.movie_statuscss}">{rec.movie_status}</td>
+                                    <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.movie_date}</td>
+                                    <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">
+                                        <span style="{rec.movie_csstype}padding:5px 10px 5px 10px;">{rec.movie_type}</span>
+                                    </td>
+                                    <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.movie_year}</td>
+                                    <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
+                                        {#each rec.movie_genre as rec2}
+                                            {rec2.moviegenre_name}<br>
+                                        {/each}
+                                    </td>
+                                    <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
+                                        <img width="50" class="img-thumbnail" src="{rec.movie_thumbnail}" alt="">
+                                    </td>
+                                    <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.movie_title}</td>
+                                    <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.movie_imdb}</td>
+                                    <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.movie_view}</td>
                                 </tr>
-                            </tbody>
-                            {/if} 
-                        </table>
+                            {/each}
+                        </tbody>
+                        {:else}
+                        <tbody>
+                            <tr>
+                                <td colspan="20">
+                                    <center>
+                                        <Loader />
+                                    </center>
+                                </td>
+                            </tr>
+                        </tbody>
+                        {/if} 
+                    </table>
                 </slot:template>
             </Panel>
         </div>
     </div>
 </div>
 <Modal
-	modal_id="modalfetchnew"
-	modal_size="modal-dialog-centered"
-	modal_title="{title_page}"
+	modal_id="modalcrudmovie"
+	modal_size="modal-dialog-centered modal-lg"
+	modal_title="Movie/{sData}"
+    modal_body_css="height:500px;overflow-y: scroll;"
     modal_footer_css="padding:5px;"
 	modal_footer={true}>
 	<slot:template slot="body">
-        <div class="mb-3">
-            <label for="example" class="form-label">Start</label>
-			<Input
-                bind:value={tanggal_start_newsfetch}
-                class="required"
-                type="date"
-                name="date"
-                id="exampleDate"
-                data-date-format="dd-mm-yyyy"
-                placeholder="date placeholder"/>
-		</div>
-        <div class="mb-3">
-            <label for="example" class="form-label">End</label>
-			<Input
-                bind:value={tanggal_end_newsfetch}
-                class="required"
-                type="date"
-                name="date"
-                id="exampleDate"
-                data-date-format="dd-mm-yyyy"
-                placeholder="date placeholder"/>
-		</div>
-        <div class="mb-3">
-            <label for="example" class="form-label">Page</label>
-            <select 
-                class="form-control"
-                bind:value={page_newsfetch}>
-                <option value="1">Page 1</option>
-                <option value="2">Page 2</option>
-                <option value="3">Page 3</option>
-            </select>
-		</div>
-	</slot:template>
-	<slot:template slot="footer">
-        <Button
-            on:click={callFunction}
-            button_function="FETCH_NEWS"
-            button_title="Submit"
-            button_css="btn-warning"/>
-	</slot:template>
-</Modal>
-<Modal
-	modal_id="modalcrudnews"
-	modal_size="modal-dialog-centered"
-	modal_title="NEWS/{sData}"
-    modal_body_css=""
-    modal_footer_css="padding:5px;"
-	modal_footer={true}>
-	<slot:template slot="body">
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">Genre</label>
-            <select 
-                bind:value={news_field_category}
-                class="form-control required">
-                {#each listgenre as rec}
-                <option value="{rec.genre_id}">{rec.genre_name}</option>
-                {/each}
-            </select>
-		</div>
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">Title</label>
-			<Input
-                bind:value={news_field_title}
-                class="required"
-                type="text"
-                placeholder="News Title"/>
-		</div>
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">Deskripsi</label>
-            <textarea
-                style="height: 100px;resize: none;" 
-                bind:value={news_field_descp} class="form-control required"></textarea>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">Movie</label>
+                    <Input
+                        bind:value={movie_field_title}
+                        class="required"
+                        type="text"
+                        placeholder="Movie Title"/>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">Deskripsi</label>
+                    <textarea
+                        style="height: 100px;resize: none;" 
+                        bind:value={movie_field_descp} class="form-control required"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">Year</label>
+                    <Input
+                        bind:value={movie_field_year}
+                        minlength=4
+                        maxlength=4
+                        style="text-align:right;"
+                        class="required"
+                        type="text"
+                        placeholder="Movie Imdb"/>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">Imdb</label>
+                    <Input
+                        bind:value={movie_field_imdb}
+                        class="required"
+                        style="text-align:right;"
+                        type="text"
+                        placeholder="Movie Imdb"/>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">Url Thumbnail</label>
+                    <Input
+                        bind:value={movie_field_image}
+                        class="required"
+                        type="text"
+                        placeholder="Movie URL Thumbnail"/>
+                    <a href="https://id.imgbb.com/" target="_blank">imgbb</a>, 
+                    <a href="https://imgur.com/" target="_blank">imgur</a>
+
+                </div>
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">Url Cover</label>
+                    <Input
+                        bind:value={movie_field_cover}
+                        class="required"
+                        type="text"
+                        placeholder="Movie URL Cover"/>
+                    <a href="https://id.imgbb.com/" target="_blank">imgbb</a>,
+                    <a href="https://imgur.com/" target="_blank">imgur</a>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">Status</label>
+                    <select  
+                        bind:value={movie_field_status}
+                        class="form-control required">
+                        <option value="1">SHOW</option>
+                        <option value="0">HIDE</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">Genre - <span style="text-decoration: underline;cursor:pointer;color:blue;">New</span></label>
+                    <table>
+                        {#each listgenre as rec }
+                        <tr>
+                            <td>{rec.name}</td>
+                        </tr>       
+                        {/each}
+                    </table>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">Source - <span style="text-decoration: underline;cursor:pointer;color:blue;">New</span></label>
+                    <table>
+                        {#each listsource as rec }
+                        <tr>
+                            <td>{rec.url}</td>
+                        </tr>       
+                        {/each}
+                    </table>
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">Url Image</label>
-			<Input
-                bind:value={news_field_image}
-                class="required"
-                type="text"
-                placeholder="News Image"/>
-		</div>
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">Url</label>
-			<Input
-                bind:value={news_field_url}
-                class="required"
-                type="text"
-                placeholder="News URL"/>
-		</div>
 	</slot:template>
 	<slot:template slot="footer">
         <Button

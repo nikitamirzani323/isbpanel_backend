@@ -38,7 +38,6 @@ func Fetch_movieHome(search string) (helpers.Responsemovie, error) {
 	default:
 		helpers.ErrorCheck(e_selectcount)
 	}
-	log.Println("TOTALRECORD : ", totalrecord)
 	sql_select := ""
 	sql_select += ""
 	sql_select += "SELECT "
@@ -49,8 +48,7 @@ func Fetch_movieHome(search string) (helpers.Responsemovie, error) {
 	if search == "" {
 		sql_select += "ORDER BY createdatemovie DESC LIMIT " + strconv.Itoa(perpage)
 	} else {
-		sql_select += "WHERE movietitle '%" + search + "%' "
-		sql_select += "OR movietitle LIKE '%" + search + "%' "
+		sql_select += "WHERE movietitle LIKE '%" + search + "%' "
 		sql_select += "ORDER BY createdatemovie DESC  LIMIT " + strconv.Itoa(perpage)
 	}
 
@@ -106,6 +104,7 @@ func Fetch_movieHome(search string) (helpers.Responsemovie, error) {
 		path_image := "https://duniafilm.b-cdn.net/uploads/cache/poster_thumb/uploads/" + poster_extension + "/" + poster_image
 
 		obj.Movie_id = movieid_db
+		obj.Movie_date = createdatemovie_db
 		obj.Movie_type = movietype_db
 		obj.Movie_title = movietitle_db
 		obj.Movie_descp = description_db
@@ -130,6 +129,85 @@ func Fetch_movieHome(search string) (helpers.Responsemovie, error) {
 	res.Perpage = perpage
 	res.Totalrecord = totalrecord
 	res.Time = time.Since(start).String()
+
+	return res, nil
+}
+func Save_movie(admin, name, tipemovie, descp, urlthum, urlcover, sdata string, idrecord, year, status int, imdb float32) (helpers.Response, error) {
+	var res helpers.Response
+	msg := "Failed"
+	con := db.CreateCon()
+	ctx := context.Background()
+	tglnow, _ := goment.New()
+	render_page := time.Now()
+	flag := false
+
+	if sdata == "New" {
+		sql_insert := `
+			insert into
+			` + configs.DB_tbl_trx_movie + ` (
+				movieid , movietitle, movietype, description, imdb, year, slug, enabled, urlthumbnail, urlcover,    
+				createmovie, createdatemovie
+			) values (
+				?,?,?,?,?,?,?,?,?,?, 
+				?, ?
+			)
+		`
+		stmt_insert, e_insert := con.PrepareContext(ctx, sql_insert)
+		helpers.ErrorCheck(e_insert)
+		defer stmt_insert.Close()
+		field_column := configs.DB_tbl_trx_movie + tglnow.Format("YYYY")
+		idrecord_counter := Get_counter(field_column)
+		res_newrecord, e_newrecord := stmt_insert.ExecContext(
+			ctx,
+			tglnow.Format("YY")+strconv.Itoa(idrecord_counter),
+			name, tipemovie, descp, imdb, year, "slug", status, urlthum, urlcover,
+			admin,
+			tglnow.Format("YYYY-MM-DD HH:mm:ss"))
+		helpers.ErrorCheck(e_newrecord)
+		insert, e := res_newrecord.RowsAffected()
+		helpers.ErrorCheck(e)
+		if insert > 0 {
+			flag = true
+			msg = "Succes"
+			log.Println("Data Berhasil di save")
+		}
+	} else {
+		sql_update := `
+			UPDATE 
+			` + configs.DB_tbl_trx_movie + ` 
+			SET movietitle=?, description=?, urlthumbnail=?, urlcover=?,
+			updatemovie=?, updatedatemovie=? 
+			WHERE movieid=? 
+		`
+		stmt_update, e_update := con.PrepareContext(ctx, sql_update)
+		helpers.ErrorCheck(e_update)
+		defer stmt_update.Close()
+		res_newrecord, e_newrecord := stmt_update.ExecContext(
+			ctx,
+			name, descp, urlthum, urlcover,
+			admin,
+			tglnow.Format("YYYY-MM-DD HH:mm:ss"), idrecord)
+		helpers.ErrorCheck(e_newrecord)
+		update, e := res_newrecord.RowsAffected()
+		helpers.ErrorCheck(e)
+		if update > 0 {
+			flag = true
+			msg = "Succes"
+			log.Println("Data Berhasil di update")
+		}
+	}
+
+	if flag {
+		res.Status = fiber.StatusOK
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	} else {
+		res.Status = fiber.StatusBadRequest
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	}
 
 	return res, nil
 }

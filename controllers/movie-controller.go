@@ -59,6 +59,7 @@ func Moviehome(c *fiber.Ctx) error {
 	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
 	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		movie_id, _ := jsonparser.GetInt(value, "movie_id")
+		movie_date, _ := jsonparser.GetString(value, "movie_date")
 		movie_type, _ := jsonparser.GetString(value, "movie_type")
 		movie_title, _ := jsonparser.GetString(value, "movie_title")
 		movie_descp, _ := jsonparser.GetString(value, "movie_descp")
@@ -82,6 +83,7 @@ func Moviehome(c *fiber.Ctx) error {
 		})
 
 		obj.Movie_id = int(movie_id)
+		obj.Movie_date = movie_date
 		obj.Movie_type = movie_type
 		obj.Movie_title = movie_title
 		obj.Movie_descp = movie_descp

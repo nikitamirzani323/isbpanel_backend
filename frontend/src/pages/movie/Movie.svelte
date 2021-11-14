@@ -75,6 +75,7 @@
                         {
                             movie_no: no,
                             movie_id: record[i]["movie_id"],
+                            movie_date: record[i]["movie_date"],
                             movie_type: record[i]["movie_type"].toUpperCase(),
                             movie_csstype: css_type,
                             movie_title: record[i]["movie_title"],
