@@ -42,13 +42,16 @@
     let movie_field_image = "";
     let movie_field_cover = "";
     let movie_field_status = "0";
+
+ 
+    let cloudflare_field_urlvideo = "";
     let searchMovie = "";
     let filterMovie = "";
     let genre_flagclick = false;
     let genre_css = "";
     let css_loader = "display: none;";
     let msgloader = "";
-
+    var fileInput;
     $: {
         if (searchMovie) {
             filterMovie = listHome.filter(
@@ -76,7 +79,6 @@
         myModal.show();
     };
     const ShowGenre = (e) => {
-        sData = ""
         myModal = new bootstrap.Modal(document.getElementById("modalgenre"));
         myModal.show();
         genre_flagclick = e
@@ -120,45 +122,10 @@
         myModal = new bootstrap.Modal(document.getElementById("modalformsource"));
         myModal.show();
     };
-    async function call_news() {
-        listnews = [];
-        let KEY_NEWS = "apiKey=25ff185c903e49ddba06551850241e06"
-        let COUNTRY_NEWS = "country=id"
-        let PAGE_NEWS = "page="+page_newsfetch
-        let FROM_NEWS = "from=" + tanggal_start_newsfetch
-        let TO_NEWS = "to="+tanggal_end_newsfetch
-        let URL_NEWS = "https://newsapi.org/v2/top-headlines?"+KEY_NEWS+"&"+COUNTRY_NEWS+"&"+FROM_NEWS+"&"+TO_NEWS+"&"+PAGE_NEWS
-        const res = await fetch(URL_NEWS);
-        const json = await res.json();
-        let status = json.status;
-        let message = json.message;
-        let record = json.articles;
-        let no = 0;
-        if(status == "ok"){
-            totalrecordnews = record.length;
-            for (var i = 0; i < record.length; i++) {
-                no = no + 1
-                listnews = [
-                            ...listnews,
-                    {
-                        news_no: no,
-                        news_author: record[i]["author"],
-                        news_title: record[i]["title"],
-                        news_description: record[i]["description"],
-                        news_url: record[i]["url"],
-                        news_urlToImage: record[i]["urlToImage"],
-                        news_publishedat: record[i]["publishedAt"],
-                        news_content: record[i]["content"],
-                    },
-                ];
-            }
-        }else{
-            alert(message)
-        }
-        
-       
-        
-    }
+    const ShowFormCloudflare = () => {
+        myModal = new bootstrap.Modal(document.getElementById("modalformcloudflare"));
+        myModal.show();
+    };
     async function call_genre() {
         listgenre = [];
         const res = await fetch("/api/genremovie", {
@@ -305,6 +272,27 @@
         }
         movie_field_urlvideo = ""
     }
+    function submitForm(event) {
+        event.preventDefault();
+        console.log(fileInput[0])
+        let headersList = {
+            "Authorization": "Bearer 8x02SSARJt_A5B77KnL2oW74qwDPFKA_9DORcf1-"
+        }
+        var formdata = new FormData();
+        formdata.append("file", "C:\Users\ANDROID\Pictures\Kartun-Hero.original.png");
+
+        var requestOptions = {
+            method: 'POST',
+            headers: headersList,
+            body: formdata,
+            redirect: 'follow'
+        };
+
+        fetch("https://api.cloudflare.com/client/v4/accounts/dc5ba4b3b061907a5e1f8cdf1ae1ec96/images/v1", requestOptions)
+        .then(response => response.text())
+        .then(result => console.log(result))
+        .catch(error => console.log('error', error));
+    }
     async function handleDeleteMovieSource(e) {
         let temp = movie_field_source.filter(item => item.movie_source_id !== parseInt(e))
         movie_field_source = []
@@ -314,6 +302,19 @@
                 {
                     movie_source_id: parseInt(temp[i].movie_source_id),
                     movie_source_name: temp[i].movie_source_name,
+                },
+            ];
+        }
+    }
+    async function handleDeleteMovieGenre(e) {
+        let temp = movie_field_genre.filter(item => item.movie_genre_id !== parseInt(e))
+        movie_field_genre = []
+        for(var i=0;i<temp.length;i++){
+            movie_field_genre = [
+                ...movie_field_genre,
+                {
+                    movie_genre_id: parseInt(temp[i].movie_genre_id),
+                    movie_genre_name: temp[i].movie_genre_name,
                 },
             ];
         }
@@ -397,9 +398,6 @@
             case "CALL_FORMNEWS":
                 ShowFormNewsFetch();
                 break;
-            case "FETCH_NEWS":
-                call_news();
-                break;
             case "CALL_GENRE":
                 ShowGenre(false);
                 break;
@@ -416,6 +414,8 @@
                 RefreshHalaman();break;
             case "SAVE_SOURCE":
                 handleNewMovieSource();break;
+            case "SAVE_CLOUDFLARE":
+                handleNewCloudflare();break;
         }
     }
     function clearfield_movie(){
@@ -622,22 +622,35 @@
                 </div>
                 <div class="mb-3">
                     <label for="exampleForm" class="form-label">Url Thumbnail</label>
-                    <Input
-                        bind:value={movie_field_image}
-                        class="required"
-                        type="text"
-                        placeholder="Movie URL Thumbnail"/>
+                    <div class="input-group mb-3">
+                        <Input
+                            bind:value={movie_field_image}
+                            class="required"
+                            type="text"
+                            placeholder="Movie URL Thumbnail"/>
+                        <button
+                            on:click={() => {
+                                ShowFormCloudflare();
+                            }}  
+                            type="button" class="btn btn-info">Cloudflare</button>
+                    </div>
                     <a href="https://id.imgbb.com/" target="_blank">imgbb</a>, 
                     <a href="https://imgur.com/" target="_blank">imgur</a>
-
                 </div>
                 <div class="mb-3">
                     <label for="exampleForm" class="form-label">Url Cover</label>
-                    <Input
-                        bind:value={movie_field_cover}
-                        class="required"
-                        type="text"
-                        placeholder="Movie URL Cover"/>
+                    <div class="input-group mb-3">
+                        <Input
+                            bind:value={movie_field_cover}
+                            class="required"
+                            type="text"
+                            placeholder="Movie URL Cover"/>
+                        <button
+                            on:click={() => {
+                                ShowFormCloudflare();
+                            }}  
+                            type="button" class="btn btn-info">Cloudflare</button>
+                    </div>
                     <a href="https://id.imgbb.com/" target="_blank">imgbb</a>,
                     <a href="https://imgur.com/" target="_blank">imgur</a>
                 </div>
@@ -659,13 +672,22 @@
                                 ShowGenre(true)
                             }} 
                             style="text-decoration: underline;cursor:pointer;color:blue;">New</span>
-                </label>
-                    <table>
-                        {#each movie_field_genre as rec }
-                        <tr>
-                            <td>{rec.movie_genre_name}</td>
-                        </tr>       
-                        {/each}
+                    </label>
+                    <table class="table table-sm">
+                        <tbody>
+                            {#each movie_field_genre as rec }
+                            <tr>
+                                <td width="1%" style="cursor: pointer;text-align:center;vertical-align:top;">
+                                    <i 
+                                        on:click={() => {
+                                            handleDeleteMovieGenre(rec.movie_genre_id);
+                                        }} 
+                                        class="bi bi-trash"></i>
+                                </td>
+                                <td width="*" style="text-align:left;vertical-align:top;font-size:12px;">{rec.movie_genre_name}</td>
+                            </tr>       
+                            {/each}
+                        </tbody>
                     </table>
                 </div>
                 <div class="mb-3">
@@ -676,19 +698,21 @@
                             }}  
                             style="text-decoration: underline;cursor:pointer;color:blue;">New</span>
                     </label>
-                    <table>
-                        {#each movie_field_source as rec }
-                        <tr>
-                            <td style="cursor: pointer;">
-                                <i 
-                                    on:click={() => {
-                                        handleDeleteMovieSource(rec.movie_source_id);
-                                    }} 
-                                    class="bi bi-trash"></i>
-                            </td>
-                            <td>{rec.movie_source_name}</td>
-                        </tr>       
-                        {/each}
+                    <table class="table table-sm">
+                        <tbody>
+                            {#each movie_field_source as rec }
+                            <tr>
+                                <td width="1%" style="cursor: pointer;">
+                                    <i 
+                                        on:click={() => {
+                                            handleDeleteMovieSource(rec.movie_source_id);
+                                        }} 
+                                        class="bi bi-trash"></i>
+                                </td>
+                                <td width="*" style="text-align:left;vertical-align:top;font-size:12px;">{rec.movie_source_name}</td>
+                            </tr>       
+                            {/each}
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -698,6 +722,32 @@
         <Button
             on:click={callFunction}
             button_function="SAVE_NEWS"
+            button_title="Save"
+            button_css="btn-warning"/>
+	</slot:template>
+</Modal>
+<Modal
+	modal_id="modalformcloudflare"
+	modal_size="modal-dialog-centered"
+	modal_title="Source"
+    modal_body_css=""
+    modal_footer_css="padding:5px;"
+	modal_footer={true}>
+	<slot:template slot="body">
+        <form on:submit|preventDefault={submitForm}>
+            
+            <input 
+              type="file" 
+              accept="image/jpg,image/png"
+              bind:files={fileInput} />
+            <br />
+            <input type="submit" />
+          </form>
+	</slot:template>
+	<slot:template slot="footer">
+        <Button
+            on:click={callFunction}
+            button_function="SAVE_CLOUDFLARE"
             button_title="Save"
             button_css="btn-warning"/>
 	</slot:template>
