@@ -279,10 +279,13 @@
         css_loader = "display: inline-block;";
         msgloader = "Sending...";
         let movie_file = ""
+        let movie_folder = ""
         if(e=="image"){
             movie_file = movie_field_image;
+            movie_folder = "public"
         }else{
             movie_file= movie_field_cover;
+            movie_folder = "cover"
         }
         const res = await fetch("/api/movieupload", {
             method: "POST",
@@ -293,14 +296,16 @@
             body: JSON.stringify({
                 sdata: sData,
                 page:"MOVIEUPLOAD-SAVE",
+                movie_folder: movie_folder,
                 movie_raw: movie_file,
             }),
         });
         const json = await res.json();
         const record = json.record;
+        console.log(record)
         console.log(record.variants[0])
         if(e=="image"){
-            movie_field_image = record.variants[0]
+            movie_field_image = record.variants[1]
         }else{
             movie_field_cover = record.variants[0]
         }
