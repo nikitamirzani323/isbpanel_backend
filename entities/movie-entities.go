@@ -31,6 +31,11 @@ type Model_genre struct {
 type Controller_movie struct {
 	Movie_search string `json:"movie_search"`
 }
+type Controller_movieupload struct {
+	Page      string `json:"page" validate:"required"`
+	Sdata     string `json:"sdata" validate:"required"`
+	Movie_raw string `json:"movie_raw" validate:"required"`
+}
 type Controller_genresave struct {
 	Page          string `json:"page" validate:"required"`
 	Sdata         string `json:"sdata" validate:"required"`

@@ -2,10 +2,12 @@ package controllers
 
 import (
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/buger/jsonparser"
 	"github.com/go-playground/validator/v10"
+	"github.com/go-resty/resty/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/nikitamirzani323/isbpanel_backend/entities"
@@ -264,4 +266,69 @@ func Genredelete(c *fiber.Ctx) error {
 	val_genre := helpers.DeleteRedis(Fieldgenre_home_redis)
 	log.Printf("Redis Delete BACKEND MOVIE GENRE : %d", val_genre)
 	return c.JSON(result)
+}
+
+type responsecloudflare struct {
+	Status string      `json:"success"`
+	Record interface{} `json:"result"`
+}
+
+func Movieuploadcloud(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_movieupload)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+
+	axios := resty.New()
+	resp, err := axios.R().
+		SetResult(responsecloudflare{}).
+		SetAuthToken("8x02SSARJt_A5B77KnL2oW74qwDPFKA_9DORcf1-").
+		SetHeader("Accept", "*/*").
+		SetHeader("Content-Type", "image/jpeg,image/png").
+		// SetMultipartField("file", "Kartun-Hero.original.png", "image/png", bytes.NewReader(fileBytes)).
+		SetFiles(map[string]string{
+			"file": client.Movie_raw,
+		}).
+		SetContentLength(true).
+		Post("https://api.cloudflare.com/client/v4/accounts/dc5ba4b3b061907a5e1f8cdf1ae1ec96/images/v1")
+	if err != nil {
+		log.Println(err.Error())
+	}
+	log.Println("Response Info:")
+	log.Println("  Error      :", err)
+	log.Println("  Status Code:", resp.StatusCode())
+	log.Println("  Status     :", resp.Status())
+	log.Println("  Proto      :", resp.Proto())
+	log.Println("  Time       :", resp.Time())
+	log.Println("  Received At:", resp.ReceivedAt())
+	log.Println("  Body       :\n", resp)
+	log.Println()
+	result := resp.Result().(*responsecloudflare)
+	return c.JSON(fiber.Map{
+		"status": http.StatusOK,
+		"record": result.Record,
+	})
 }

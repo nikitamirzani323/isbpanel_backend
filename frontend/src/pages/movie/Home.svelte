@@ -51,7 +51,7 @@
     let genre_css = "";
     let css_loader = "display: none;";
     let msgloader = "";
-    var fileInput;
+    var avatar, fileInput;
     $: {
         if (searchMovie) {
             filterMovie = listHome.filter(
@@ -125,6 +125,7 @@
     const ShowFormCloudflare = () => {
         myModal = new bootstrap.Modal(document.getElementById("modalformcloudflare"));
         myModal.show();
+        handleNewCloudflare()
     };
     async function call_genre() {
         listgenre = [];
@@ -272,26 +273,42 @@
         }
         movie_field_urlvideo = ""
     }
-    function submitForm(event) {
-        event.preventDefault();
-        console.log(fileInput[0])
-        let headersList = {
-            "Authorization": "Bearer 8x02SSARJt_A5B77KnL2oW74qwDPFKA_9DORcf1-"
+    async function handleNewCloudflare(e) {
+        css_loader = "display: inline-block;";
+        msgloader = "Sending...";
+        css_loader = "display: inline-block;";
+        msgloader = "Sending...";
+        let movie_file = ""
+        if(e=="image"){
+            movie_file = movie_field_image;
+        }else{
+            movie_file= movie_field_cover;
         }
-        var formdata = new FormData();
-        formdata.append("file", "C:\Users\ANDROID\Pictures\Kartun-Hero.original.png");
-
-        var requestOptions = {
-            method: 'POST',
-            headers: headersList,
-            body: formdata,
-            redirect: 'follow'
-        };
-
-        fetch("https://api.cloudflare.com/client/v4/accounts/dc5ba4b3b061907a5e1f8cdf1ae1ec96/images/v1", requestOptions)
-        .then(response => response.text())
-        .then(result => console.log(result))
-        .catch(error => console.log('error', error));
+        const res = await fetch("/api/movieupload", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token,
+            },
+            body: JSON.stringify({
+                sdata: sData,
+                page:"MOVIEUPLOAD-SAVE",
+                movie_raw: movie_file,
+            }),
+        });
+        const json = await res.json();
+        const record = json.record;
+        console.log(record.variants[0])
+        if(e=="image"){
+            movie_field_image = record.variants[0]
+        }else{
+            movie_field_cover = record.variants[0]
+        }
+        msgloader = json.message;
+        setTimeout(function () {
+            css_loader = "display: none;";
+        }, 1000);
+        
     }
     async function handleDeleteMovieSource(e) {
         let temp = movie_field_source.filter(item => item.movie_source_id !== parseInt(e))
@@ -447,6 +464,15 @@
                 dispatch("handleMovie", movie);
         }  
     };
+    const onFileSelected =(e)=>{
+        let image = e.target.files[0];
+        let reader = new FileReader();
+        reader.readAsDataURL(image);
+        reader.onload = e => {
+            avatar = e.target.result
+        };
+        console.log(fileInput.value)
+    }
 </script>
 
 <div id="loader" style="margin-left:50%;{css_loader}">
@@ -630,7 +656,7 @@
                             placeholder="Movie URL Thumbnail"/>
                         <button
                             on:click={() => {
-                                ShowFormCloudflare();
+                                handleNewCloudflare("image");
                             }}  
                             type="button" class="btn btn-info">Cloudflare</button>
                     </div>
@@ -647,7 +673,7 @@
                             placeholder="Movie URL Cover"/>
                         <button
                             on:click={() => {
-                                ShowFormCloudflare();
+                                handleNewCloudflare("cover");
                             }}  
                             type="button" class="btn btn-info">Cloudflare</button>
                     </div>
@@ -734,15 +760,17 @@
     modal_footer_css="padding:5px;"
 	modal_footer={true}>
 	<slot:template slot="body">
-        <form on:submit|preventDefault={submitForm}>
-            
-            <input 
-              type="file" 
-              accept="image/jpg,image/png"
-              bind:files={fileInput} />
-            <br />
-            <input type="submit" />
-          </form>
+        <center>
+            {#if avatar}
+            <img width="100" class="avatar" src="{avatar}" alt="d" />
+            {:else}
+            <img width="100" class="avatar" src="https://cdn4.iconfinder.com/data/icons/small-n-flat/24/user-alt-512.png" alt="" /> 
+            {/if}
+            <br>
+            <img width="50" src="https://static.thenounproject.com/png/625182-200.png" alt="" on:click={()=>{fileInput.click();}} />
+            <div class="chan" on:click={()=>{fileInput.click();}}>Choose Image</div>
+            <input style="display:none" type="file" accept=".jpg, .jpeg, .png" on:change={(e)=>onFileSelected(e)} bind:this={fileInput} >
+        </center>
 	</slot:template>
 	<slot:template slot="footer">
         <Button

@@ -11,6 +11,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.9.0 // indirect
 	github.com/go-redis/redis/v8 v8.11.4 // indirect
+	github.com/go-resty/resty/v2 v2.7.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/gofiber/fiber/v2 v2.20.2 // indirect
 	github.com/gofiber/jwt/v3 v3.1.2 // indirect
@@ -24,6 +25,7 @@ require (
 	github.com/valyala/fasthttp v1.31.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
+	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
 	golang.org/x/sys v0.0.0-20211015200801-69063c4bb744 // indirect
 	golang.org/x/text v0.3.7 // indirect
 )
