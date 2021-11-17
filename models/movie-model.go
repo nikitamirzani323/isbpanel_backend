@@ -42,7 +42,7 @@ func Fetch_movieHome(search string) (helpers.Responsemovie, error) {
 	sql_select += ""
 	sql_select += "SELECT "
 	sql_select += "movieid , movietitle, description, movietype, "
-	sql_select += "rating , imdb, year, views, enabled, posted_id, "
+	sql_select += "rating , imdb, year, views, enabled, posted_id, cover_id,  "
 	sql_select += "createmovie, COALESCE(createdatemovie,''), updatemovie, COALESCE(updatedatemovie,'') "
 	sql_select += "FROM " + configs.DB_tbl_trx_movie + "  "
 	if search == "" {
@@ -56,14 +56,14 @@ func Fetch_movieHome(search string) (helpers.Responsemovie, error) {
 	helpers.ErrorCheck(err)
 	for row.Next() {
 		var (
-			movieid_db, year_db, views_db, enabled_db, posted_id_db                int
+			movieid_db, year_db, views_db, enabled_db, posted_id_db, cover_id_db   int
 			rating_db, imdb_db                                                     float32
 			movietitle_db, movietype_db, description_db                            string
 			createmovie_db, createdatemovie_db, updatemovie_db, updatedatemovie_db string
 		)
 
 		err = row.Scan(
-			&movieid_db, &movietitle_db, &description_db, &movietype_db, &rating_db, &imdb_db, &year_db, &views_db, &enabled_db, &posted_id_db,
+			&movieid_db, &movietitle_db, &description_db, &movietype_db, &rating_db, &imdb_db, &year_db, &views_db, &enabled_db, &posted_id_db, &cover_id_db,
 			&createmovie_db, &createdatemovie_db, &updatemovie_db, &updatedatemovie_db)
 
 		helpers.ErrorCheck(err)
@@ -101,7 +101,9 @@ func Fetch_movieHome(search string) (helpers.Responsemovie, error) {
 			arraobjmoviegenre = append(arraobjmoviegenre, objmoviegenre)
 		}
 		poster_image, poster_extension := _GetMedia(posted_id_db)
+		cover_image, cover_extension := _GetMedia(cover_id_db)
 		path_image := "https://duniafilm.b-cdn.net/uploads/cache/poster_thumb/uploads/" + poster_extension + "/" + poster_image
+		path_imagecover := "https://duniafilm.b-cdn.net/uploads/cache/cover_thumb/uploads/" + cover_extension + "/" + cover_image
 
 		obj.Movie_id = movieid_db
 		obj.Movie_date = createdatemovie_db
@@ -109,6 +111,7 @@ func Fetch_movieHome(search string) (helpers.Responsemovie, error) {
 		obj.Movie_title = movietitle_db
 		obj.Movie_descp = description_db
 		obj.Movie_thumbnail = path_image
+		obj.Movie_cover = path_imagecover
 		obj.Movie_year = year_db
 		obj.Movie_rating = rating_db
 		obj.Movie_imdb = imdb_db

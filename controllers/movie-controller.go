@@ -66,6 +66,7 @@ func Moviehome(c *fiber.Ctx) error {
 		movie_title, _ := jsonparser.GetString(value, "movie_title")
 		movie_descp, _ := jsonparser.GetString(value, "movie_descp")
 		movie_thumbnail, _ := jsonparser.GetString(value, "movie_thumbnail")
+		movie_cover, _ := jsonparser.GetString(value, "movie_cover")
 		movie_year, _ := jsonparser.GetInt(value, "movie_year")
 		movie_rating, _ := jsonparser.GetFloat(value, "movie_rating")
 		movie_imdb, _ := jsonparser.GetFloat(value, "movie_imdb")
@@ -90,6 +91,7 @@ func Moviehome(c *fiber.Ctx) error {
 		obj.Movie_title = movie_title
 		obj.Movie_descp = movie_descp
 		obj.Movie_thumbnail = movie_thumbnail
+		obj.Movie_cover = movie_cover
 		obj.Movie_year = int(movie_year)
 		obj.Movie_rating = float32(movie_rating)
 		obj.Movie_imdb = float32(movie_imdb)
@@ -331,7 +333,68 @@ func Movieuploadcloud(c *fiber.Ctx) error {
 	log.Println()
 	result := resp.Result().(*responseuploadcloudflare)
 	return c.JSON(fiber.Map{
-		"status": http.StatusOK,
+		"status": result.Status,
+		"record": result.Record,
+	})
+}
+func Movieupdatecloud(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_movieupdate)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+	flag_lock := false
+	if client.Movie_tipe == "LOCK" {
+		flag_lock = true
+	}
+	axios := resty.New()
+	resp, err := axios.R().
+		SetResult(responseuploadcloudflare{}).
+		SetError(responseuploadcloudflare{}).
+		SetAuthToken("8x02SSARJt_A5B77KnL2oW74qwDPFKA_9DORcf1-").
+		SetBody(map[string]interface{}{
+			"id":                client.Movie_id,
+			"requireSignedURLs": flag_lock,
+		}).
+		SetContentLength(true).
+		Patch("https://api.cloudflare.com/client/v4/accounts/dc5ba4b3b061907a5e1f8cdf1ae1ec96/images/v1/" + client.Movie_id)
+	if err != nil {
+		log.Println(err.Error())
+	}
+	log.Println("Response Info:")
+	log.Println("  Error      :", err)
+	log.Println("  Status Code:", resp.StatusCode())
+	log.Println("  Status     :", resp.Status())
+	log.Println("  Proto      :", resp.Proto())
+	log.Println("  Time       :", resp.Time())
+	log.Println("  Received At:", resp.ReceivedAt())
+	log.Println("  Body       :\n", resp)
+	log.Println()
+	result := resp.Result().(*responseuploadcloudflare)
+	return c.JSON(fiber.Map{
+		"status": result.Status,
 		"record": result.Record,
 	})
 }

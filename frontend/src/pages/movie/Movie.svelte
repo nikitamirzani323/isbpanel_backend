@@ -81,6 +81,7 @@
                             movie_title: record[i]["movie_title"],
                             movie_descp: record[i]["movie_descp"],
                             movie_thumbnail: record[i]["movie_thumbnail"],
+                            movie_cover: record[i]["movie_cover"],
                             movie_year: record[i]["movie_year"].toString(),
                             movie_rating: record[i]["movie_rating"],
                             movie_imdb: record[i]["movie_imdb"],

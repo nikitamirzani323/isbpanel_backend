@@ -7,6 +7,7 @@ type Model_movie struct {
 	Movie_title     string      `json:"movie_title"`
 	Movie_descp     string      `json:"movie_descp"`
 	Movie_thumbnail string      `json:"movie_thumbnail"`
+	Movie_cover     string      `json:"movie_cover"`
 	Movie_year      int         `json:"movie_year"`
 	Movie_rating    float32     `json:"movie_rating"`
 	Movie_imdb      float32     `json:"movie_imdb"`
@@ -35,6 +36,12 @@ type Controller_movieupload struct {
 	Page      string `json:"page" validate:"required"`
 	Sdata     string `json:"sdata" validate:"required"`
 	Movie_raw string `json:"movie_raw" validate:"required"`
+}
+type Controller_movieupdate struct {
+	Page       string `json:"page" validate:"required"`
+	Sdata      string `json:"sdata" validate:"required"`
+	Movie_id   string `json:"movie_id" validate:"required"`
+	Movie_tipe string `json:"movie_tipe" validate:"required"`
 }
 type Controller_genresave struct {
 	Page          string `json:"page" validate:"required"`

@@ -42,14 +42,14 @@
     let movie_field_status = "0";
 
  
-    let cloudflare_field_urlvideo = "";
+    let album_field_name = "";
     let searchMovie = "";
     let filterMovie = "";
     let genre_flagclick = false;
     let genre_css = "";
     let css_loader = "display: none;";
     let msgloader = "";
-    var avatar, fileInput;
+    var fileInput;
     $: {
         if (searchMovie) {
             filterMovie = listHome.filter(
@@ -92,6 +92,19 @@
         myModal = new bootstrap.Modal(document.getElementById("modalalbum"));
         myModal.show();
         call_album();
+    };
+    const ShowFormAlbum = (e,id,name,display) => {
+        sData = e
+        if(e == "Edit"){
+            genre_field_idrecord = parseInt(id);
+            genre_field_name = name;
+            genre_field_display = parseInt(display);
+        }else{
+            clearfield_genre()
+        }
+        
+        myModal = new bootstrap.Modal(document.getElementById("modalcrudalbum"));
+        myModal.show();
     };
     const ShowFormGenre = (e,id,name,display) => {
         sData = e
@@ -161,7 +174,6 @@
                     ];
                 }
             }
-            console.log(listalbum)
         } 
     }
     async function call_genre() {
@@ -310,20 +322,11 @@
         }
         movie_field_urlvideo = ""
     }
-    async function handleNewCloudflare(e) {
+    async function handleNewCloudflare() {
         css_loader = "display: inline-block;";
         msgloader = "Sending...";
         css_loader = "display: inline-block;";
         msgloader = "Sending...";
-        let movie_file = ""
-        let movie_folder = ""
-        if(e=="image"){
-            movie_file = movie_field_image;
-            movie_folder = "public"
-        }else{
-            movie_file= movie_field_cover;
-            movie_folder = "cover"
-        }
         const res = await fetch("/api/movieupload", {
             method: "POST",
             headers: {
@@ -333,20 +336,47 @@
             body: JSON.stringify({
                 sdata: sData,
                 page:"MOVIEUPLOAD-SAVE",
-                movie_folder: movie_folder,
-                movie_raw: movie_file,
+                movie_raw: album_field_name,
             }),
         });
         const json = await res.json();
-        const record = json.record;
-        console.log(record)
-        console.log(record.variants[0])
-        if(e=="image"){
-            movie_field_image = record.variants[1]
-        }else{
-            movie_field_cover = record.variants[0]
+        const status = json.status;
+        if(status == true){
+            album_field_name = ""
+            myModal.hide();
+            msgloader = "Success";
         }
-        msgloader = json.message;
+        
+        setTimeout(function () {
+            css_loader = "display: none;";
+        }, 1000);
+        call_album()
+    }
+    async function handleUpdateCloudflare(e,id) {
+        css_loader = "display: inline-block;";
+        msgloader = "Sending...";
+        css_loader = "display: inline-block;";
+        msgloader = "Sending...";
+        const res = await fetch("/api/movieupdate", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token,
+            },
+            body: JSON.stringify({
+                sdata: "Edit",
+                page:"MOVIEUPLOAD-UPDATE",
+                movie_id: id,
+                movie_tipe: e,
+            }),
+        });
+        const json = await res.json();
+        const status = json.status;
+        if(status == true){
+            call_album()
+            msgloader = "Success";
+        }
+        
         setTimeout(function () {
             css_loader = "display: none;";
         }, 1000);
@@ -455,28 +485,26 @@
     function callFunction(event){
         switch(event.detail){
             case "CALL_FORMNEWS":
-                ShowFormNewsFetch();
-                break;
+                ShowFormNewsFetch();break;
             case "CALL_ALBUM":
-                ShowAlbum();
-                break;
+                ShowAlbum();break;
+            case "FORMNEW_ALBUM":
+                ShowFormAlbum("New");break;
             case "CALL_GENRE":
-                ShowGenre(false);
-                break;
+                ShowGenre(false);break;
             case "FORM_MOVIE":
-                ShowFormMovie("New");
-                break;
+                ShowFormMovie("New");break;
             case "FORMNEW_GENRE":
-                ShowFormGenre("New");
-                break;
+                ShowFormGenre("New");break;
             case "SAVE_GENRE":
-                handleSaveGenre();
-                break;
+                handleSaveGenre();break;
             case "REFRESH":
                 RefreshHalaman();break;
             case "SAVE_SOURCE":
                 handleNewMovieSource();break;
             case "SAVE_CLOUDFLARE":
+                handleNewCloudflare();break;
+            case "SAVE_ALBUM":
                 handleNewCloudflare();break;
         }
     }
@@ -509,15 +537,7 @@
                 dispatch("handleMovie", movie);
         }  
     };
-    const onFileSelected =(e)=>{
-        let image = e.target.files[0];
-        let reader = new FileReader();
-        reader.readAsDataURL(image);
-        reader.onload = e => {
-            avatar = e.target.result
-        };
-        console.log(fileInput.value)
-    }
+   
 </script>
 
 <div id="loader" style="margin-left:50%;{css_loader}">
@@ -591,6 +611,7 @@
                                 <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">YEAR</th>
                                 <th NOWRAP width="5%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">GENRE</th>
                                 <th NOWRAP width="2%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">THUMBNAIL</th>
+                                <th NOWRAP width="2%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">COVER</th>
                                 <th NOWRAP width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">MOVIE</th>
                                 <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">IMDB</th>
                                 <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">VIEW</th>
@@ -628,6 +649,9 @@
                                     </td>
                                     <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
                                         <img width="50" class="img-thumbnail" src="{rec.movie_thumbnail}" alt="">
+                                    </td>
+                                    <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
+                                        <img width="50" class="img-thumbnail" src="{rec.movie_cover}" alt="">
                                     </td>
                                     <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.movie_title}</td>
                                     <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.movie_imdb}</td>
@@ -708,7 +732,7 @@
                             on:click={() => {
                                 handleNewCloudflare("image");
                             }}  
-                            type="button" class="btn btn-info">Cloudflare</button>
+                            type="button" class="btn btn-info">Album</button>
                     </div>
                     <a href="https://id.imgbb.com/" target="_blank">imgbb</a>, 
                     <a href="https://imgur.com/" target="_blank">imgur</a>
@@ -825,13 +849,13 @@
                         {#if rec.album_signed == "LOCKED"}
                         <i 
                             on:click={() => {
-                                ShowFormGenre("Edit",rec.genre_id,rec.genre_name,rec.genre_display);
+                                handleUpdateCloudflare("UNLOCK",rec.album_id);
                             }} 
                             class="bi bi-lock-fill"></i>
                         {:else}
                         <i 
                             on:click={() => {
-                                ShowFormGenre("Edit",rec.genre_id,rec.genre_name,rec.genre_display);
+                                handleUpdateCloudflare("LOCK",rec.album_id);
                             }} 
                             class="bi bi-unlock"></i>
                         {/if}
@@ -854,8 +878,33 @@
 	<slot:template slot="footer">
         <Button
             on:click={callFunction}
-            button_function="SAVE_CLOUDFLARE"
+            button_function="FORMNEW_ALBUM"
             button_title="New"
+            button_css="btn-primary"/>
+	</slot:template>
+</Modal>
+<Modal
+	modal_id="modalcrudalbum"
+	modal_size="modal-dialog-centered"
+	modal_title="ALBUM/{sData}"
+    modal_body_css=""
+    modal_footer_css="padding:5px;"
+	modal_footer={true}>
+	<slot:template slot="body">
+        <div class="mb-3">
+            <label for="exampleForm" class="form-label">Path File</label>
+			<Input
+                bind:value={album_field_name}
+                class="required"
+                type="text"
+                placeholder="Path File"/>
+		</div>
+	</slot:template>
+	<slot:template slot="footer">
+        <Button
+            on:click={callFunction}
+            button_function="SAVE_ALBUM"
+            button_title="Save"
             button_css="btn-warning"/>
 	</slot:template>
 </Modal>
