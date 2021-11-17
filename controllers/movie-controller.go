@@ -268,8 +268,8 @@ func Genredelete(c *fiber.Ctx) error {
 	return c.JSON(result)
 }
 
-type responsecloudflare struct {
-	Status string      `json:"success"`
+type responseuploadcloudflare struct {
+	Status bool        `json:"success"`
 	Record interface{} `json:"result"`
 }
 
@@ -304,13 +304,16 @@ func Movieuploadcloud(c *fiber.Ctx) error {
 
 	axios := resty.New()
 	resp, err := axios.R().
-		SetResult(responsecloudflare{}).
+		SetResult(responseuploadcloudflare{}).
+		SetError(responseuploadcloudflare{}).
 		SetAuthToken("8x02SSARJt_A5B77KnL2oW74qwDPFKA_9DORcf1-").
 		SetHeader("Accept", "*/*").
 		SetHeader("Content-Type", "image/jpeg,image/png").
-		// SetMultipartField("file", "Kartun-Hero.original.png", "image/png", bytes.NewReader(fileBytes)).
 		SetFiles(map[string]string{
 			"file": client.Movie_raw,
+		}).
+		SetFormData(map[string]string{
+			"requireSignedURLs": `true`,
 		}).
 		SetContentLength(true).
 		Post("https://api.cloudflare.com/client/v4/accounts/dc5ba4b3b061907a5e1f8cdf1ae1ec96/images/v1")
@@ -326,7 +329,32 @@ func Movieuploadcloud(c *fiber.Ctx) error {
 	log.Println("  Received At:", resp.ReceivedAt())
 	log.Println("  Body       :\n", resp)
 	log.Println()
-	result := resp.Result().(*responsecloudflare)
+	result := resp.Result().(*responseuploadcloudflare)
+	return c.JSON(fiber.Map{
+		"status": http.StatusOK,
+		"record": result.Record,
+	})
+}
+func Moviecloud(c *fiber.Ctx) error {
+	axios := resty.New()
+	resp, err := axios.R().
+		SetResult(responseuploadcloudflare{}).
+		SetError(responseuploadcloudflare{}).
+		SetAuthToken("8x02SSARJt_A5B77KnL2oW74qwDPFKA_9DORcf1-").
+		Get("https://api.cloudflare.com/client/v4/accounts/dc5ba4b3b061907a5e1f8cdf1ae1ec96/images/v1")
+	if err != nil {
+		log.Println(err.Error())
+	}
+	log.Println("Response Info:")
+	log.Println("  Error      :", err)
+	log.Println("  Status Code:", resp.StatusCode())
+	log.Println("  Status     :", resp.Status())
+	log.Println("  Proto      :", resp.Proto())
+	log.Println("  Time       :", resp.Time())
+	log.Println("  Received At:", resp.ReceivedAt())
+	log.Println("  Body       :\n", resp)
+	log.Println()
+	result := resp.Result().(*responseuploadcloudflare)
 	return c.JSON(fiber.Map{
 		"status": http.StatusOK,
 		"record": result.Record,

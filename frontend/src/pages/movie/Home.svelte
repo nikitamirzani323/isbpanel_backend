@@ -17,15 +17,13 @@
     let sData = "";
     let myModal = "";
     
-    let listnews = []
+    let listalbum = []
     let listgenre = []
     let record = ""
     let totalrecordnews = 0
     let totalrecordcategory = 0
     
-    let tanggal_start_newsfetch = "";
-    let tanggal_end_newsfetch = "";
-    let page_newsfetch = "";
+    
     let genre_field_idrecord = 0;
     let genre_field_name = "";
     let genre_field_display = 0;
@@ -90,6 +88,11 @@
         }
         call_genre()
     };
+    const ShowAlbum = () => {
+        myModal = new bootstrap.Modal(document.getElementById("modalalbum"));
+        myModal.show();
+        call_album();
+    };
     const ShowFormGenre = (e,id,name,display) => {
         sData = e
         if(e == "Edit"){
@@ -122,11 +125,39 @@
         myModal = new bootstrap.Modal(document.getElementById("modalformsource"));
         myModal.show();
     };
-    const ShowFormCloudflare = () => {
-        myModal = new bootstrap.Modal(document.getElementById("modalformcloudflare"));
-        myModal.show();
-        handleNewCloudflare()
-    };
+    async function call_album(){
+        const res = await fetch("/api/moviealbum", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token,
+            },
+            body: JSON.stringify({
+                sdata: sData,
+                page:"MOVIEALBUM-VIEW",
+            }),
+        });
+        const json = await res.json();
+        if (json.status == 200) {
+            record = json.record;
+            if (record != null) {
+                let no = 0
+                let images = record.images
+                for (var i = 0; i < images.length; i++) {
+                    no = no + 1;
+                    listalbum = [
+                        ...listalbum,
+                        {
+                            album_no: no,
+                            album_filename: images[i]["filename"],
+                            album_id: images[i]["id"],
+                        },
+                    ];
+                }
+            }
+            console.log(listalbum)
+        } 
+    }
     async function call_genre() {
         listgenre = [];
         const res = await fetch("/api/genremovie", {
@@ -420,6 +451,9 @@
             case "CALL_FORMNEWS":
                 ShowFormNewsFetch();
                 break;
+            case "CALL_ALBUM":
+                ShowAlbum();
+                break;
             case "CALL_GENRE":
                 ShowGenre(false);
                 break;
@@ -496,6 +530,11 @@
                 button_function="FORM_SERIES"
                 button_title="New Series"
                 button_css="btn-dark"/>
+            <Button
+                on:click={callFunction}
+                button_function="CALL_ALBUM"
+                button_title="Album"
+                button_css="btn-primary"/>
             <Button
                 on:click={callFunction}
                 button_function="CALL_GENRE"
@@ -758,30 +797,51 @@
 	</slot:template>
 </Modal>
 <Modal
-	modal_id="modalformcloudflare"
+	modal_id="modalalbum"
 	modal_size="modal-dialog-centered"
-	modal_title="Source"
-    modal_body_css=""
+	modal_title="Album"
+    modal_body_css="height:500px; overflow-y: scroll;"
     modal_footer_css="padding:5px;"
 	modal_footer={true}>
 	<slot:template slot="body">
-        <center>
-            {#if avatar}
-            <img width="100" class="avatar" src="{avatar}" alt="d" />
-            {:else}
-            <img width="100" class="avatar" src="https://cdn4.iconfinder.com/data/icons/small-n-flat/24/user-alt-512.png" alt="" /> 
-            {/if}
-            <br>
-            <img width="50" src="https://static.thenounproject.com/png/625182-200.png" alt="" on:click={()=>{fileInput.click();}} />
-            <div class="chan" on:click={()=>{fileInput.click();}}>Choose Image</div>
-            <input style="display:none" type="file" accept=".jpg, .jpeg, .png" on:change={(e)=>onFileSelected(e)} bind:this={fileInput} >
-        </center>
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th width="1%" colspan="2">&nbsp;</th>
+                    <th width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NO</th>
+                    <th width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">FILENAME</th>
+                </tr>
+            </thead>
+            <tbody>
+                {#each listalbum as rec }
+                <tr>
+                    <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
+                        <i 
+                            on:click={() => {
+                                ShowFormGenre("Edit",rec.genre_id,rec.genre_name,rec.genre_display);
+                            }} 
+                            class="bi bi-pencil"></i>
+                    </td>
+                    <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
+                        <i 
+                            on:click={() => {
+                                handleDeleteCategoryNews(rec.genre_id);
+                            }} 
+                            class="bi bi-trash"></i>
+                    </td>
+                    <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.album_no}</td>
+                    <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.album_filename}</td>
+                </tr>
+                {/each}
+                
+            </tbody>
+        </table>
 	</slot:template>
 	<slot:template slot="footer">
         <Button
             on:click={callFunction}
             button_function="SAVE_CLOUDFLARE"
-            button_title="Save"
+            button_title="New"
             button_css="btn-warning"/>
 	</slot:template>
 </Modal>
