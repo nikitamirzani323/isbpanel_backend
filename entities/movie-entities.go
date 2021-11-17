@@ -32,16 +32,21 @@ type Model_genre struct {
 type Controller_movie struct {
 	Movie_search string `json:"movie_search"`
 }
-type Controller_movieupload struct {
+type Controller_cloudflaremovieupload struct {
 	Page      string `json:"page" validate:"required"`
 	Sdata     string `json:"sdata" validate:"required"`
 	Movie_raw string `json:"movie_raw" validate:"required"`
 }
-type Controller_movieupdate struct {
+type Controller_cloudflaremovieupdate struct {
 	Page       string `json:"page" validate:"required"`
 	Sdata      string `json:"sdata" validate:"required"`
 	Movie_id   string `json:"movie_id" validate:"required"`
 	Movie_tipe string `json:"movie_tipe" validate:"required"`
+}
+type Controller_cloudflaremoviedelete struct {
+	Page     string `json:"page" validate:"required"`
+	Sdata    string `json:"sdata" validate:"required"`
+	Movie_id string `json:"movie_id" validate:"required"`
 }
 type Controller_genresave struct {
 	Page          string `json:"page" validate:"required"`

@@ -88,10 +88,15 @@
         }
         call_genre()
     };
-    const ShowAlbum = () => {
+    const ShowAlbum = (e) => {
         myModal = new bootstrap.Modal(document.getElementById("modalalbum"));
         myModal.show();
         call_album();
+        if(e=="thumb"){
+            movie_field_image = e
+        }else{
+            movie_field_cover = e
+        }
     };
     const ShowFormAlbum = (e,id,name,display) => {
         sData = e
@@ -140,7 +145,7 @@
     };
     async function call_album(){
         listalbum = []
-        const res = await fetch("/api/moviealbum", {
+        const res = await fetch("/api/moviecloudualbum", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -169,6 +174,8 @@
                             album_no: no,
                             album_filename: images[i]["filename"],
                             album_id: images[i]["id"],
+                            album_variant_0: images[i]["variants"][0],
+                            album_variant_1: images[i]["variants"][1],
                             album_signed: signed,
                         },
                     ];
@@ -327,7 +334,7 @@
         msgloader = "Sending...";
         css_loader = "display: inline-block;";
         msgloader = "Sending...";
-        const res = await fetch("/api/movieupload", {
+        const res = await fetch("/api/moviecloudupload", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -335,7 +342,7 @@
             },
             body: JSON.stringify({
                 sdata: sData,
-                page:"MOVIEUPLOAD-SAVE",
+                page:"MOVIECLOUDUPLOAD-SAVE",
                 movie_raw: album_field_name,
             }),
         });
@@ -357,7 +364,7 @@
         msgloader = "Sending...";
         css_loader = "display: inline-block;";
         msgloader = "Sending...";
-        const res = await fetch("/api/movieupdate", {
+        const res = await fetch("/api/moviecloudupdate", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -368,6 +375,35 @@
                 page:"MOVIEUPLOAD-UPDATE",
                 movie_id: id,
                 movie_tipe: e,
+            }),
+        });
+        const json = await res.json();
+        const status = json.status;
+        if(status == true){
+            call_album()
+            msgloader = "Success";
+        }
+        
+        setTimeout(function () {
+            css_loader = "display: none;";
+        }, 1000);
+        
+    }
+    async function handleDeleteCloudflare(id) {
+        css_loader = "display: inline-block;";
+        msgloader = "Sending...";
+        css_loader = "display: inline-block;";
+        msgloader = "Sending...";
+        const res = await fetch("/api/movieclouddelete", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token,
+            },
+            body: JSON.stringify({
+                sdata: "Edit",
+                page:"MOVIECLOUD-DELETE",
+                movie_id: id,
             }),
         });
         const json = await res.json();
@@ -730,7 +766,7 @@
                             placeholder="Movie URL Thumbnail"/>
                         <button
                             on:click={() => {
-                                handleNewCloudflare("image");
+                                ShowAlbum("thumb");
                             }}  
                             type="button" class="btn btn-info">Album</button>
                     </div>
@@ -747,7 +783,7 @@
                             placeholder="Movie URL Cover"/>
                         <button
                             on:click={() => {
-                                handleNewCloudflare("cover");
+                                ShowAlbum("cover");
                             }}  
                             type="button" class="btn btn-info">Cloudflare</button>
                     </div>
@@ -840,6 +876,8 @@
                     <th width="1%" colspan="2">&nbsp;</th>
                     <th width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NO</th>
                     <th width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">FILENAME</th>
+                    <th width="5%" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">THUMB</th>
+                    <th width="5%" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">COVER</th>
                 </tr>
             </thead>
             <tbody>
@@ -863,12 +901,18 @@
                     <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
                         <i 
                             on:click={() => {
-                                handleDeleteCategoryNews(rec.genre_id);
+                                handleDeleteCloudflare(rec.album_id);
                             }} 
                             class="bi bi-trash"></i>
                     </td>
                     <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.album_no}</td>
                     <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.album_filename}</td>
+                    <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
+                        <a href="{rec.album_variant_1}" target="_blank">LINK</a>
+                    </td>
+                    <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
+                        <a href="{rec.album_variant_0}" target="_blank">LINK</a>
+                    </td>
                 </tr>
                 {/each}
                 
