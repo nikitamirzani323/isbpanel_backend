@@ -13,6 +13,7 @@
     let record = "";
     let record_message = "";
     let perpage = 0;
+    let page = 1;
     let totalrecordall = 0;
     let totalpaging = 0;
     let totalrecord = 0;
@@ -47,7 +48,8 @@
                 Authorization: "Bearer " + token,
             },
             body: JSON.stringify({
-                movie_search: e
+                movie_search: e,
+                movie_page : parseInt(page)
             }),
         });
         const json = await res.json();
@@ -94,7 +96,6 @@
                         },
                     ];
                 }
-                console.log(totalpaging)
                 for(var i=1;i<totalpaging;i++){
                     listPage = [
                         ...listPage,
@@ -123,10 +124,15 @@
     const handleMovie = (e) => {
         search = e.detail.searchMovie;
         initHome(search)
-   };
+    };
+    const handlePaging = (e) => {
+        page = e.detail.page
+        initHome("")
+    };
     initapp()
 </script>
 <Home
+    on:handlePaging={handlePaging}
     on:handleMovie={handleMovie}
     on:handleRefreshData={handleRefreshData}
     {token}

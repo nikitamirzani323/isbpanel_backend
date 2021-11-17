@@ -15,7 +15,7 @@ import (
 	"github.com/nleeper/goment"
 )
 
-func Fetch_movieHome(search string) (helpers.Responsemovie, error) {
+func Fetch_movieHome(search string, page int) (helpers.Responsemovie, error) {
 	var obj entities.Model_movie
 	var arraobj []entities.Model_movie
 	var res helpers.Responsemovie
@@ -26,6 +26,12 @@ func Fetch_movieHome(search string) (helpers.Responsemovie, error) {
 
 	perpage := 50
 	totalrecord := 0
+	offset := 0
+	if page < 2 {
+		offset = 0
+	} else {
+		offset = perpage * page
+	}
 
 	sql_selectcount := `SELECT 
 		COUNT(movieid) as totalmovie 
@@ -46,10 +52,10 @@ func Fetch_movieHome(search string) (helpers.Responsemovie, error) {
 	sql_select += "createmovie, COALESCE(createdatemovie,''), updatemovie, COALESCE(updatedatemovie,'') "
 	sql_select += "FROM " + configs.DB_tbl_trx_movie + "  "
 	if search == "" {
-		sql_select += "ORDER BY createdatemovie DESC LIMIT " + strconv.Itoa(perpage)
+		sql_select += "ORDER BY createdatemovie DESC  LIMIT " + strconv.Itoa(offset) + " , " + strconv.Itoa(perpage)
 	} else {
 		sql_select += "WHERE movietitle LIKE '%" + search + "%' "
-		sql_select += "ORDER BY createdatemovie DESC  LIMIT " + strconv.Itoa(perpage)
+		sql_select += "ORDER BY createdatemovie DESC LIMIT " + strconv.Itoa(perpage)
 	}
 
 	row, err := con.QueryContext(ctx, sql_select)
@@ -133,7 +139,7 @@ func Fetch_movieHome(search string) (helpers.Responsemovie, error) {
 
 	return res, nil
 }
-func Save_movie(admin, name, tipemovie, descp, urlthum, sdata string, idrecord, year, status int, imdb float32) (helpers.Response, error) {
+func Save_movie(admin, name, label, tipemovie, descp, urlthum, sdata string, idrecord, year, status int, imdb float32) (helpers.Response, error) {
 	var res helpers.Response
 	msg := "Failed"
 	con := db.CreateCon()
@@ -146,10 +152,10 @@ func Save_movie(admin, name, tipemovie, descp, urlthum, sdata string, idrecord, 
 		sql_insert := `
 			insert into
 			` + configs.DB_tbl_trx_movie + ` (
-				movieid , movietitle, movietype, description, imdb, year, slug, enabled, urlthumbnail,    
+				movieid , movietitle, label, movietype, description, imdb, year, slug, enabled, urlthumbnail,    
 				createmovie, createdatemovie
 			) values (
-				?,?,?,?,?,?,?,?,?, 
+				?,?,?,?,?,?,?,?,?,?, 
 				?, ?
 			)
 		`
@@ -161,7 +167,7 @@ func Save_movie(admin, name, tipemovie, descp, urlthum, sdata string, idrecord, 
 		res_newrecord, e_newrecord := stmt_insert.ExecContext(
 			ctx,
 			tglnow.Format("YY")+strconv.Itoa(idrecord_counter),
-			name, tipemovie, descp, imdb, year, "slug", status, urlthum,
+			name, label, tipemovie, descp, imdb, year, "slug", status, urlthum,
 			admin,
 			tglnow.Format("YYYY-MM-DD HH:mm:ss"))
 		helpers.ErrorCheck(e_newrecord)

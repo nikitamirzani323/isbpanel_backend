@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"log"
-	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/buger/jsonparser"
@@ -46,14 +46,19 @@ func Moviehome(c *fiber.Ctx) error {
 			"record":  errors,
 		})
 	}
+	log.Println(client.Movie_page)
 	if client.Movie_search != "" {
-		val_tafsirmimpi := helpers.DeleteRedis(Fieldmovie_home_redis + "_" + client.Movie_search)
-		log.Printf("Redis Delete BACKEND MOVIE : %d", val_tafsirmimpi)
+		val_movie := helpers.DeleteRedis(Fieldmovie_home_redis + "_" + strconv.Itoa(client.Movie_page) + "_" + client.Movie_search)
+		log.Printf("Redis Delete BACKEND MOVIE : %d", val_movie)
+	}
+	if client.Movie_page > 1 {
+		val_movie := helpers.DeleteRedis(Fieldmovie_home_redis + "_" + strconv.Itoa(client.Movie_page) + "_" + client.Movie_search)
+		log.Printf("Redis Delete BACKEND MOVIE : %d", val_movie)
 	}
 	var obj entities.Model_movie
 	var arraobj []entities.Model_movie
 	render_page := time.Now()
-	resultredis, flag := helpers.GetRedis(Fieldmovie_home_redis + "_" + client.Movie_search)
+	resultredis, flag := helpers.GetRedis(Fieldmovie_home_redis + "_" + strconv.Itoa(client.Movie_page) + "_" + client.Movie_search)
 	jsonredis := []byte(resultredis)
 	message_RD, _ := jsonparser.GetString(jsonredis, "message")
 	perpage_RD, _ := jsonparser.GetInt(jsonredis, "perpage")
@@ -104,7 +109,7 @@ func Moviehome(c *fiber.Ctx) error {
 		arraobj = append(arraobj, obj)
 	})
 	if !flag {
-		result, err := models.Fetch_movieHome(client.Movie_search)
+		result, err := models.Fetch_movieHome(client.Movie_search, client.Movie_page)
 		if err != nil {
 			c.Status(fiber.StatusBadRequest)
 			return c.JSON(fiber.Map{
@@ -113,7 +118,7 @@ func Moviehome(c *fiber.Ctx) error {
 				"record":  nil,
 			})
 		}
-		helpers.SetRedis(Fieldmovie_home_redis+"_"+client.Movie_search, result, 5*time.Minute)
+		helpers.SetRedis(Fieldmovie_home_redis+"_"+strconv.Itoa(client.Movie_page)+"_"+client.Movie_search, result, 5*time.Minute)
 		log.Println("MOVIE MYSQL")
 		return c.JSON(result)
 	} else {
@@ -127,6 +132,56 @@ func Moviehome(c *fiber.Ctx) error {
 			"time":        time.Since(render_page).String(),
 		})
 	}
+}
+func Moviesave(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_moviesave)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+	user := c.Locals("jwt").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	temp_decp := helpers.Decryption(name)
+	client_admin, _ := helpers.Parsing_Decry(temp_decp, "==")
+
+	result, err := models.Save_movie(
+		client_admin,
+		client.Movie_name, client.Movie_label, client.Movie_tipe, client.Movie_descp, client.Movie_urlmovie,
+		client.Sdata, client.Movie_id, client.Movie_year, client.Movie_status, client.Movie_imdb)
+	if err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+	val_movie := helpers.DeleteRedis(Fieldmovie_home_redis)
+	log.Printf("Redis Delete BACKEND MOVIE : %d", val_movie)
+	return c.JSON(result)
 }
 func Genrehome(c *fiber.Ctx) error {
 	var obj entities.Model_genre
@@ -322,15 +377,6 @@ func Movieuploadcloud(c *fiber.Ctx) error {
 	if err != nil {
 		log.Println(err.Error())
 	}
-	log.Println("Response Info:")
-	log.Println("  Error      :", err)
-	log.Println("  Status Code:", resp.StatusCode())
-	log.Println("  Status     :", resp.Status())
-	log.Println("  Proto      :", resp.Proto())
-	log.Println("  Time       :", resp.Time())
-	log.Println("  Received At:", resp.ReceivedAt())
-	log.Println("  Body       :\n", resp)
-	log.Println()
 	result := resp.Result().(*responseuploadcloudflare)
 	return c.JSON(fiber.Map{
 		"status": result.Status,
@@ -383,15 +429,6 @@ func Movieupdatecloud(c *fiber.Ctx) error {
 	if err != nil {
 		log.Println(err.Error())
 	}
-	log.Println("Response Info:")
-	log.Println("  Error      :", err)
-	log.Println("  Status Code:", resp.StatusCode())
-	log.Println("  Status     :", resp.Status())
-	log.Println("  Proto      :", resp.Proto())
-	log.Println("  Time       :", resp.Time())
-	log.Println("  Received At:", resp.ReceivedAt())
-	log.Println("  Body       :\n", resp)
-	log.Println()
 	result := resp.Result().(*responseuploadcloudflare)
 	return c.JSON(fiber.Map{
 		"status": result.Status,
@@ -436,15 +473,6 @@ func Moviedeletecloud(c *fiber.Ctx) error {
 	if err != nil {
 		log.Println(err.Error())
 	}
-	log.Println("Response Info:")
-	log.Println("  Error      :", err)
-	log.Println("  Status Code:", resp.StatusCode())
-	log.Println("  Status     :", resp.Status())
-	log.Println("  Proto      :", resp.Proto())
-	log.Println("  Time       :", resp.Time())
-	log.Println("  Received At:", resp.ReceivedAt())
-	log.Println("  Body       :\n", resp)
-	log.Println()
 	result := resp.Result().(*responseuploadcloudflare)
 	return c.JSON(fiber.Map{
 		"status": result.Status,
@@ -461,18 +489,9 @@ func Moviecloud(c *fiber.Ctx) error {
 	if err != nil {
 		log.Println(err.Error())
 	}
-	log.Println("Response Info:")
-	log.Println("  Error      :", err)
-	log.Println("  Status Code:", resp.StatusCode())
-	log.Println("  Status     :", resp.Status())
-	log.Println("  Proto      :", resp.Proto())
-	log.Println("  Time       :", resp.Time())
-	log.Println("  Received At:", resp.ReceivedAt())
-	log.Println("  Body       :\n", resp)
-	log.Println()
 	result := resp.Result().(*responseuploadcloudflare)
 	return c.JSON(fiber.Map{
-		"status": http.StatusOK,
+		"status": result.Status,
 		"record": result.Record,
 	})
 }

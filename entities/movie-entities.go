@@ -31,6 +31,20 @@ type Model_genre struct {
 
 type Controller_movie struct {
 	Movie_search string `json:"movie_search"`
+	Movie_page   int    `json:"movie_page"`
+}
+type Controller_moviesave struct {
+	Page           string  `json:"page" validate:"required"`
+	Sdata          string  `json:"sdata" validate:"required"`
+	Movie_id       int     `json:"movie_id"`
+	Movie_name     string  `json:"movie_name" validate:"required"`
+	Movie_label    string  `json:"movie_label" validate:"required"`
+	Movie_tipe     string  `json:"movie_tipe" validate:"required"`
+	Movie_descp    string  `json:"movie_descp" validate:"required"`
+	Movie_urlmovie string  `json:"movie_urlmovie" validate:"required"`
+	Movie_year     int     `json:"movie_year" validate:"required"`
+	Movie_imdb     float32 `json:"movie_imdb" validate:"required"`
+	Movie_status   int     `json:"movie_status"`
 }
 type Controller_cloudflaremovieupload struct {
 	Page      string `json:"page" validate:"required"`

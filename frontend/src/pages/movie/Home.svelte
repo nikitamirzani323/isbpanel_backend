@@ -5,8 +5,6 @@
 	import Button from "../../components/Button.svelte";
 	import Modal from "../../components/Modal.svelte";
     import { createEventDispatcher } from "svelte";
-    import { createForm } from "svelte-forms-lib";
-    import * as yup from "yup";
 
     export let table_header_font = ""
 	export let table_body_font = ""
@@ -31,15 +29,15 @@
 
     let movie_field_idrecord = 0;
     let movie_field_title = "";
+    let movie_field_label = "";
     let movie_field_descp = "";
     let movie_field_urlvideo = "";
     let movie_field_genre = [];
     let movie_field_source_count = 0;
     let movie_field_source = [];
-    let movie_field_year = 0.0;
+    let movie_field_year = 0;
     let movie_field_imdb = 0.0;
     let movie_field_image = "";
-    let movie_field_cover = "";
     let movie_field_status = "0";
 
     let album_field_name = "";
@@ -49,27 +47,8 @@
     let genre_css = "";
     let css_loader = "display: none;";
     let msgloader = "";
-    const schema = yup.object().shape({
-        movie_field_title: yup.string().required().matches(/^[a-zA-z0-9 \( \)]+$/, "Movie must Character A-Z or a-z or 1-9 dan spasi "),
-        movie_field_label: yup.string().required().matches(/^[a-zA-z0-9 \( \)]+$/, "Movie must Character A-Z or a-z or 1-9 dan spasi "),
-        movie_field_descp: yup.string().required(),
-    });
-    const { form, errors, handleChange, handleSubmit } = createForm({
-        initialValues: {
-            movie_field_title: "",
-            movie_field_label: "",
-            movie_field_descp: ""
-        },
-        validationSchema: schema,
-        onSubmit:(values) => {
-            // handleSave(values.username,values.password)
-        }
-    })
+   
     $: {
-        if ($errors.movie_field_title){
-            alert($errors.movie_field_title+"\n")
-            $form.movie_field_title = ""
-        }
         if (searchMovie) {
             filterMovie = listHome.filter(
                 (item) =>
@@ -90,11 +69,14 @@
     const RefreshHalaman = () => {
         dispatch("handleRefreshData", "call");
     };
-    const ShowFormNewsFetch = () => {
-        sData = "Edit"
-        myModal = new bootstrap.Modal(document.getElementById("modalfetchnew"));
-        myModal.show();
+    const handleSelectPaging = (event) => {
+        let page = event.target.value
+        const movie = {
+                page,
+        };
+        dispatch("handlePaging", movie);
     };
+    
     const ShowGenre = (e) => {
         myModal = new bootstrap.Modal(document.getElementById("modalgenre"));
         myModal.show();
@@ -293,7 +275,7 @@
         let msg = ""
         css_loader = "display: inline-block;";
         msgloader = "Sending...";
-        const res = await fetch("/api/newssave", {
+        const res = await fetch("/api/moviesave", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -301,13 +283,16 @@
             },
             body: JSON.stringify({
                 sdata: sData,
-                page:"NEWS-SAVE",
-                news_id: news_field_idrecord,
-                news_category: news_field_category,
-                news_title: news_field_title,
-                news_descp: news_field_descp,
-                news_url: news_field_url,
-                news_image: news_field_image,
+                page:"MOVIE-SAVE",
+                movie_id: movie_field_idrecord,
+                movie_name: movie_field_title,
+                movie_label: movie_field_label,
+                movie_tipe: "movie",
+                movie_descp: movie_field_descp,
+                movie_urlmovie: movie_field_urlvideo,
+                movie_year: parseInt(movie_field_year),
+                movie_imdb: parseFloat(movie_field_imdb),
+                movie_status: parseInt(movie_field_status),
             }),
         });
         const json = await res.json();
@@ -539,8 +524,6 @@
     }
     function callFunction(event){
         switch(event.detail){
-            case "CALL_FORMNEWS":
-                ShowFormNewsFetch();break;
             case "CALL_ALBUM":
                 ShowAlbum();break;
             case "FORMNEW_ALBUM":
@@ -561,11 +544,14 @@
                 handleNewCloudflare();break;
             case "SAVE_ALBUM":
                 handleNewCloudflare();break;
+            case "SAVE_MOVIE":
+                handleSave();break;
         }
     }
     function clearfield_movie(){
         movie_field_idrecord = 0;
         movie_field_title = "";
+        movie_field_label = "";
         movie_field_descp = "";
         movie_field_urlvideo = "";
         movie_field_genre = [];
@@ -573,7 +559,6 @@
         movie_field_year = 0.0;
         movie_field_imdb = 0.0;
         movie_field_image = "";
-        movie_field_cover = "";
         movie_field_status = "0";
     }
     function clearfield_genre(){
@@ -592,7 +577,7 @@
                 dispatch("handleMovie", movie);
         }  
     };
-   
+    
 </script>
 
 <div id="loader" style="margin-left:50%;{css_loader}">
@@ -634,6 +619,7 @@
                 <slot:template slot="card-title">
                     <div class="float-end">
                         <select
+                            on:change={handleSelectPaging}
                             style="text-align: center;" 
                             class="form-control">
                             {#each listPage as rec}
@@ -678,7 +664,7 @@
                                     <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
                                         <i 
                                         on:click={() => {
-                                            ShowFormNews("Edit",rec.news_id,rec.news_idcategory,rec.news_title,rec.news_descp,rec.news_url,rec.news_image)
+                                            ShowFormMovie("Edit",rec.news_id,rec.news_idcategory,rec.news_title,rec.news_descp,rec.news_url,rec.news_image)
                                         }} 
                                         class="bi bi-pencil"></i>
                                     </td>
@@ -743,9 +729,7 @@
                 <div class="mb-3">
                     <label for="exampleForm" class="form-label">Movie</label>
                     <Input
-                        on:change="{handleChange}"
-                        bind:value={$form.movie_field_title}
-                        invalid={$errors.movie_field_title.length > 0}
+                        bind:value={movie_field_title}
                         class="required"
                         type="text"
                         placeholder="Movie Title"/>
@@ -753,9 +737,7 @@
                 <div class="mb-3">
                     <label for="exampleForm" class="form-label">Label</label>
                     <Input
-                        on:change="{handleChange}"
-                        bind:value={$form.movie_field_label}
-                        invalid={$errors.movie_field_label.length > 0}
+                        bind:value={movie_field_label}
                         class="required"
                         type="text"
                         placeholder="Movie Label"/>
@@ -870,7 +852,7 @@
 	<slot:template slot="footer">
         <Button
             on:click={callFunction}
-            button_function="SAVE_NEWS"
+            button_function="SAVE_MOVIE"
             button_title="Save"
             button_css="btn-warning"/>
 	</slot:template>
