@@ -51,10 +51,6 @@ func Moviehome(c *fiber.Ctx) error {
 		val_movie := helpers.DeleteRedis(Fieldmovie_home_redis + "_" + strconv.Itoa(client.Movie_page) + "_" + client.Movie_search)
 		log.Printf("Redis Delete BACKEND MOVIE : %d", val_movie)
 	}
-	if client.Movie_page > 1 {
-		val_movie := helpers.DeleteRedis(Fieldmovie_home_redis + "_" + strconv.Itoa(client.Movie_page) + "_" + client.Movie_search)
-		log.Printf("Redis Delete BACKEND MOVIE : %d", val_movie)
-	}
 	var obj entities.Model_movie
 	var arraobj []entities.Model_movie
 	render_page := time.Now()

@@ -61,7 +61,12 @@
             if (record != null) {
                 totalpaging = Math.floor(parseInt(totalrecordall) / parseInt(perpage))
                 totalrecord = record.length;
+                console.log("PERPAGE :" + perpage)
+                console.log("PAGE :" + page)
                 let no = 0
+                if(page > 1){
+                    no = page * perpage
+                }
                 for (var i = 0; i < record.length; i++) {
                     let genre = record[i]["movie_genre"]
                     if(record[i]["movie_genre"] == null){
@@ -96,14 +101,17 @@
                         },
                     ];
                 }
-                for(var i=1;i<totalpaging;i++){
-                    listPage = [
-                        ...listPage,
-                        {
-                            page_id: i,
-                            page_display: i + " Of " + perpage*i,
-                        },
-                    ];
+                if(page==1){
+                    listPage = [];
+                    for(var i=1;i<totalpaging;i++){
+                        listPage = [
+                            ...listPage,
+                            {
+                                page_id: i,
+                                page_display: i + " Of " + perpage*i,
+                            },
+                        ];
+                    }
                 }
             }
         } else {
