@@ -126,6 +126,7 @@
         myModal.show();
     };
     async function call_album(){
+        listalbum = []
         const res = await fetch("/api/moviealbum", {
             method: "POST",
             headers: {
@@ -144,6 +145,10 @@
                 let no = 0
                 let images = record.images
                 for (var i = 0; i < images.length; i++) {
+                    let signed = ""
+                    if(images[i]["requireSignedURLs"] == true){
+                        signed = "LOCKED"
+                    }
                     no = no + 1;
                     listalbum = [
                         ...listalbum,
@@ -151,6 +156,7 @@
                             album_no: no,
                             album_filename: images[i]["filename"],
                             album_id: images[i]["id"],
+                            album_signed: signed,
                         },
                     ];
                 }
@@ -816,11 +822,19 @@
                 {#each listalbum as rec }
                 <tr>
                     <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
+                        {#if rec.album_signed == "LOCKED"}
                         <i 
                             on:click={() => {
                                 ShowFormGenre("Edit",rec.genre_id,rec.genre_name,rec.genre_display);
                             }} 
-                            class="bi bi-pencil"></i>
+                            class="bi bi-lock-fill"></i>
+                        {:else}
+                        <i 
+                            on:click={() => {
+                                ShowFormGenre("Edit",rec.genre_id,rec.genre_name,rec.genre_display);
+                            }} 
+                            class="bi bi-unlock"></i>
+                        {/if}
                     </td>
                     <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
                         <i 
