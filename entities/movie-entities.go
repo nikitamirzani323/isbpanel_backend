@@ -5,9 +5,9 @@ type Model_movie struct {
 	Movie_date      string      `json:"movie_date"`
 	Movie_type      string      `json:"movie_type"`
 	Movie_title     string      `json:"movie_title"`
+	Movie_label     string      `json:"movie_label"`
 	Movie_descp     string      `json:"movie_descp"`
 	Movie_thumbnail string      `json:"movie_thumbnail"`
-	Movie_cover     string      `json:"movie_cover"`
 	Movie_year      int         `json:"movie_year"`
 	Movie_rating    float32     `json:"movie_rating"`
 	Movie_imdb      float32     `json:"movie_imdb"`

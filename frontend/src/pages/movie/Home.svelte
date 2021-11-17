@@ -5,6 +5,8 @@
 	import Button from "../../components/Button.svelte";
 	import Modal from "../../components/Modal.svelte";
     import { createEventDispatcher } from "svelte";
+    import { createForm } from "svelte-forms-lib";
+    import * as yup from "yup";
 
     export let table_header_font = ""
 	export let table_body_font = ""
@@ -20,7 +22,6 @@
     let listalbum = []
     let listgenre = []
     let record = ""
-    let totalrecordnews = 0
     let totalrecordcategory = 0
     
     
@@ -41,7 +42,6 @@
     let movie_field_cover = "";
     let movie_field_status = "0";
 
- 
     let album_field_name = "";
     let searchMovie = "";
     let filterMovie = "";
@@ -49,8 +49,27 @@
     let genre_css = "";
     let css_loader = "display: none;";
     let msgloader = "";
-    var fileInput;
+    const schema = yup.object().shape({
+        movie_field_title: yup.string().required().matches(/^[a-zA-z0-9 \( \)]+$/, "Movie must Character A-Z or a-z or 1-9 dan spasi "),
+        movie_field_label: yup.string().required().matches(/^[a-zA-z0-9 \( \)]+$/, "Movie must Character A-Z or a-z or 1-9 dan spasi "),
+        movie_field_descp: yup.string().required(),
+    });
+    const { form, errors, handleChange, handleSubmit } = createForm({
+        initialValues: {
+            movie_field_title: "",
+            movie_field_label: "",
+            movie_field_descp: ""
+        },
+        validationSchema: schema,
+        onSubmit:(values) => {
+            // handleSave(values.username,values.password)
+        }
+    })
     $: {
+        if ($errors.movie_field_title){
+            alert($errors.movie_field_title+"\n")
+            $form.movie_field_title = ""
+        }
         if (searchMovie) {
             filterMovie = listHome.filter(
                 (item) =>
@@ -647,7 +666,6 @@
                                 <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">YEAR</th>
                                 <th NOWRAP width="5%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">GENRE</th>
                                 <th NOWRAP width="2%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">THUMBNAIL</th>
-                                <th NOWRAP width="2%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">COVER</th>
                                 <th NOWRAP width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">MOVIE</th>
                                 <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">IMDB</th>
                                 <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">VIEW</th>
@@ -687,9 +705,9 @@
                                         <img width="50" class="img-thumbnail" src="{rec.movie_thumbnail}" alt="">
                                     </td>
                                     <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
-                                        <img width="50" class="img-thumbnail" src="{rec.movie_cover}" alt="">
+                                        {rec.movie_title}<br>
+                                        <b>LABEL</b> : {rec.movie_label}
                                     </td>
-                                    <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.movie_title}</td>
                                     <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.movie_imdb}</td>
                                     <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.movie_view}</td>
                                 </tr>
@@ -725,10 +743,22 @@
                 <div class="mb-3">
                     <label for="exampleForm" class="form-label">Movie</label>
                     <Input
-                        bind:value={movie_field_title}
+                        on:change="{handleChange}"
+                        bind:value={$form.movie_field_title}
+                        invalid={$errors.movie_field_title.length > 0}
                         class="required"
                         type="text"
                         placeholder="Movie Title"/>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">Label</label>
+                    <Input
+                        on:change="{handleChange}"
+                        bind:value={$form.movie_field_label}
+                        invalid={$errors.movie_field_label.length > 0}
+                        class="required"
+                        type="text"
+                        placeholder="Movie Label"/>
                 </div>
                 <div class="mb-3">
                     <label for="exampleForm" class="form-label">Deskripsi</label>
@@ -771,23 +801,6 @@
                             type="button" class="btn btn-info">Album</button>
                     </div>
                     <a href="https://id.imgbb.com/" target="_blank">imgbb</a>, 
-                    <a href="https://imgur.com/" target="_blank">imgur</a>
-                </div>
-                <div class="mb-3">
-                    <label for="exampleForm" class="form-label">Url Cover</label>
-                    <div class="input-group mb-3">
-                        <Input
-                            bind:value={movie_field_cover}
-                            class="required"
-                            type="text"
-                            placeholder="Movie URL Cover"/>
-                        <button
-                            on:click={() => {
-                                ShowAlbum("cover");
-                            }}  
-                            type="button" class="btn btn-info">Cloudflare</button>
-                    </div>
-                    <a href="https://id.imgbb.com/" target="_blank">imgbb</a>,
                     <a href="https://imgur.com/" target="_blank">imgur</a>
                 </div>
                 <div class="mb-3">

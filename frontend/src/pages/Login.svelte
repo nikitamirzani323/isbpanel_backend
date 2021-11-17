@@ -73,9 +73,7 @@
             <div class="card mt-1" style="">
                 <div class="card-header" style="background-color: #1f2937;border-radius: 0px;">
                     <span
-                        style="color:white;font-weight: bold;font-size: 15px;"
-                        >LOGIN ISB PANEL</span
-                    >
+                        style="color:white;font-weight: bold;font-size: 15px;">LOGIN ISB PANEL</span>
                 </div>
                 <div class="card-body" style="padding:10px;">
                     <div class="mb-3">
