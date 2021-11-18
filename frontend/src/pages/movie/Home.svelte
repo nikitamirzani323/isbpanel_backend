@@ -93,11 +93,6 @@
         myModal = new bootstrap.Modal(document.getElementById("modalalbum"));
         myModal.show();
         call_album();
-        if(e=="thumb"){
-            movie_field_image = e
-        }else{
-            movie_field_cover = e
-        }
     };
     const ShowFormAlbum = (e,id,name,display) => {
         sData = e
@@ -158,11 +153,11 @@
             }),
         });
         const json = await res.json();
-        if (json.status == 200) {
+        if (json.status == true) {
             record = json.record;
+            let images = record.images;
+            let no = 0;
             if (record != null) {
-                let no = 0
-                let images = record.images
                 for (var i = 0; i < images.length; i++) {
                     let signed = ""
                     if(images[i]["requireSignedURLs"] == true){
@@ -176,13 +171,12 @@
                             album_filename: images[i]["filename"],
                             album_id: images[i]["id"],
                             album_variant_0: images[i]["variants"][0],
-                            album_variant_1: images[i]["variants"][1],
                             album_signed: signed,
                         },
                     ];
                 }
             }
-        } 
+        }
     }
     async function call_genre() {
         listgenre = [];
@@ -871,8 +865,7 @@
                     <th width="1%" colspan="2">&nbsp;</th>
                     <th width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NO</th>
                     <th width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">FILENAME</th>
-                    <th width="5%" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">THUMB</th>
-                    <th width="5%" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">COVER</th>
+                    <th width="5%" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">LINK</th>
                 </tr>
             </thead>
             <tbody>
@@ -902,9 +895,6 @@
                     </td>
                     <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.album_no}</td>
                     <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.album_filename}</td>
-                    <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
-                        <a href="{rec.album_variant_1}" target="_blank">LINK</a>
-                    </td>
                     <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
                         <a href="{rec.album_variant_0}" target="_blank">LINK</a>
                     </td>
