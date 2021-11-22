@@ -27,8 +27,9 @@ type Model_moviegenre struct {
 	Moviegenre_name string `json:"moviegenre_name"`
 }
 type Model_moviesource struct {
-	Moviesource_id  int    `json:"moviesource_id"`
-	Moviesource_url string `json:"moviesource_url"`
+	Moviesource_id     int    `json:"moviesource_id"`
+	Moviesource_stream string `json:"moviesource_stream"`
+	Moviesource_url    string `json:"moviesource_url"`
 }
 type Model_genre struct {
 	Genre_id      int    `json:"genre_id"`

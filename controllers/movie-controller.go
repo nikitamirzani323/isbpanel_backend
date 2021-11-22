@@ -94,8 +94,10 @@ func Moviehome(c *fiber.Ctx) error {
 		record_moviesource_RD, _, _, _ := jsonparser.Get(value, "movie_source")
 		jsonparser.ArrayEach(record_moviesource_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 			moviesource_id, _ := jsonparser.GetInt(value, "moviesource_id")
+			moviesource_stream, _ := jsonparser.GetString(value, "moviesource_stream")
 			moviesource_url, _ := jsonparser.GetString(value, "moviesource_url")
 			objmoviesource.Moviesource_id = int(moviesource_id)
+			objmoviesource.Moviesource_stream = moviesource_stream
 			objmoviesource.Moviesource_url = moviesource_url
 			arraobjmoviesource = append(arraobjmoviesource, objmoviesource)
 		})
@@ -181,7 +183,8 @@ func Moviesave(c *fiber.Ctx) error {
 
 	result, err := models.Save_movie(
 		client_admin,
-		client.Movie_name, client.Movie_label, client.Movie_slug, client.Movie_tipe, client.Movie_descp, client.Movie_urlmovie, string(client.Movie_gender),
+		client.Movie_name, client.Movie_label, client.Movie_slug, client.Movie_tipe, client.Movie_descp, client.Movie_urlmovie,
+		string(client.Movie_gender), string(client.Movie_source),
 		client.Sdata, client.Movie_id, client.Movie_year, client.Movie_status, client.Movie_imdb)
 	if err != nil {
 		c.Status(fiber.StatusBadRequest)

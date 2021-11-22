@@ -132,7 +132,7 @@
         myModal = new bootstrap.Modal(document.getElementById("modalcrudgenre"));
         myModal.show();
     };
-    const ShowFormMovie = (e,id,title,label,descp,image,year,imdb,slug,status,genre) => {
+    const ShowFormMovie = (e,id,title,label,descp,image,year,imdb,slug,status,genre,source) => {
         sData = e
         if(e == "Edit"){
             console.log(genre)
@@ -149,12 +149,22 @@
                 movie_field_status = "1";
             }
             movie_field_genre = [];
+            movie_field_source = [];
             for (var i = 0; i < genre.length; i++) {
                 movie_field_genre = [
                     ...movie_field_genre,
                     {
                         movie_genre_id: genre[i]['moviegenre_id'],
                         movie_genre_name: genre[i]['moviegenre_name'],
+                    },
+                ];         
+            }
+            for (var i = 0; i < source.length; i++) {
+                movie_field_source = [
+                    ...movie_field_source,
+                    {
+                        movie_source_id: source[i]['moviesource_id'],
+                        movie_source_name: source[i]['moviesource_url'],
                     },
                 ];         
             }
@@ -317,7 +327,8 @@
                 movie_year: parseInt(movie_field_year),
                 movie_imdb: parseFloat(movie_field_imdb),
                 movie_status: parseInt(movie_field_status),
-                movie_gender:movie_field_genre
+                movie_gender:movie_field_genre,
+                movie_source:movie_field_source
             }),
         });
         const json = await res.json();
@@ -709,7 +720,7 @@
                                         <i 
                                         on:click={() => {
                                             ShowFormMovie("Edit",rec.movie_id,rec.movie_title,rec.movie_label,rec.movie_descp,
-                                            rec.movie_thumbnail,rec.movie_year,rec.movie_imdb,rec.movie_slug,rec.movie_status,rec.movie_genre)
+                                            rec.movie_thumbnail,rec.movie_year,rec.movie_imdb,rec.movie_slug,rec.movie_status,rec.movie_genre,rec.movie_source)
                                         }} 
                                         class="bi bi-pencil"></i>
                                     </td>
@@ -738,7 +749,7 @@
                                                 style="text-decoration: underline;color:blue;cursor:pointer;" 
                                                 on:click={() => {
                                                     popupwindow(rec2.moviesource_url)
-                                                }} >STREAM</span><br>
+                                                }} >{rec2.moviesource_stream}</span><br>
                                         {/each}
                                     </td>
                                     <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
@@ -907,7 +918,13 @@
                                         }} 
                                         class="bi bi-trash"></i>
                                 </td>
-                                <td width="*" style="text-align:left;vertical-align:top;font-size:12px;">{rec.movie_source_name}</td>
+                                <td 
+                                    on:click={() => {
+                                        popupwindow(rec.movie_source_name)
+                                    }} 
+                                    width="*" style="text-align:left;vertical-align:top;font-size:12px;cursor:pointer;text-decoration:underline;color:blue;">
+                                    {rec.movie_source_name}
+                                </td>
                             </tr>       
                             {/each}
                         </tbody>
