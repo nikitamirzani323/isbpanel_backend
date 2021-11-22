@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/buger/jsonparser"
 	"github.com/gofiber/fiber/v2"
 	"github.com/nikitamirzani323/isbpanel_backend/configs"
 	"github.com/nikitamirzani323/isbpanel_backend/db"
@@ -48,7 +49,7 @@ func Fetch_movieHome(search string, page int) (helpers.Responsemovie, error) {
 	sql_select += ""
 	sql_select += "SELECT "
 	sql_select += "movieid , movietitle, description, movietype, "
-	sql_select += "rating , imdb, year, views, enabled, posted_id,label,   "
+	sql_select += "rating , imdb, year, views, enabled, COALESCE(posted_id,0),label, urlthumbnail, slug,   "
 	sql_select += "createmovie, COALESCE(createdatemovie,''), updatemovie, COALESCE(updatedatemovie,'') "
 	sql_select += "FROM " + configs.DB_tbl_trx_movie + "  "
 	if search == "" {
@@ -62,14 +63,15 @@ func Fetch_movieHome(search string, page int) (helpers.Responsemovie, error) {
 	helpers.ErrorCheck(err)
 	for row.Next() {
 		var (
-			movieid_db, year_db, views_db, enabled_db, posted_id_db                int
-			rating_db, imdb_db                                                     float32
-			movietitle_db, movietype_db, description_db, label_db                  string
-			createmovie_db, createdatemovie_db, updatemovie_db, updatedatemovie_db string
+			movieid_db, year_db, views_db, enabled_db, posted_id_db                         int
+			rating_db, imdb_db                                                              float32
+			movietitle_db, movietype_db, description_db, label_db, urlthumbnail_db, slug_db string
+			createmovie_db, createdatemovie_db, updatemovie_db, updatedatemovie_db          string
 		)
 
 		err = row.Scan(
-			&movieid_db, &movietitle_db, &description_db, &movietype_db, &rating_db, &imdb_db, &year_db, &views_db, &enabled_db, &posted_id_db, &label_db,
+			&movieid_db, &movietitle_db, &description_db, &movietype_db, &rating_db, &imdb_db, &year_db, &views_db,
+			&enabled_db, &posted_id_db, &label_db, &urlthumbnail_db, &slug_db,
 			&createmovie_db, &createdatemovie_db, &updatemovie_db, &updatedatemovie_db)
 
 		helpers.ErrorCheck(err)
@@ -91,7 +93,7 @@ func Fetch_movieHome(search string, page int) (helpers.Responsemovie, error) {
 		var objmoviegenre entities.Model_moviegenre
 		var arraobjmoviegenre []entities.Model_moviegenre
 		sql_selectmoviegenre := `SELECT 
-			B.nmgenre 
+			A.idgenre, B.nmgenre 
 			FROM ` + configs.DB_tbl_trx_moviegenre + ` as A 
 			JOIN ` + configs.DB_tbl_mst_moviegenre + ` as B ON B.idgenre = A.idgenre 
 			WHERE A.movieid = ?   
@@ -100,20 +102,51 @@ func Fetch_movieHome(search string, page int) (helpers.Responsemovie, error) {
 		helpers.ErrorCheck(err)
 		for row_moviegenre.Next() {
 			var (
+				idgenre_db int
 				nmgenre_db string
 			)
-			err = row_moviegenre.Scan(&nmgenre_db)
+			err = row_moviegenre.Scan(&idgenre_db, &nmgenre_db)
+			objmoviegenre.Moviegenre_id = idgenre_db
 			objmoviegenre.Moviegenre_name = nmgenre_db
 			arraobjmoviegenre = append(arraobjmoviegenre, objmoviegenre)
 		}
-		poster_image, poster_extension := _GetMedia(posted_id_db)
-		path_image := "https://duniafilm.b-cdn.net/uploads/cache/poster_thumb/uploads/" + poster_extension + "/" + poster_image
+
+		var objmoviesource entities.Model_moviesource
+		var arraobjmoviesource []entities.Model_moviesource
+		if movietype_db == "movie" {
+			sql_selectmoviesource := `SELECT 
+				id, url 
+				FROM ` + configs.DB_tbl_mst_moviesource + ` 
+				WHERE poster_id = ?   
+			`
+			row_moviesource, err := con.QueryContext(ctx, sql_selectmoviesource, movieid_db)
+			helpers.ErrorCheck(err)
+			for row_moviesource.Next() {
+				var (
+					id_db  int
+					url_db string
+				)
+				err = row_moviesource.Scan(&id_db, &url_db)
+				objmoviesource.Moviesource_id = id_db
+				objmoviesource.Moviesource_url = url_db
+				arraobjmoviesource = append(arraobjmoviesource, objmoviesource)
+			}
+		}
+
+		path_image := ""
+		if urlthumbnail_db == "" {
+			poster_image, poster_extension := _GetMedia(posted_id_db)
+			path_image = "https://duniafilm.b-cdn.net/uploads/cache/poster_thumb/uploads/" + poster_extension + "/" + poster_image
+		} else {
+			path_image = urlthumbnail_db
+		}
 
 		obj.Movie_id = movieid_db
 		obj.Movie_date = createdatemovie_db
 		obj.Movie_type = movietype_db
 		obj.Movie_title = movietitle_db
 		obj.Movie_label = label_db
+		obj.Movie_slug = slug_db
 		obj.Movie_descp = description_db
 		obj.Movie_thumbnail = path_image
 		obj.Movie_year = year_db
@@ -121,6 +154,7 @@ func Fetch_movieHome(search string, page int) (helpers.Responsemovie, error) {
 		obj.Movie_imdb = imdb_db
 		obj.Movie_view = views_db
 		obj.Movie_genre = arraobjmoviegenre
+		obj.Movie_source = arraobjmoviesource
 		obj.Movie_status = status
 		obj.Movie_statuscss = statuscss
 		obj.Movie_create = create
@@ -139,7 +173,7 @@ func Fetch_movieHome(search string, page int) (helpers.Responsemovie, error) {
 
 	return res, nil
 }
-func Save_movie(admin, name, label, tipemovie, descp, urlthum, sdata string, idrecord, year, status int, imdb float32) (helpers.Response, error) {
+func Save_movie(admin, name, label, slug, tipemovie, descp, urlthum, listgenre, sdata string, idrecord, year, status int, imdb float32) (helpers.Response, error) {
 	var res helpers.Response
 	msg := "Failed"
 	con := db.CreateCon()
@@ -148,6 +182,7 @@ func Save_movie(admin, name, label, tipemovie, descp, urlthum, sdata string, idr
 	render_page := time.Now()
 	flag := false
 
+	temp_idrecord := ""
 	if sdata == "New" {
 		sql_insert := `
 			insert into
@@ -164,10 +199,11 @@ func Save_movie(admin, name, label, tipemovie, descp, urlthum, sdata string, idr
 		defer stmt_insert.Close()
 		field_column := configs.DB_tbl_trx_movie + tglnow.Format("YYYY")
 		idrecord_counter := Get_counter(field_column)
+		temp_idrecord = tglnow.Format("YY") + tglnow.Format("MM") + strconv.Itoa(idrecord_counter)
 		res_newrecord, e_newrecord := stmt_insert.ExecContext(
 			ctx,
-			tglnow.Format("YY")+strconv.Itoa(idrecord_counter),
-			name, label, tipemovie, descp, imdb, year, "slug", status, urlthum,
+			temp_idrecord,
+			name, label, tipemovie, descp, imdb, year, slug, status, urlthum,
 			admin,
 			tglnow.Format("YYYY-MM-DD HH:mm:ss"))
 		helpers.ErrorCheck(e_newrecord)
@@ -178,11 +214,47 @@ func Save_movie(admin, name, label, tipemovie, descp, urlthum, sdata string, idr
 			msg = "Succes"
 			log.Println("Data Berhasil di save")
 		}
+		if flag {
+			//GENRE
+			json := []byte(listgenre)
+			jsonparser.ArrayEach(json, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+				movie_genre_id, _ := jsonparser.GetInt(value, "movie_genre_id")
+				movie_genre_name, _ := jsonparser.GetString(value, "movie_genre_name")
+
+				log.Printf("%d - %s", int(movie_genre_id), movie_genre_name)
+				sql_insertgenre := `
+				insert into
+					` + configs.DB_tbl_trx_moviegenre + ` (
+						idmoviegenre , movieid, idgenre
+					) values (
+						?,?,?
+					)
+				`
+				stmt_insertgenre, e_insertgenre := con.PrepareContext(ctx, sql_insertgenre)
+				helpers.ErrorCheck(e_insertgenre)
+				defer stmt_insertgenre.Close()
+				field_column := configs.DB_tbl_trx_moviegenre + tglnow.Format("YYYY")
+				idrecord_counter := Get_counter(field_column)
+				res_newrecordgenre, e_newrecordgenre := stmt_insertgenre.ExecContext(
+					ctx,
+					tglnow.Format("YY")+tglnow.Format("MM")+strconv.Itoa(idrecord_counter),
+					temp_idrecord, movie_genre_id)
+				helpers.ErrorCheck(e_newrecordgenre)
+				insertgenre, e := res_newrecordgenre.RowsAffected()
+				helpers.ErrorCheck(e)
+				if insertgenre > 0 {
+					flag = true
+					msg = "Succes"
+					log.Println("Data GENERE Berhasil di save")
+				}
+			})
+
+		}
 	} else {
 		sql_update := `
 			UPDATE 
 			` + configs.DB_tbl_trx_movie + ` 
-			SET movietitle=?, description=?, urlthumbnail=?, urlcover=?,
+			SET movietitle=?, description=?, slug=?, urlthumbnail=?, 
 			updatemovie=?, updatedatemovie=? 
 			WHERE movieid=? 
 		`
@@ -191,7 +263,7 @@ func Save_movie(admin, name, label, tipemovie, descp, urlthum, sdata string, idr
 		defer stmt_update.Close()
 		res_newrecord, e_newrecord := stmt_update.ExecContext(
 			ctx,
-			name, descp, urlthum,
+			name, descp, slug, urlthum,
 			admin,
 			tglnow.Format("YYYY-MM-DD HH:mm:ss"), idrecord)
 		helpers.ErrorCheck(e_newrecord)
@@ -202,6 +274,153 @@ func Save_movie(admin, name, label, tipemovie, descp, urlthum, sdata string, idr
 			msg = "Succes"
 			log.Println("Data Berhasil di update")
 		}
+		if flag {
+			stmt_genre_delete, e_genre_delete := con.PrepareContext(ctx, `
+					DELETE FROM  
+					`+configs.DB_tbl_trx_moviegenre+`   
+					WHERE movieid=?  
+			`)
+
+			helpers.ErrorCheck(e_genre_delete)
+			rec_genre_delete, e_rec_genre_delete := stmt_genre_delete.ExecContext(ctx, idrecord)
+			helpers.ErrorCheck(e_rec_genre_delete)
+
+			affect_genre_delete, err_affer_genre_delete := rec_genre_delete.RowsAffected()
+			helpers.ErrorCheck(err_affer_genre_delete)
+
+			defer stmt_genre_delete.Close()
+			if affect_genre_delete > 0 {
+				flag = true
+				log.Printf("Delete genre : %d\n", idrecord)
+			} else {
+				log.Printf("Delete genre : %d Failed\n ", idrecord)
+				flag = true
+			}
+			if flag {
+				//GENRE
+				json := []byte(listgenre)
+				jsonparser.ArrayEach(json, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+					movie_genre_id, _ := jsonparser.GetInt(value, "movie_genre_id")
+					movie_genre_name, _ := jsonparser.GetString(value, "movie_genre_name")
+
+					log.Printf("%d - %s", int(movie_genre_id), movie_genre_name)
+					sql_insertgenre := `
+						insert into
+							` + configs.DB_tbl_trx_moviegenre + ` (
+								idmoviegenre , movieid, idgenre
+							) values (
+								?,?,?
+							)
+						`
+					stmt_insertgenre, e_insertgenre := con.PrepareContext(ctx, sql_insertgenre)
+					helpers.ErrorCheck(e_insertgenre)
+					defer stmt_insertgenre.Close()
+					field_column := configs.DB_tbl_trx_moviegenre + tglnow.Format("YYYY")
+					idrecord_counter := Get_counter(field_column)
+					res_newrecordgenre, e_newrecordgenre := stmt_insertgenre.ExecContext(
+						ctx,
+						tglnow.Format("YY")+tglnow.Format("MM")+strconv.Itoa(idrecord_counter),
+						idrecord, movie_genre_id)
+					helpers.ErrorCheck(e_newrecordgenre)
+					insertgenre, e := res_newrecordgenre.RowsAffected()
+					helpers.ErrorCheck(e)
+					if insertgenre > 0 {
+						flag = true
+						msg = "Succes"
+						log.Println("Data GENERE Berhasil di save")
+					}
+				})
+			}
+
+		}
+	}
+
+	if flag {
+		res.Status = fiber.StatusOK
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	} else {
+		res.Status = fiber.StatusBadRequest
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	}
+
+	return res, nil
+}
+func Delete_movie(admin string, idrecord int) (helpers.Response, error) {
+	var res helpers.Response
+	msg := "Failed"
+	con := db.CreateCon()
+	ctx := context.Background()
+	render_page := time.Now()
+	flag := false
+
+	flag = CheckDB(configs.DB_tbl_trx_movie, "movieid", strconv.Itoa(idrecord))
+
+	if flag {
+		//DELETE GENRE
+		sql_deletegenre := `
+			DELETE FROM
+			` + configs.DB_tbl_trx_moviegenre + ` 
+			WHERE movieid=? 
+		`
+		stmt_deletegenre, e_deletegenre := con.PrepareContext(ctx, sql_deletegenre)
+		helpers.ErrorCheck(e_deletegenre)
+		defer stmt_deletegenre.Close()
+		rec_deletegenre, e_deletegenre := stmt_deletegenre.ExecContext(ctx, idrecord)
+
+		helpers.ErrorCheck(e_deletegenre)
+		deletegenre, egenre := rec_deletegenre.RowsAffected()
+		helpers.ErrorCheck(egenre)
+		if deletegenre > 0 {
+			flag = true
+			msg = "Succes"
+			log.Println("Data Genre Berhasil di delete")
+		}
+
+		//DELETE SOURCE
+		sql_deletesource := `
+			DELETE FROM
+			` + configs.DB_tbl_mst_moviesource + ` 
+			WHERE poster_id=? 
+		`
+		stmt_deletesource, e_deletesource := con.PrepareContext(ctx, sql_deletesource)
+		helpers.ErrorCheck(e_deletesource)
+		defer stmt_deletesource.Close()
+		rec_deletesource, e_deletesource := stmt_deletesource.ExecContext(ctx, idrecord)
+
+		helpers.ErrorCheck(e_deletesource)
+		deletesource, esource := rec_deletesource.RowsAffected()
+		helpers.ErrorCheck(esource)
+		if deletesource > 0 {
+			flag = true
+			msg = "Succes"
+			log.Println("Data Source Berhasil di delete")
+		}
+
+		//DELETE MOVIE
+		sql_delete := `
+			DELETE FROM
+			` + configs.DB_tbl_trx_movie + ` 
+			WHERE movieid=? 
+		`
+		stmt_delete, e_delete := con.PrepareContext(ctx, sql_delete)
+		helpers.ErrorCheck(e_delete)
+		defer stmt_delete.Close()
+		rec_delete, e_delete := stmt_delete.ExecContext(ctx, idrecord)
+
+		helpers.ErrorCheck(e_delete)
+		delete, e := rec_delete.RowsAffected()
+		helpers.ErrorCheck(e)
+		if delete > 0 {
+			flag = true
+			msg = "Succes"
+			log.Println("Data Movie Berhasil di delete")
+		}
+	} else {
+		msg = "Data Not Found"
 	}
 
 	if flag {

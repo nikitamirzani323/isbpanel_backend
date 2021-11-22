@@ -69,8 +69,12 @@
                 }
                 for (var i = 0; i < record.length; i++) {
                     let genre = record[i]["movie_genre"]
+                    let source = record[i]["movie_source"]
                     if(record[i]["movie_genre"] == null){
                         genre = []
+                    }
+                    if(record[i]["movie_source"] == null){
+                        source = []
                     }
                     let css_type = "background-color:#0dcaf0;font-weight:bold;"
                     if(record[i]["movie_type"] == "movie"){
@@ -87,6 +91,7 @@
                             movie_csstype: css_type,
                             movie_title: record[i]["movie_title"],
                             movie_label: record[i]["movie_label"],
+                            movie_slug: record[i]["movie_slug"],
                             movie_descp: record[i]["movie_descp"],
                             movie_thumbnail: record[i]["movie_thumbnail"],
                             movie_year: record[i]["movie_year"].toString(),
@@ -94,6 +99,7 @@
                             movie_imdb: record[i]["movie_imdb"],
                             movie_view: record[i]["movie_view"],
                             movie_genre: genre,
+                            movie_source: source,
                             movie_status: record[i]["movie_status"],
                             movie_statuscss: record[i]["movie_statuscss"],
                             movie_create: record[i]["movie_create"],

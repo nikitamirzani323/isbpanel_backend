@@ -30,6 +30,7 @@
     let movie_field_idrecord = 0;
     let movie_field_title = "";
     let movie_field_label = "";
+    let movie_field_slug = "";
     let movie_field_descp = "";
     let movie_field_urlvideo = "";
     let movie_field_genre = [];
@@ -43,11 +44,14 @@
     let album_field_name = "";
     let searchMovie = "";
     let filterMovie = "";
+    let album_flagclick = false;
     let genre_flagclick = false;
+    let album_css = "";
     let genre_css = "";
     let css_loader = "display: none;";
     let msgloader = "";
-   
+    let pagingnow = 1;
+    
     $: {
         if (searchMovie) {
             filterMovie = listHome.filter(
@@ -71,6 +75,7 @@
     };
     const handleSelectPaging = (event) => {
         let page = event.target.value
+        pagingnow = page
         const movie = {
                 page,
         };
@@ -92,6 +97,13 @@
     const ShowAlbum = (e) => {
         myModal = new bootstrap.Modal(document.getElementById("modalalbum"));
         myModal.show();
+        album_flagclick = e
+        if(album_flagclick){
+            album_css = "text-decoration:underline;color:blue;cursor:pointer;"
+        }else{
+            album_css = "";
+            album_flagclick = false
+        }
         call_album();
     };
     const ShowFormAlbum = (e,id,name,display) => {
@@ -120,14 +132,32 @@
         myModal = new bootstrap.Modal(document.getElementById("modalcrudgenre"));
         myModal.show();
     };
-    const ShowFormMovie = (e,id,category,title,descp,url,image) => {
+    const ShowFormMovie = (e,id,title,label,descp,image,year,imdb,slug,status,genre) => {
         sData = e
         if(e == "Edit"){
+            console.log(genre)
             movie_field_idrecord = parseInt(id);
             movie_field_title = title;
+            movie_field_label = label;
             movie_field_descp = descp;
-            movie_field_genre = parseInt(category);
             movie_field_image = image;
+            movie_field_slug = slug;
+            movie_field_year = parseInt(year);
+            movie_field_imdb = parseFloat(imdb);
+            movie_field_status = "0";
+            if(status == "SHOW"){
+                movie_field_status = "1";
+            }
+            movie_field_genre = [];
+            for (var i = 0; i < genre.length; i++) {
+                movie_field_genre = [
+                    ...movie_field_genre,
+                    {
+                        movie_genre_id: genre[i]['moviegenre_id'],
+                        movie_genre_name: genre[i]['moviegenre_name'],
+                    },
+                ];         
+            }
         }else{
             clearfield_movie()
         }
@@ -265,8 +295,6 @@
         
     }
     async function handleSave() {
-        let flag = true
-        let msg = ""
         css_loader = "display: inline-block;";
         msgloader = "Sending...";
         const res = await fetch("/api/moviesave", {
@@ -278,15 +306,18 @@
             body: JSON.stringify({
                 sdata: sData,
                 page:"MOVIE-SAVE",
+                movie_page: parseInt(pagingnow),
                 movie_id: movie_field_idrecord,
                 movie_name: movie_field_title,
                 movie_label: movie_field_label,
+                movie_slug: movie_field_slug,
                 movie_tipe: "movie",
                 movie_descp: movie_field_descp,
-                movie_urlmovie: movie_field_urlvideo,
+                movie_urlmovie: movie_field_image,
                 movie_year: parseInt(movie_field_year),
                 movie_imdb: parseFloat(movie_field_imdb),
                 movie_status: parseInt(movie_field_status),
+                movie_gender:movie_field_genre
             }),
         });
         const json = await res.json();
@@ -302,6 +333,10 @@
         setTimeout(function () {
             css_loader = "display: none;";
         }, 1000);
+    }
+    async function handleNewMovieImage(file) {
+        movie_field_image = file
+        myModal.hide();
     }
     async function handleNewMovieGenre(id,name) {
         movie_field_genre = [
@@ -442,7 +477,7 @@
             ];
         }
     }
-    async function handleDeleteNews(e) {
+    async function handleDeleteMovie(e) {
         let flag = true
         let msg = ""
         if(e == ""){
@@ -452,15 +487,15 @@
         if(flag){
             css_loader = "display: inline-block;";
             msgloader = "Sending...";
-            const res = await fetch("/api/newsdelete", {
+            const res = await fetch("/api/moviedelete", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: "Bearer " + token,
                 },
                 body: JSON.stringify({
-                    page:"NEWS-DELETE",
-                    news_id: parseInt(e),
+                    page:"MOVIE-DELETE",
+                    movie_id: parseInt(e),
                 }),
             });
             const json = await res.json();
@@ -546,6 +581,7 @@
         movie_field_idrecord = 0;
         movie_field_title = "";
         movie_field_label = "";
+        movie_field_slug = "";
         movie_field_descp = "";
         movie_field_urlvideo = "";
         movie_field_genre = [];
@@ -571,7 +607,20 @@
                 dispatch("handleMovie", movie);
         }  
     };
-    
+    function lowercase(element) {
+		function onInput(event) {
+			element.value = element.value.toLowerCase();
+		}
+		element.addEventListener('input', onInput);
+		return {
+			destroy() {
+				element.removeEventListener('input', onInput);
+			}
+		}
+	}
+    function popupwindow(e){
+        window.open(e, "", "width=640, height=480");
+    }
 </script>
 
 <div id="loader" style="margin-left:50%;{css_loader}">
@@ -645,6 +694,7 @@
                                 <th NOWRAP width="2%" style="text-align: center;vertical-align: top;font-weight:bold;font-size: {table_header_font};">TYPE</th>
                                 <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">YEAR</th>
                                 <th NOWRAP width="5%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">GENRE</th>
+                                <th NOWRAP width="5%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">SOURCE</th>
                                 <th NOWRAP width="2%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">THUMBNAIL</th>
                                 <th NOWRAP width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">MOVIE</th>
                                 <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">IMDB</th>
@@ -658,14 +708,15 @@
                                     <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
                                         <i 
                                         on:click={() => {
-                                            ShowFormMovie("Edit",rec.news_id,rec.news_idcategory,rec.news_title,rec.news_descp,rec.news_url,rec.news_image)
+                                            ShowFormMovie("Edit",rec.movie_id,rec.movie_title,rec.movie_label,rec.movie_descp,
+                                            rec.movie_thumbnail,rec.movie_year,rec.movie_imdb,rec.movie_slug,rec.movie_status,rec.movie_genre)
                                         }} 
                                         class="bi bi-pencil"></i>
                                     </td>
                                     <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
                                         <i 
                                             on:click={() => {
-                                                handleDeleteNews(rec.news_id);
+                                                handleDeleteMovie(rec.movie_id);
                                             }} 
                                             class="bi bi-trash"></i>
                                     </td>
@@ -682,11 +733,21 @@
                                         {/each}
                                     </td>
                                     <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
+                                        {#each rec.movie_source as rec2}
+                                            <span
+                                                style="text-decoration: underline;color:blue;cursor:pointer;" 
+                                                on:click={() => {
+                                                    popupwindow(rec2.moviesource_url)
+                                                }} >STREAM</span><br>
+                                        {/each}
+                                    </td>
+                                    <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
                                         <img width="50" class="img-thumbnail" src="{rec.movie_thumbnail}" alt="">
                                     </td>
                                     <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
                                         {rec.movie_title}<br>
-                                        <b>LABEL</b> : {rec.movie_label}
+                                        <b>LABEL</b> : {rec.movie_label}<br>
+                                        <b>SLUG</b> : {rec.movie_slug}
                                     </td>
                                     <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.movie_imdb}</td>
                                     <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.movie_view}</td>
@@ -737,6 +798,18 @@
                         placeholder="Movie Label"/>
                 </div>
                 <div class="mb-3">
+                    <label for="exampleForm" class="form-label">Slug</label>
+                    <input
+                        use:lowercase
+                        bind:value={movie_field_slug}
+                        class="required form-control"
+                        type="text"
+                        placeholder="Movie Slug"/>
+                    <p class="text-muted">
+                        Ex : dragon-ball-2021
+                    </p>
+                </div>
+                <div class="mb-3">
                     <label for="exampleForm" class="form-label">Deskripsi</label>
                     <textarea
                         style="height: 100px;resize: none;" 
@@ -763,16 +836,16 @@
                         placeholder="Movie Imdb"/>
                 </div>
                 <div class="mb-3">
-                    <label for="exampleForm" class="form-label">Url Thumbnail</label>
+                    <label for="exampleForm" class="form-label">Url Image</label>
                     <div class="input-group mb-3">
                         <Input
                             bind:value={movie_field_image}
                             class="required"
                             type="text"
-                            placeholder="Movie URL Thumbnail"/>
+                            placeholder="Movie URL Image"/>
                         <button
                             on:click={() => {
-                                ShowAlbum("thumb");
+                                ShowAlbum(true);
                             }}  
                             type="button" class="btn btn-info">Album</button>
                     </div>
@@ -894,7 +967,15 @@
                             class="bi bi-trash"></i>
                     </td>
                     <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.album_no}</td>
-                    <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.album_filename}</td>
+                    {#if album_flagclick == true}
+                        <td 
+                            on:click={() => {
+                                handleNewMovieImage(rec.album_variant_0);
+                            }} 
+                            NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};{album_css}">{rec.album_filename}</td>
+                    {:else}
+                        <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.album_filename}</td>
+                    {/if}
                     <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
                         <a href="{rec.album_variant_0}" target="_blank">LINK</a>
                     </td>

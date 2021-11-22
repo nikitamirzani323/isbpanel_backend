@@ -66,6 +66,7 @@ func Moviehome(c *fiber.Ctx) error {
 		movie_type, _ := jsonparser.GetString(value, "movie_type")
 		movie_title, _ := jsonparser.GetString(value, "movie_title")
 		movie_label, _ := jsonparser.GetString(value, "movie_label")
+		movie_slug, _ := jsonparser.GetString(value, "movie_slug")
 		movie_descp, _ := jsonparser.GetString(value, "movie_descp")
 		movie_thumbnail, _ := jsonparser.GetString(value, "movie_thumbnail")
 		movie_year, _ := jsonparser.GetInt(value, "movie_year")
@@ -81,9 +82,22 @@ func Moviehome(c *fiber.Ctx) error {
 		var arraobjmoviegenre []entities.Model_moviegenre
 		record_moviegenre_RD, _, _, _ := jsonparser.Get(value, "movie_genre")
 		jsonparser.ArrayEach(record_moviegenre_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+			moviegenre_id, _ := jsonparser.GetInt(value, "moviegenre_id")
 			moviegenre_name, _ := jsonparser.GetString(value, "moviegenre_name")
+			objmoviegenre.Moviegenre_id = int(moviegenre_id)
 			objmoviegenre.Moviegenre_name = moviegenre_name
 			arraobjmoviegenre = append(arraobjmoviegenre, objmoviegenre)
+		})
+
+		var objmoviesource entities.Model_moviesource
+		var arraobjmoviesource []entities.Model_moviesource
+		record_moviesource_RD, _, _, _ := jsonparser.Get(value, "movie_source")
+		jsonparser.ArrayEach(record_moviesource_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+			moviesource_id, _ := jsonparser.GetInt(value, "moviesource_id")
+			moviesource_url, _ := jsonparser.GetString(value, "moviesource_url")
+			objmoviesource.Moviesource_id = int(moviesource_id)
+			objmoviesource.Moviesource_url = moviesource_url
+			arraobjmoviesource = append(arraobjmoviesource, objmoviesource)
 		})
 
 		obj.Movie_id = int(movie_id)
@@ -91,6 +105,7 @@ func Moviehome(c *fiber.Ctx) error {
 		obj.Movie_type = movie_type
 		obj.Movie_title = movie_title
 		obj.Movie_label = movie_label
+		obj.Movie_slug = movie_slug
 		obj.Movie_descp = movie_descp
 		obj.Movie_thumbnail = movie_thumbnail
 		obj.Movie_year = int(movie_year)
@@ -100,6 +115,7 @@ func Moviehome(c *fiber.Ctx) error {
 		obj.Movie_status = movie_status
 		obj.Movie_statuscss = movie_statuscss
 		obj.Movie_genre = arraobjmoviegenre
+		obj.Movie_source = arraobjmoviesource
 		obj.Movie_create = movie_create
 		obj.Movie_update = movie_update
 		arraobj = append(arraobj, obj)
@@ -165,7 +181,7 @@ func Moviesave(c *fiber.Ctx) error {
 
 	result, err := models.Save_movie(
 		client_admin,
-		client.Movie_name, client.Movie_label, client.Movie_tipe, client.Movie_descp, client.Movie_urlmovie,
+		client.Movie_name, client.Movie_label, client.Movie_slug, client.Movie_tipe, client.Movie_descp, client.Movie_urlmovie, string(client.Movie_gender),
 		client.Sdata, client.Movie_id, client.Movie_year, client.Movie_status, client.Movie_imdb)
 	if err != nil {
 		c.Status(fiber.StatusBadRequest)
@@ -175,7 +191,54 @@ func Moviesave(c *fiber.Ctx) error {
 			"record":  nil,
 		})
 	}
-	val_movie := helpers.DeleteRedis(Fieldmovie_home_redis)
+	val_movie := helpers.DeleteRedis(Fieldmovie_home_redis + "_1_")
+	log.Printf("Redis Delete BACKEND MOVIE : %d", val_movie)
+	return c.JSON(result)
+}
+func Moviedelete(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_moviedelete)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+	user := c.Locals("jwt").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	temp_decp := helpers.Decryption(name)
+	client_admin, _ := helpers.Parsing_Decry(temp_decp, "==")
+
+	result, err := models.Delete_movie(client_admin, client.Movie_id)
+	if err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+	val_movie := helpers.DeleteRedis(Fieldmovie_home_redis + "_1_")
 	log.Printf("Redis Delete BACKEND MOVIE : %d", val_movie)
 	return c.JSON(result)
 }
