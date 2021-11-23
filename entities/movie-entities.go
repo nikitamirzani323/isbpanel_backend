@@ -52,9 +52,10 @@ type Model_movieseries struct {
 	Movie_update    string      `json:"movie_update"`
 }
 type Model_movieseason struct {
-	Movieseason_id      int    `json:"movieseason_id"`
-	Movieseason_name    string `json:"movieseason_name"`
-	Movieseason_display int    `json:"movieseason_display"`
+	Movieseason_id           int    `json:"movieseason_id"`
+	Movieseason_name         string `json:"movieseason_name"`
+	Movieseason_episodetotal int    `json:"movieseason_episodetotal"`
+	Movieseason_display      int    `json:"movieseason_display"`
 }
 type Model_genre struct {
 	Genre_id      int    `json:"genre_id"`
@@ -107,6 +108,21 @@ type Controller_movieseriessave struct {
 }
 type Controller_movieseason struct {
 	Movie_id int `json:"movie_id" validate:"required"`
+}
+type Controller_movieseasonsave struct {
+	Page                string `json:"page" validate:"required"`
+	Sdata               string `json:"sdata" validate:"required"`
+	Movie_page          int    `json:"movie_page" validate:"required"`
+	Movie_id            int    `json:"movie_id" validate:"required"`
+	Movieseason_id      int    `json:"movieseason_id"`
+	Movieseason_name    string `json:"movieseason_name" validate:"required"`
+	Movieseason_display int    `json:"movieseason_display" validate:"required"`
+}
+type Controller_movieseasondelete struct {
+	Page           string `json:"page" validate:"required"`
+	Movie_page     int    `json:"movie_page" validate:"required"`
+	Movie_id       int    `json:"movie_id" validate:"required"`
+	Movieseason_id int    `json:"movieseason_id" validate:"required"`
 }
 type Controller_cloudflaremovieupload struct {
 	Page      string `json:"page" validate:"required"`

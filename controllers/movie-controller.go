@@ -324,8 +324,10 @@ func Moviehomeseries(c *fiber.Ctx) error {
 		jsonparser.ArrayEach(record_movieseason_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 			movieseason_id, _ := jsonparser.GetInt(value, "movieseason_id")
 			movieseason_display, _ := jsonparser.GetInt(value, "movieseason_display")
+			movieseason_episodetotal, _ := jsonparser.GetInt(value, "movieseason_episodetotal")
 			movieseason_name, _ := jsonparser.GetString(value, "movieseason_name")
 			objmovieseason.Movieseason_id = int(movieseason_id)
+			objmovieseason.Movieseason_episodetotal = int(movieseason_episodetotal)
 			objmovieseason.Movieseason_display = int(movieseason_display)
 			objmovieseason.Movieseason_name = movieseason_name
 			arraobjmovieseason = append(arraobjmovieseason, objmovieseason)
@@ -466,10 +468,12 @@ func Seasonhome(c *fiber.Ctx) error {
 	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		movieseason_id, _ := jsonparser.GetInt(value, "movieseason_id")
 		movieseason_name, _ := jsonparser.GetString(value, "movieseason_name")
+		movieseason_episodetotal, _ := jsonparser.GetInt(value, "movieseason_episodetotal")
 		movieseason_display, _ := jsonparser.GetInt(value, "movieseason_display")
 
 		obj.Movieseason_id = int(movieseason_id)
 		obj.Movieseason_name = movieseason_name
+		obj.Movieseason_episodetotal = int(movieseason_episodetotal)
 		obj.Movieseason_display = int(movieseason_display)
 		arraobj = append(arraobj, obj)
 	})
@@ -495,6 +499,106 @@ func Seasonhome(c *fiber.Ctx) error {
 			"time":    time.Since(render_page).String(),
 		})
 	}
+}
+func Seasonsave(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_movieseasonsave)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+	user := c.Locals("jwt").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	temp_decp := helpers.Decryption(name)
+	client_admin, _ := helpers.Parsing_Decry(temp_decp, "==")
+
+	result, err := models.Save_season(
+		client_admin,
+		client.Movieseason_name, client.Sdata, client.Movieseason_id, client.Movie_id, client.Movieseason_display)
+	if err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+	val_season := helpers.DeleteRedis(Fieldmovieseriesseason_home_redis + "_" + strconv.Itoa(client.Movie_id))
+	log.Printf("Redis Delete BACKEND MOVIE SEASON : %d", val_season)
+	val_movieseries := helpers.DeleteRedis(Fieldmovieseries_home_redis + "_" + strconv.Itoa(client.Movie_page) + "_")
+	log.Printf("Redis Delete BACKEND MOVIE SERIES : %d", val_movieseries)
+	return c.JSON(result)
+}
+func Seasondelete(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_movieseasondelete)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+	user := c.Locals("jwt").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	temp_decp := helpers.Decryption(name)
+	client_admin, _ := helpers.Parsing_Decry(temp_decp, "==")
+
+	result, err := models.Delete_season(client_admin, client.Movieseason_id, client.Movie_id)
+	if err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+	val_season := helpers.DeleteRedis(Fieldmovieseriesseason_home_redis + "_" + strconv.Itoa(client.Movie_id))
+	log.Printf("Redis Delete BACKEND MOVIE SEASON : %d", val_season)
+	val_movieseries := helpers.DeleteRedis(Fieldmovieseries_home_redis + "_" + strconv.Itoa(client.Movie_page) + "_")
+	log.Printf("Redis Delete BACKEND MOVIE SERIES : %d", val_movieseries)
+	return c.JSON(result)
 }
 func Genrehome(c *fiber.Ctx) error {
 	var obj entities.Model_genre

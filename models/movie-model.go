@@ -634,8 +634,10 @@ func Fetch_movieseriesHome(search string, page int) (helpers.Responsemovie, erro
 				title_db           string
 			)
 			err = row_movieseason.Scan(&id_db, &title_db, &position_db)
+			totalepisode := _GetTotalEpisode(id_db)
 			objmovieseason.Movieseason_id = id_db
 			objmovieseason.Movieseason_name = title_db
+			objmovieseason.Movieseason_episodetotal = totalepisode
 			objmovieseason.Movieseason_display = position_db
 			arraobjmovieseason = append(arraobjmovieseason, objmovieseason)
 		}
@@ -877,11 +879,12 @@ func Fetch_season(idmovie int) (helpers.Response, error) {
 		)
 
 		err = row.Scan(&id_db, &title_db, &position_db)
-
 		helpers.ErrorCheck(err)
+		totalepisode := _GetTotalEpisode(id_db)
 
 		obj.Movieseason_id = id_db
 		obj.Movieseason_name = title_db
+		obj.Movieseason_episodetotal = totalepisode
 		obj.Movieseason_display = position_db
 		arraobj = append(arraobj, obj)
 		msg = "Success"
@@ -895,7 +898,124 @@ func Fetch_season(idmovie int) (helpers.Response, error) {
 
 	return res, nil
 }
+func Save_season(admin, name, sdata string, idrecord, idmovie, display int) (helpers.Response, error) {
+	var res helpers.Response
+	msg := "Failed"
+	con := db.CreateCon()
+	ctx := context.Background()
+	tglnow, _ := goment.New()
+	render_page := time.Now()
+	flag := false
 
+	if sdata == "New" {
+		sql_insert := `
+			insert into
+			` + configs.DB_tbl_mst_season + ` (
+				id ,poster_id, title, position
+			) values (
+				? ,?, ?, ?
+			)
+		`
+		stmt_insert, e_insert := con.PrepareContext(ctx, sql_insert)
+		helpers.ErrorCheck(e_insert)
+		defer stmt_insert.Close()
+		field_column := configs.DB_tbl_mst_season + tglnow.Format("YYYY")
+		idrecord_counter := Get_counter(field_column)
+		res_newrecord, e_newrecord := stmt_insert.ExecContext(
+			ctx,
+			tglnow.Format("YY")+strconv.Itoa(idrecord_counter),
+			idmovie, name, display)
+		helpers.ErrorCheck(e_newrecord)
+		insert, e := res_newrecord.RowsAffected()
+		helpers.ErrorCheck(e)
+		if insert > 0 {
+			flag = true
+			msg = "Succes"
+			log.Println("Data Berhasil di save")
+		}
+	} else {
+		sql_update := `
+			UPDATE 
+			` + configs.DB_tbl_mst_season + ` 
+			SET title=?, position=? 
+			WHERE id=? 
+		`
+		stmt_update, e_update := con.PrepareContext(ctx, sql_update)
+		helpers.ErrorCheck(e_update)
+		defer stmt_update.Close()
+		res_newrecord, e_newrecord := stmt_update.ExecContext(
+			ctx,
+			name, display, idrecord)
+		helpers.ErrorCheck(e_newrecord)
+		update, e := res_newrecord.RowsAffected()
+		helpers.ErrorCheck(e)
+		if update > 0 {
+			flag = true
+			msg = "Succes"
+			log.Println("Data Berhasil di update")
+		}
+	}
+
+	if flag {
+		res.Status = fiber.StatusOK
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	} else {
+		res.Status = fiber.StatusBadRequest
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	}
+
+	return res, nil
+}
+func Delete_season(admin string, idrecord, idmovie int) (helpers.Response, error) {
+	var res helpers.Response
+	msg := "Failed"
+	con := db.CreateCon()
+	ctx := context.Background()
+	render_page := time.Now()
+	flag := false
+
+	flag = CheckDBTwoField(configs.DB_tbl_mst_season, "id", strconv.Itoa(idrecord), "poster_id", strconv.Itoa(idmovie))
+	if flag {
+		sql_delete := `
+			DELETE FROM
+			` + configs.DB_tbl_mst_season + ` 
+			WHERE id=? AND poster_id=? 
+		`
+		stmt_delete, e_delete := con.PrepareContext(ctx, sql_delete)
+		helpers.ErrorCheck(e_delete)
+		defer stmt_delete.Close()
+		rec_delete, e_delete := stmt_delete.ExecContext(ctx, idrecord, idmovie)
+
+		helpers.ErrorCheck(e_delete)
+		delete, e := rec_delete.RowsAffected()
+		helpers.ErrorCheck(e)
+		if delete > 0 {
+			flag = true
+			msg = "Succes"
+			log.Println("Data Season Berhasil di delete")
+		}
+	} else {
+		msg = "Data Not Found"
+	}
+
+	if flag {
+		res.Status = fiber.StatusOK
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	} else {
+		res.Status = fiber.StatusBadRequest
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	}
+
+	return res, nil
+}
 func Fetch_genre() (helpers.Response, error) {
 	var obj entities.Model_genre
 	var arraobj []entities.Model_genre
@@ -1102,4 +1222,23 @@ func _GetMedia(idrecord int) (string, string) {
 		helpers.ErrorCheck(e)
 	}
 	return url, extension
+}
+func _GetTotalEpisode(idrecord int) int {
+	con := db.CreateCon()
+	ctx := context.Background()
+	total := 0
+
+	sql_select := `SELECT
+		count(id) as total  
+		FROM ` + configs.DB_tbl_mst_episode + `  
+		WHERE season_id = ? 
+	`
+	row := con.QueryRowContext(ctx, sql_select, idrecord)
+	switch e := row.Scan(&total); e {
+	case sql.ErrNoRows:
+	case nil:
+	default:
+		helpers.ErrorCheck(e)
+	}
+	return total
 }

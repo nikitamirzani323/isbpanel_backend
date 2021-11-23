@@ -28,6 +28,12 @@
     let genre_field_name = "";
     let genre_field_display = 0;
 
+    let season_field_idrecord = 0;
+    let season_field_idmovie = 0;
+    let season_field_titlemovie = "";
+    let season_field_name = "";
+    let season_field_display = 0;
+
     let movie_field_idrecord = 0;
     let movie_field_title = "";
     let movie_field_label = "";
@@ -109,17 +115,10 @@
         }
         call_album();
     };
-    const ShowSeason = (e) => {
+    const ShowSeason = (e,title) => {
         myModal = new bootstrap.Modal(document.getElementById("modalseason"));
         myModal.show();
-        album_flagclick = e
-        if(album_flagclick){
-            album_css = "text-decoration:underline;color:blue;cursor:pointer;"
-        }else{
-            album_css = "";
-            album_flagclick = false
-        }
-        call_season(e);
+        call_season(e,title);
     };
     const ShowFormAlbum = (e,id,name,display) => {
         sData = e
@@ -145,6 +144,19 @@
         }
         
         myModal = new bootstrap.Modal(document.getElementById("modalcrudgenre"));
+        myModal.show();
+    };
+    const ShowFormSeason = (e,id,name,display) => {
+        sData = e
+        if(e == "Edit"){
+            season_field_idrecord = parseInt(id);
+            season_field_name = name;
+            season_field_display = parseInt(display);
+        }else{
+            clearfield_season()
+        }
+        
+        myModal = new bootstrap.Modal(document.getElementById("modalcrudseason"));
         myModal.show();
     };
     const ShowFormMovie = (e,tipe,id,title,label,descp,image,year,imdb,slug,status,genre,source) => {
@@ -268,8 +280,10 @@
             }
         } 
     }
-    async function call_season(e) {
+    async function call_season(e,title) {
         listseason = [];
+        season_field_idmovie = e;
+        season_field_titlemovie = title;
         const res = await fetch("/api/movieseriesseason", {
             method: "POST",
             headers: {
@@ -294,12 +308,67 @@
                             movieseason_no: no,
                             movieseason_id: record[i]["movieseason_id"],
                             movieseason_name: record[i]["movieseason_name"],
+                            movieseason_episodetotal: record[i]["movieseason_episodetotal"],
                             movieseason_display: record[i]["movieseason_display"],
                         },
                     ];
                 }
             }
         } 
+    }
+    async function handleSaveSeason() {
+        let flag = true
+        let msg = ""
+        css_loader = "display: inline-block;";
+        msgloader = "Sending...";
+        if(sData == "New"){
+            if(season_field_name == ""){
+                flag = false
+                msg += "The Name is required\n"
+            }
+            if(season_field_display == "" || parseInt(season_field_display) == 0){
+                flag = false
+                msg += "The Display is required\n"
+            }
+        }
+        if(flag){
+            css_loader = "display: inline-block;";
+            msgloader = "Sending...";
+            const res = await fetch("/api/movieseriesseasonsave", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + token,
+                },
+                body: JSON.stringify({
+                    sdata: sData,
+                    page:"MOVIESEASON-SAVE",
+                    movie_page: parseInt(pagingnow),
+                    movie_id: parseInt(season_field_idmovie),
+                    movieseason_id: parseInt(season_field_idrecord),
+                    movieseason_name: season_field_name.toUpperCase(),
+                    movieseason_display: parseInt(season_field_display),
+                }),
+            });
+            const json = await res.json();
+            if (json.status == 200) {
+                msgloader = json.message;
+                myModal.hide()
+                call_season(season_field_idmovie,season_field_titlemovie)
+                clearfield_season()
+                RefreshHalaman()
+            } else if(json.status == 403){
+                alert(json.message)
+            } else {
+                msgloader = json.message;
+            }
+            setTimeout(function () {
+                css_loader = "display: none;";
+            }, 1000);
+        }else{
+            alert(msg)
+        }
+        
     }
     async function handleSaveGenre() {
         let flag = true
@@ -573,31 +642,38 @@
             alert(msg)
         }
     }
-    async function handleDeleteCategoryNews(e) {
+    async function handleDeleteSeason(e) {
         let flag = true
         let msg = ""
-        if(e == ""){
+        if(e == "" || parseInt(e) < 1){
             flag = false
-            msg = "The Category is required"
+            msg = "The Season is required"
+        }
+        if(parseInt(season_field_idmovie) < 1){
+            flag = false
+            msg = "The Movie ID is required"
         }
         if(flag){
             css_loader = "display: inline-block;";
             msgloader = "Sending...";
-            const res = await fetch("/api/categorynewsdelete", {
+            const res = await fetch("/api/movieseriesseasondelete", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: "Bearer " + token,
                 },
                 body: JSON.stringify({
-                    page:"CATEGORYNEWS-DELETE",
-                    category_id: parseInt(e),
+                    page:"MOVIESEASON-DELETE",
+                    movie_page: parseInt(pagingnow),
+                    movie_id: parseInt(season_field_idmovie),
+                    movieseason_id: parseInt(e),
                 }),
             });
             const json = await res.json();
             if (json.status == 200) {
-                call_category()
                 msgloader = json.message;
+                call_season(season_field_idmovie,season_field_titlemovie)
+                RefreshHalaman()
             } else if(json.status == 403){
                 alert(json.message)
             } else {
@@ -609,9 +685,14 @@
         }else{
             alert(msg)
         }
+        
     }
     function callFunction(event){
         switch(event.detail){
+            case "FORMNEW_SEASON":
+                ShowFormSeason("New");break;
+            case "SAVE_SEASON":
+                handleSaveSeason();break;
             case "CALL_ALBUM":
                 ShowAlbum();break;
             case "FORMNEW_ALBUM":
@@ -655,6 +736,11 @@
         genre_field_name = "";
         genre_field_display = 0;
     }
+    function clearfield_season(){
+        season_field_idrecord = 0;
+        season_field_name = "";
+        season_field_display = 0;
+    }
     const handleKeyboard_checkenter = (e) => {
         let keyCode = e.which || e.keyCode;
         if (keyCode === 13) {
@@ -666,6 +752,17 @@
                 dispatch("handleMovie", movie);
         }  
     };
+    function uppercase(element) {
+		function onInput(event) {
+			element.value = element.value.toUpperCase();
+		}
+		element.addEventListener('input', onInput);
+		return {
+			destroy() {
+				element.removeEventListener('input', onInput);
+			}
+		}
+	}
     function lowercase(element) {
 		function onInput(event) {
 			element.value = element.value.toLowerCase();
@@ -768,11 +865,13 @@
                                         class="bi bi-pencil"></i>
                                     </td>
                                     <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
+                                        {#if listseason.length < 1}
                                         <i 
                                             on:click={() => {
                                                 handleDeleteMovie(rec.movie_id);
                                             }} 
                                             class="bi bi-trash"></i>
+                                        {/if}
                                     </td>
                                     <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.movie_no}</td>
                                     <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};{rec.movie_statuscss}">{rec.movie_status}</td>
@@ -788,11 +887,11 @@
                                     </td>
                                     <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
                                         {#each rec.movie_season as rec2}
-                                            {rec2.movieseason_name}<br>
+                                            {rec2.movieseason_name} - {rec2.movieseason_episodetotal}<br>
                                         {/each}
                                         <button 
                                             on:click={() => {
-                                                ShowSeason(rec.movie_id);
+                                                ShowSeason(rec.movie_id,rec.movie_title);
                                             }} 
                                             type="button" class="btn btn-info btn-sm">New Season</button>
                                     </td>
@@ -1171,7 +1270,7 @@
 <Modal
 	modal_id="modalseason"
 	modal_size="modal-dialog-centered"
-	modal_title="SEASON"
+	modal_title="{season_field_titlemovie}"
     modal_body_css="height:500px; overflow-y: scroll;"
     modal_footer_css="padding:5px;"
 	modal_footer={true}>
@@ -1182,6 +1281,7 @@
                     <th width="1%" colspan="2">&nbsp;</th>
                     <th width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NO</th>
                     <th width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">SEASON</th>
+                    <th width="5%" style="text-align: right;vertical-align: top;font-weight:bold;font-size:{table_header_font};">EPISODE</th>
                     <th width="5%" style="text-align: right;vertical-align: top;font-weight:bold;font-size:{table_header_font};">DISPLAY</th>
                 </tr>
             </thead>
@@ -1191,19 +1291,22 @@
                     <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
                         <i 
                             on:click={() => {
-                                ShowFormGenre("Edit",rec.movieseason_id,rec.movieseason_name,rec.movieseason_display);
+                                ShowFormSeason("Edit",rec.movieseason_id,rec.movieseason_name,rec.movieseason_display);
                             }} 
                             class="bi bi-pencil"></i>
                     </td>
                     <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
+                        {#if rec.movieseason_episodetotal < 1}
                         <i 
                             on:click={() => {
-                                handleDeleteCategoryNews(rec.movieseason_id);
+                                handleDeleteSeason(rec.movieseason_id);
                             }} 
                             class="bi bi-trash"></i>
+                        {/if}
                     </td>
                     <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.movieseason_no}</td>
                     <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};{genre_css}">{rec.movieseason_name}</td>
+                    <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};>{rec.movieseason_episodetotal}</td>
                     <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.movieseason_display}</td>
                 </tr>
                 {/each}
@@ -1214,8 +1317,44 @@
 	<slot:template slot="footer">
         <Button
             on:click={callFunction}
-            button_function="FORMNEW_GENRE"
+            button_function="FORMNEW_SEASON"
             button_title="New"
+            button_css="btn-warning"/>
+	</slot:template>
+</Modal>
+<Modal
+	modal_id="modalcrudseason"
+	modal_size="modal-dialog-centered"
+	modal_title="SEASON/{sData}"
+    modal_body_css=""
+    modal_footer_css="padding:5px;"
+	modal_footer={true}>
+	<slot:template slot="body">
+        <div class="mb-3">
+            <label for="exampleForm" class="form-label">Name</label>
+			<input
+                use:uppercase
+                bind:value={season_field_name}
+                class="required form-control"
+                type="text"
+                placeholder="Season Name"/>
+		</div>
+        <div class="mb-3">
+            <label for="exampleForm" class="form-label">Display</label>
+			<Input
+                bind:value={season_field_display}
+                class="required"
+                maxlength=3
+                type="text"
+                style="text-align:right;"
+                placeholder="Season Display"/>
+		</div>
+	</slot:template>
+	<slot:template slot="footer">
+        <Button
+            on:click={callFunction}
+            button_function="SAVE_SEASON"
+            button_title="Save"
             button_css="btn-warning"/>
 	</slot:template>
 </Modal>

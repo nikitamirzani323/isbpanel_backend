@@ -9,6 +9,7 @@ const (
 	DB_tbl_mst_tafsirmimpi string = "tbl_mst_togel_tafsir_mimpi"
 	DB_tbl_mst_pasaran     string = "tbl_mst_pasaran_togel"
 	DB_tbl_mst_season      string = "tbl_mst_series_season"
+	DB_tbl_mst_episode     string = "tbl_mst_series_episode"
 	DB_tbl_mst_mediatable  string = "tbl_mst_mediatable"
 	DB_tbl_mst_moviegenre  string = "tbl_mst_movie_genre"
 	DB_tbl_mst_moviesource string = "tbl_mst_movie_source"
