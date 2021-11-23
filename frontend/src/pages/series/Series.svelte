@@ -57,10 +57,10 @@
             record = json.record;
             perpage = json.perpage;
             totalrecordall = json.totalrecord;
+            totalrecord = json.totalrecord;
             record_message = json.message;
             if (record != null) {
                 totalpaging = Math.ceil(parseInt(totalrecordall) / parseInt(perpage))
-                totalrecord = record.length;
                 console.log("PERPAGE :" + perpage)
                 console.log("PAGE :" + page)
                 console.log("TOTAL PAGING :" + totalpaging)

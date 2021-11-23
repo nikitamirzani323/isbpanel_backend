@@ -20,6 +20,7 @@
     let listalbum = []
     let listgenre = []
     let listseason = []
+    let listepisode = []
     let record = ""
     let totalrecordcategory = 0
     
@@ -33,6 +34,12 @@
     let season_field_titlemovie = "";
     let season_field_name = "";
     let season_field_display = 0;
+
+    let episode_field_idrecord = 0;
+    let episode_field_seasonid = 0;
+    let episode_field_titleseason = "";
+    let episode_field_name = "";
+    let episode_field_display = 0;
 
     let movie_field_idrecord = 0;
     let movie_field_title = "";
@@ -120,6 +127,13 @@
         myModal.show();
         call_season(e,title);
     };
+    const ShowEpisode = (e,title) => {
+        episode_field_seasonid = e
+        episode_field_titleseason = title
+        myModal = new bootstrap.Modal(document.getElementById("modalepisode"));
+        myModal.show();
+        call_episode(e);
+    };
     const ShowFormAlbum = (e,id,name,display) => {
         sData = e
         if(e == "Edit"){
@@ -159,49 +173,36 @@
         myModal = new bootstrap.Modal(document.getElementById("modalcrudseason"));
         myModal.show();
     };
-    const ShowFormMovie = (e,tipe,id,title,label,descp,image,year,imdb,slug,status,genre,source) => {
+    const ShowFormMovie = (e,id,title,label,descp,image,year,imdb,slug,status,genre) => {
         sData = e
-        if(tipe == "MOVIE"){
-            if(e == "Edit"){
-                console.log(genre)
-                movie_field_idrecord = parseInt(id);
-                movie_field_title = title;
-                movie_field_label = label;
-                movie_field_descp = descp;
-                movie_field_image = image;
-                movie_field_slug = slug;
-                movie_field_year = parseInt(year);
-                movie_field_imdb = parseFloat(imdb);
-                movie_field_status = "0";
-                if(status == "SHOW"){
-                    movie_field_status = "1";
-                }
-                movie_field_genre = [];
-                movie_field_source = [];
-                for (var i = 0; i < genre.length; i++) {
-                    movie_field_genre = [
-                        ...movie_field_genre,
-                        {
-                            movie_genre_id: genre[i]['moviegenre_id'],
-                            movie_genre_name: genre[i]['moviegenre_name'],
-                        },
-                    ];         
-                }
-                for (var i = 0; i < source.length; i++) {
-                    movie_field_source = [
-                        ...movie_field_source,
-                        {
-                            movie_source_id: source[i]['moviesource_id'],
-                            movie_source_name: source[i]['moviesource_url'],
-                        },
-                    ];         
-                }
-            }else{
-                clearfield_movie()
+        if(e == "Edit"){
+            movie_field_idrecord = parseInt(id);
+            movie_field_title = title;
+            movie_field_label = label;
+            movie_field_descp = descp;
+            movie_field_image = image;
+            movie_field_slug = slug;
+            movie_field_year = parseInt(year);
+            movie_field_imdb = parseFloat(imdb);
+            movie_field_status = "0";
+            if(status == "SHOW"){
+                movie_field_status = "1";
             }
-            myModal = new bootstrap.Modal(document.getElementById("modalcrudmovie"));
-            myModal.show();
+            movie_field_genre = [];
+            for (var i = 0; i < genre.length; i++) {
+                movie_field_genre = [
+                    ...movie_field_genre,
+                    {
+                        movie_genre_id: genre[i]['moviegenre_id'],
+                        movie_genre_name: genre[i]['moviegenre_name'],
+                    },
+                ];         
+            }
+        }else{
+            clearfield_movie()
         }
+        myModal = new bootstrap.Modal(document.getElementById("modalcrudmovie"));
+        myModal.show();
     };
     const ShowFormSource = () => {
         myModal = new bootstrap.Modal(document.getElementById("modalformsource"));
@@ -274,6 +275,45 @@
                             genre_display: record[i]["genre_display"],
                             genre_create: record[i]["genre_create"],
                             genre_update: record[i]["genre_update"],
+                        },
+                    ];
+                }
+            }
+        } 
+    }
+    async function call_episode(e) {
+        listepisode = [];
+        const res = await fetch("/api/movieseriesepisode", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token,
+            },
+            body: JSON.stringify({
+                movie_id: parseInt(season_field_idmovie),
+                season_id: parseInt(e),
+            }),
+        });
+        const json = await res.json();
+        if (json.status == 200) {
+            record = json.record;
+            if (record != null) {
+                let no = 0
+                for (var i = 0; i < record.length; i++) {
+                    let source = record[i]["movieepisode_source"]
+                    if(record[i]["movieepisode_source"] == null){
+                        source = []
+                    }
+                    no = no + 1;
+                    listepisode = [
+                        ...listepisode,
+                        {
+                            movieepisode_no: no,
+                            movieepisode_id: record[i]["movieepisode_id"],
+                            movieepisode_seasonid: record[i]["movieepisode_seasonid"],
+                            movieepisode_name: record[i]["movieepisode_name"],
+                            movieepisode_display: record[i]["movieepisode_display"],
+                            movieepisode_source: source,
                         },
                     ];
                 }
@@ -700,7 +740,7 @@
             case "CALL_GENRE":
                 ShowGenre(false);break;
             case "FORM_MOVIE":
-                ShowFormMovie("New","MOVIE");break;
+                ShowFormMovie("New");break;
             case "FORMNEW_GENRE":
                 ShowFormGenre("New");break;
             case "SAVE_GENRE":
@@ -859,13 +899,13 @@
                                     <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
                                         <i 
                                         on:click={() => {
-                                            ShowFormMovie("Edit",rec.movie_type,rec.movie_id,rec.movie_title,rec.movie_label,rec.movie_descp,
-                                            rec.movie_thumbnail,rec.movie_year,rec.movie_imdb,rec.movie_slug,rec.movie_status,rec.movie_genre,rec.movie_source)
+                                            ShowFormMovie("Edit",rec.movie_id,rec.movie_title,rec.movie_label,rec.movie_descp,
+                                            rec.movie_thumbnail,rec.movie_year,rec.movie_imdb,rec.movie_slug,rec.movie_status,rec.movie_genre)
                                         }} 
                                         class="bi bi-pencil"></i>
                                     </td>
                                     <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
-                                        {#if listseason.length < 1}
+                                        {#if listseason.length > 0}
                                         <i 
                                             on:click={() => {
                                                 handleDeleteMovie(rec.movie_id);
@@ -1306,7 +1346,11 @@
                     </td>
                     <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.movieseason_no}</td>
                     <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};{genre_css}">{rec.movieseason_name}</td>
-                    <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.movieseason_episodetotal}</td>
+                    <td 
+                        on:click={() => {
+                            ShowEpisode(rec.movieseason_id,rec.movieseason_name);
+                        }}
+                        NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};cursor:pointer;text-decoration:underline;color:blue;">{rec.movieseason_episodetotal}</td>
                     <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.movieseason_display}</td>
                 </tr>
                 {/each}
@@ -1355,6 +1399,68 @@
             on:click={callFunction}
             button_function="SAVE_SEASON"
             button_title="Save"
+            button_css="btn-warning"/>
+	</slot:template>
+</Modal>
+
+<Modal
+	modal_id="modalepisode"
+	modal_size="modal-dialog-centered"
+	modal_title="{episode_field_titleseason}"
+    modal_body_css="height:500px; overflow-y: scroll;"
+    modal_footer_css="padding:5px;"
+	modal_footer={true}>
+	<slot:template slot="body">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th width="1%" colspan="2">&nbsp;</th>
+                    <th width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NO</th>
+                    <th width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">Episode</th>
+                    <th width="5%" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">SOURCE</th>
+                    <th width="5%" style="text-align: right;vertical-align: top;font-weight:bold;font-size:{table_header_font};">DISPLAY</th>
+                </tr>
+            </thead>
+            <tbody>
+                {#each listepisode as rec }
+                <tr>
+                    <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
+                        <i 
+                            on:click={() => {
+                                ShowFormSeason("Edit",rec.movieepisode_id,rec.movieepisode_name,rec.movieepisode_display);
+                            }} 
+                            class="bi bi-pencil"></i>
+                    </td>
+                    <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
+                        <i 
+                            on:click={() => {
+                                handleDeleteEpisode(rec.movieepisode_id);
+                            }} 
+                            class="bi bi-trash"></i>
+                    </td>
+                    <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.movieepisode_no}</td>
+                    <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};{genre_css}">{rec.movieepisode_name}</td>
+                    <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};cursor:pointer;text-decoration:underline;color:blue;">
+                        {#each rec.movieepisode_source as rec2}
+                            <span
+                            style="text-decoration: underline;color:blue;cursor:pointer;" 
+                            on:click={() => {
+                                popupwindow(rec2.moviesource_url)
+                            }} >{rec2.moviesource_stream}</span><br>
+                        {/each}
+                    </td>
+                    <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.movieepisode_display}</td>
+                </tr>
+                {/each}
+                
+            </tbody>
+        </table>
+	</slot:template>
+	<slot:template slot="footer">
+        <Button
+            on:click={callFunction}
+            button_function="FORMNEW_SEASON"
+            button_title="New"
             button_css="btn-warning"/>
 	</slot:template>
 </Modal>

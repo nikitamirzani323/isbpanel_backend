@@ -57,6 +57,13 @@ type Model_movieseason struct {
 	Movieseason_episodetotal int    `json:"movieseason_episodetotal"`
 	Movieseason_display      int    `json:"movieseason_display"`
 }
+type Model_movieepisode struct {
+	Movieepisode_id       int         `json:"movieepisode_id"`
+	Movieepisode_seasonid int         `json:"movieepisode_seasonid"`
+	Movieepisode_name     string      `json:"movieepisode_name"`
+	Movieepisode_display  int         `json:"movieepisode_display"`
+	Movieepisode_source   interface{} `json:"movieepisode_source"`
+}
 type Model_genre struct {
 	Genre_id      int    `json:"genre_id"`
 	Genre_name    string `json:"genre_name"`
@@ -123,6 +130,10 @@ type Controller_movieseasondelete struct {
 	Movie_page     int    `json:"movie_page" validate:"required"`
 	Movie_id       int    `json:"movie_id" validate:"required"`
 	Movieseason_id int    `json:"movieseason_id" validate:"required"`
+}
+type Controller_movieepisode struct {
+	Movie_id  int `json:"movie_id" validate:"required"`
+	Season_id int `json:"season_id" validate:"required"`
 }
 type Controller_cloudflaremovieupload struct {
 	Page      string `json:"page" validate:"required"`

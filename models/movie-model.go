@@ -1016,6 +1016,75 @@ func Delete_season(admin string, idrecord, idmovie int) (helpers.Response, error
 
 	return res, nil
 }
+func Fetch_episode(idseason int) (helpers.Response, error) {
+	var obj entities.Model_movieepisode
+	var arraobj []entities.Model_movieepisode
+	var res helpers.Response
+	msg := "Data Not Found"
+	con := db.CreateCon()
+	ctx := context.Background()
+	start := time.Now()
+
+	sql_select := `SELECT 
+			id , title, position
+			FROM ` + configs.DB_tbl_mst_episode + ` 
+			WHERE season_id=? 
+			ORDER BY position ASC   
+		`
+
+	row, err := con.QueryContext(ctx, sql_select, idseason)
+	helpers.ErrorCheck(err)
+	for row.Next() {
+		var (
+			id_db, position_db int
+			title_db           string
+		)
+
+		err = row.Scan(&id_db, &title_db, &position_db)
+		helpers.ErrorCheck(err)
+
+		//SOURCE
+		var objmoviesource entities.Model_moviesource
+		var arraobjmoviesource []entities.Model_moviesource
+		sql_selectmoviesource := `SELECT 
+			id, url 
+			FROM ` + configs.DB_tbl_mst_moviesource + ` 
+			WHERE episode_id = ?   
+		`
+		row_moviesource, err := con.QueryContext(ctx, sql_selectmoviesource, id_db)
+		helpers.ErrorCheck(err)
+		nosource := 0
+		for row_moviesource.Next() {
+			nosource = nosource + 1
+			var (
+				id_db  int
+				url_db string
+			)
+			err = row_moviesource.Scan(&id_db, &url_db)
+			objmoviesource.Moviesource_id = id_db
+			objmoviesource.Moviesource_stream = "STREAM-" + strconv.Itoa(nosource)
+			objmoviesource.Moviesource_url = url_db
+			arraobjmoviesource = append(arraobjmoviesource, objmoviesource)
+		}
+
+		obj.Movieepisode_id = id_db
+		obj.Movieepisode_seasonid = idseason
+		obj.Movieepisode_name = title_db
+		obj.Movieepisode_display = position_db
+		obj.Movieepisode_source = arraobjmoviesource
+		arraobj = append(arraobj, obj)
+		msg = "Success"
+	}
+	defer row.Close()
+
+	res.Status = fiber.StatusOK
+	res.Message = msg
+	res.Record = arraobj
+	res.Time = time.Since(start).String()
+
+	return res, nil
+}
+
 func Fetch_genre() (helpers.Response, error) {
 	var obj entities.Model_genre
 	var arraobj []entities.Model_genre
