@@ -19,6 +19,7 @@
     
     let listalbum = []
     let listgenre = []
+    let listseason = []
     let record = ""
     let totalrecordcategory = 0
     
@@ -107,6 +108,18 @@
             album_flagclick = false
         }
         call_album();
+    };
+    const ShowSeason = (e) => {
+        myModal = new bootstrap.Modal(document.getElementById("modalseason"));
+        myModal.show();
+        album_flagclick = e
+        if(album_flagclick){
+            album_css = "text-decoration:underline;color:blue;cursor:pointer;"
+        }else{
+            album_css = "";
+            album_flagclick = false
+        }
+        call_season(e);
     };
     const ShowFormAlbum = (e,id,name,display) => {
         sData = e
@@ -249,6 +262,39 @@
                             genre_display: record[i]["genre_display"],
                             genre_create: record[i]["genre_create"],
                             genre_update: record[i]["genre_update"],
+                        },
+                    ];
+                }
+            }
+        } 
+    }
+    async function call_season(e) {
+        listseason = [];
+        const res = await fetch("/api/movieseriesseason", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token,
+            },
+            body: JSON.stringify({
+                movie_id: e,
+            }),
+        });
+        const json = await res.json();
+        if (json.status == 200) {
+            record = json.record;
+            if (record != null) {
+                totalrecordcategory = record.length;
+                let no = 0
+                for (var i = 0; i < record.length; i++) {
+                    no = no + 1;
+                    listseason = [
+                        ...listseason,
+                        {
+                            movieseason_no: no,
+                            movieseason_id: record[i]["movieseason_id"],
+                            movieseason_name: record[i]["movieseason_name"],
+                            movieseason_display: record[i]["movieseason_display"],
                         },
                     ];
                 }
@@ -744,7 +790,11 @@
                                         {#each rec.movie_season as rec2}
                                             {rec2.movieseason_name}<br>
                                         {/each}
-                                        <button type="button" class="btn btn-info btn-sm">New Season</button>
+                                        <button 
+                                            on:click={() => {
+                                                ShowSeason(rec.movie_id);
+                                            }} 
+                                            type="button" class="btn btn-info btn-sm">New Season</button>
                                     </td>
                                     <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
                                         <img width="50" class="img-thumbnail" src="{rec.movie_thumbnail}" alt="">
@@ -1114,6 +1164,58 @@
             on:click={callFunction}
             button_function="SAVE_GENRE"
             button_title="Save"
+            button_css="btn-warning"/>
+	</slot:template>
+</Modal>
+
+<Modal
+	modal_id="modalseason"
+	modal_size="modal-dialog-centered"
+	modal_title="SEASON"
+    modal_body_css="height:500px; overflow-y: scroll;"
+    modal_footer_css="padding:5px;"
+	modal_footer={true}>
+	<slot:template slot="body">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th width="1%" colspan="2">&nbsp;</th>
+                    <th width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NO</th>
+                    <th width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">SEASON</th>
+                    <th width="5%" style="text-align: right;vertical-align: top;font-weight:bold;font-size:{table_header_font};">DISPLAY</th>
+                </tr>
+            </thead>
+            <tbody>
+                {#each listseason as rec }
+                <tr>
+                    <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
+                        <i 
+                            on:click={() => {
+                                ShowFormGenre("Edit",rec.movieseason_id,rec.movieseason_name,rec.movieseason_display);
+                            }} 
+                            class="bi bi-pencil"></i>
+                    </td>
+                    <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
+                        <i 
+                            on:click={() => {
+                                handleDeleteCategoryNews(rec.movieseason_id);
+                            }} 
+                            class="bi bi-trash"></i>
+                    </td>
+                    <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.movieseason_no}</td>
+                    <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};{genre_css}">{rec.movieseason_name}</td>
+                    <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.movieseason_display}</td>
+                </tr>
+                {/each}
+                
+            </tbody>
+        </table>
+	</slot:template>
+	<slot:template slot="footer">
+        <Button
+            on:click={callFunction}
+            button_function="FORMNEW_GENRE"
+            button_title="New"
             button_css="btn-warning"/>
 	</slot:template>
 </Modal>

@@ -105,6 +105,9 @@ type Controller_movieseriessave struct {
 	Movie_status   int             `json:"movie_status"`
 	Movie_gender   json.RawMessage `json:"movie_gender" validate:"required"`
 }
+type Controller_movieseason struct {
+	Movie_id int `json:"movie_id" validate:"required"`
+}
 type Controller_cloudflaremovieupload struct {
 	Page      string `json:"page" validate:"required"`
 	Sdata     string `json:"sdata" validate:"required"`

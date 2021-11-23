@@ -436,6 +436,94 @@ func Save_movie(admin, name, label, slug, tipemovie, descp, urlthum, listgenre, 
 
 	return res, nil
 }
+func Delete_movie(admin string, idrecord int) (helpers.Response, error) {
+	var res helpers.Response
+	msg := "Failed"
+	con := db.CreateCon()
+	ctx := context.Background()
+	render_page := time.Now()
+	flag := false
+
+	flag = CheckDB(configs.DB_tbl_trx_movie, "movieid", strconv.Itoa(idrecord))
+
+	if flag {
+		//DELETE GENRE
+		sql_deletegenre := `
+			DELETE FROM
+			` + configs.DB_tbl_trx_moviegenre + ` 
+			WHERE movieid=? 
+		`
+		stmt_deletegenre, e_deletegenre := con.PrepareContext(ctx, sql_deletegenre)
+		helpers.ErrorCheck(e_deletegenre)
+		defer stmt_deletegenre.Close()
+		rec_deletegenre, e_deletegenre := stmt_deletegenre.ExecContext(ctx, idrecord)
+
+		helpers.ErrorCheck(e_deletegenre)
+		deletegenre, egenre := rec_deletegenre.RowsAffected()
+		helpers.ErrorCheck(egenre)
+		if deletegenre > 0 {
+			flag = true
+			msg = "Succes"
+			log.Println("Data Genre Berhasil di delete")
+		}
+
+		//DELETE SOURCE
+		sql_deletesource := `
+			DELETE FROM
+			` + configs.DB_tbl_mst_moviesource + ` 
+			WHERE poster_id=? 
+		`
+		stmt_deletesource, e_deletesource := con.PrepareContext(ctx, sql_deletesource)
+		helpers.ErrorCheck(e_deletesource)
+		defer stmt_deletesource.Close()
+		rec_deletesource, e_deletesource := stmt_deletesource.ExecContext(ctx, idrecord)
+
+		helpers.ErrorCheck(e_deletesource)
+		deletesource, esource := rec_deletesource.RowsAffected()
+		helpers.ErrorCheck(esource)
+		if deletesource > 0 {
+			flag = true
+			msg = "Succes"
+			log.Println("Data Source Berhasil di delete")
+		}
+
+		//DELETE MOVIE
+		sql_delete := `
+			DELETE FROM
+			` + configs.DB_tbl_trx_movie + ` 
+			WHERE movieid=? 
+		`
+		stmt_delete, e_delete := con.PrepareContext(ctx, sql_delete)
+		helpers.ErrorCheck(e_delete)
+		defer stmt_delete.Close()
+		rec_delete, e_delete := stmt_delete.ExecContext(ctx, idrecord)
+
+		helpers.ErrorCheck(e_delete)
+		delete, e := rec_delete.RowsAffected()
+		helpers.ErrorCheck(e)
+		if delete > 0 {
+			flag = true
+			msg = "Succes"
+			log.Println("Data Movie Berhasil di delete")
+		}
+	} else {
+		msg = "Data Not Found"
+	}
+
+	if flag {
+		res.Status = fiber.StatusOK
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	} else {
+		res.Status = fiber.StatusBadRequest
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	}
+
+	return res, nil
+}
 func Fetch_movieseriesHome(search string, page int) (helpers.Responsemovie, error) {
 	var obj entities.Model_movieseries
 	var arraobj []entities.Model_movieseries
@@ -764,94 +852,50 @@ func Save_movieseries(admin, name, label, slug, tipemovie, descp, urlthum, listg
 
 	return res, nil
 }
-func Delete_movie(admin string, idrecord int) (helpers.Response, error) {
+func Fetch_season(idmovie int) (helpers.Response, error) {
+	var obj entities.Model_movieseason
+	var arraobj []entities.Model_movieseason
 	var res helpers.Response
-	msg := "Failed"
+	msg := "Data Not Found"
 	con := db.CreateCon()
 	ctx := context.Background()
-	render_page := time.Now()
-	flag := false
+	start := time.Now()
 
-	flag = CheckDB(configs.DB_tbl_trx_movie, "movieid", strconv.Itoa(idrecord))
-
-	if flag {
-		//DELETE GENRE
-		sql_deletegenre := `
-			DELETE FROM
-			` + configs.DB_tbl_trx_moviegenre + ` 
-			WHERE movieid=? 
-		`
-		stmt_deletegenre, e_deletegenre := con.PrepareContext(ctx, sql_deletegenre)
-		helpers.ErrorCheck(e_deletegenre)
-		defer stmt_deletegenre.Close()
-		rec_deletegenre, e_deletegenre := stmt_deletegenre.ExecContext(ctx, idrecord)
-
-		helpers.ErrorCheck(e_deletegenre)
-		deletegenre, egenre := rec_deletegenre.RowsAffected()
-		helpers.ErrorCheck(egenre)
-		if deletegenre > 0 {
-			flag = true
-			msg = "Succes"
-			log.Println("Data Genre Berhasil di delete")
-		}
-
-		//DELETE SOURCE
-		sql_deletesource := `
-			DELETE FROM
-			` + configs.DB_tbl_mst_moviesource + ` 
+	sql_select := `SELECT 
+			id , title, position
+			FROM ` + configs.DB_tbl_mst_season + ` 
 			WHERE poster_id=? 
+			ORDER BY position ASC   
 		`
-		stmt_deletesource, e_deletesource := con.PrepareContext(ctx, sql_deletesource)
-		helpers.ErrorCheck(e_deletesource)
-		defer stmt_deletesource.Close()
-		rec_deletesource, e_deletesource := stmt_deletesource.ExecContext(ctx, idrecord)
 
-		helpers.ErrorCheck(e_deletesource)
-		deletesource, esource := rec_deletesource.RowsAffected()
-		helpers.ErrorCheck(esource)
-		if deletesource > 0 {
-			flag = true
-			msg = "Succes"
-			log.Println("Data Source Berhasil di delete")
-		}
+	row, err := con.QueryContext(ctx, sql_select, idmovie)
+	helpers.ErrorCheck(err)
+	for row.Next() {
+		var (
+			id_db, position_db int
+			title_db           string
+		)
 
-		//DELETE MOVIE
-		sql_delete := `
-			DELETE FROM
-			` + configs.DB_tbl_trx_movie + ` 
-			WHERE movieid=? 
-		`
-		stmt_delete, e_delete := con.PrepareContext(ctx, sql_delete)
-		helpers.ErrorCheck(e_delete)
-		defer stmt_delete.Close()
-		rec_delete, e_delete := stmt_delete.ExecContext(ctx, idrecord)
+		err = row.Scan(&id_db, &title_db, &position_db)
 
-		helpers.ErrorCheck(e_delete)
-		delete, e := rec_delete.RowsAffected()
-		helpers.ErrorCheck(e)
-		if delete > 0 {
-			flag = true
-			msg = "Succes"
-			log.Println("Data Movie Berhasil di delete")
-		}
-	} else {
-		msg = "Data Not Found"
+		helpers.ErrorCheck(err)
+
+		obj.Movieseason_id = id_db
+		obj.Movieseason_name = title_db
+		obj.Movieseason_display = position_db
+		arraobj = append(arraobj, obj)
+		msg = "Success"
 	}
+	defer row.Close()
 
-	if flag {
-		res.Status = fiber.StatusOK
-		res.Message = msg
-		res.Record = nil
-		res.Time = time.Since(render_page).String()
-	} else {
-		res.Status = fiber.StatusBadRequest
-		res.Message = msg
-		res.Record = nil
-		res.Time = time.Since(render_page).String()
-	}
+	res.Status = fiber.StatusOK
+	res.Message = msg
+	res.Record = arraobj
+	res.Time = time.Since(start).String()
 
 	return res, nil
 }
+
 func Fetch_genre() (helpers.Response, error) {
 	var obj entities.Model_genre
 	var arraobj []entities.Model_genre

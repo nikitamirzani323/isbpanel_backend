@@ -71,6 +71,7 @@ func Init() *fiber.App {
 	app.Post("/api/moviedelete", middleware.JWTProtected(), controllers.Moviedelete)
 	app.Post("/api/movieseries", middleware.JWTProtected(), controllers.Moviehomeseries)
 	app.Post("/api/movieseriessave", middleware.JWTProtected(), controllers.Movieseriessave)
+	app.Post("/api/movieseriesseason", middleware.JWTProtected(), controllers.Seasonhome)
 	app.Post("/api/moviecloudualbum", middleware.JWTProtected(), controllers.Moviecloud)
 	app.Post("/api/moviecloudupdate", middleware.JWTProtected(), controllers.Movieupdatecloud)
 	app.Post("/api/movieclouddelete", middleware.JWTProtected(), controllers.Moviedeletecloud)
