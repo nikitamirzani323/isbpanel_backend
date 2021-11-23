@@ -19,8 +19,7 @@
                 data-bs-target="#navbarCollapse"
                 aria-controls="navbarCollapse"
                 aria-expanded="false"
-                aria-label="Toggle navigation"
-            >
+                aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon" />
             </button>
             <div class="collapse navbar-collapse" id="navbarCollapse">
@@ -45,8 +44,23 @@
                             </li>
                         </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" aria-current="page" use:link href="/movie" style="font-size: 13px;">MOVIE</a>
+                    <li class="nav-item dropdown">
+                        <a
+                            class="nav-link dropdown-toggle"
+                            id="navbarDropdown"
+                            role="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false" style="font-size: 13px;">
+                            MOVIE
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li>
+                                <a class="dropdown-item" use:link href="/movie" style="font-size: 13px;">MOVIE</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" use:link href="/series" style="font-size: 13px;">SERIES</a>
+                            </li>
+                        </ul>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" aria-current="page" use:link href="/news" style="font-size: 13px;">NEWS</a>

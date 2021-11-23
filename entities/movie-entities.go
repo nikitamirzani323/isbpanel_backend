@@ -31,6 +31,31 @@ type Model_moviesource struct {
 	Moviesource_stream string `json:"moviesource_stream"`
 	Moviesource_url    string `json:"moviesource_url"`
 }
+type Model_movieseries struct {
+	Movie_id        int         `json:"movie_id"`
+	Movie_date      string      `json:"movie_date"`
+	Movie_type      string      `json:"movie_type"`
+	Movie_title     string      `json:"movie_title"`
+	Movie_label     string      `json:"movie_label"`
+	Movie_slug      string      `json:"movie_slug"`
+	Movie_descp     string      `json:"movie_descp"`
+	Movie_thumbnail string      `json:"movie_thumbnail"`
+	Movie_year      int         `json:"movie_year"`
+	Movie_rating    float32     `json:"movie_rating"`
+	Movie_imdb      float32     `json:"movie_imdb"`
+	Movie_view      int         `json:"movie_view"`
+	Movie_genre     interface{} `json:"movie_genre"`
+	Movie_season    interface{} `json:"movie_season"`
+	Movie_status    string      `json:"movie_status"`
+	Movie_statuscss string      `json:"movie_statuscss"`
+	Movie_create    string      `json:"movie_create"`
+	Movie_update    string      `json:"movie_update"`
+}
+type Model_movieseason struct {
+	Movieseason_id      int    `json:"movieseason_id"`
+	Movieseason_name    string `json:"movieseason_name"`
+	Movieseason_display int    `json:"movieseason_display"`
+}
 type Model_genre struct {
 	Genre_id      int    `json:"genre_id"`
 	Genre_name    string `json:"genre_name"`
@@ -63,6 +88,22 @@ type Controller_moviesave struct {
 type Controller_moviedelete struct {
 	Page     string `json:"page" validate:"required"`
 	Movie_id int    `json:"movie_id" validate:"required"`
+}
+type Controller_movieseriessave struct {
+	Page           string          `json:"page" validate:"required"`
+	Sdata          string          `json:"sdata" validate:"required"`
+	Movie_page     int             `json:"movie_page" validate:"required"`
+	Movie_id       int             `json:"movie_id"`
+	Movie_name     string          `json:"movie_name" validate:"required"`
+	Movie_label    string          `json:"movie_label" validate:"required"`
+	Movie_slug     string          `json:"movie_slug" validate:"required"`
+	Movie_tipe     string          `json:"movie_tipe" validate:"required"`
+	Movie_descp    string          `json:"movie_descp" validate:"required"`
+	Movie_urlmovie string          `json:"movie_urlmovie" validate:"required"`
+	Movie_year     int             `json:"movie_year" validate:"required"`
+	Movie_imdb     float32         `json:"movie_imdb" validate:"required"`
+	Movie_status   int             `json:"movie_status"`
+	Movie_gender   json.RawMessage `json:"movie_gender" validate:"required"`
 }
 type Controller_cloudflaremovieupload struct {
 	Page      string `json:"page" validate:"required"`

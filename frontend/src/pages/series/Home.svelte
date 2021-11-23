@@ -13,7 +13,7 @@
 	export let listHome = []
 	export let totalrecord = 0
     let dispatch = createEventDispatcher();
-    let title_page = "MOVIE"
+    let title_page = "MOVIE - SERIES"
     let sData = "";
     let myModal = "";
     
@@ -310,7 +310,7 @@
     async function handleSave() {
         css_loader = "display: inline-block;";
         msgloader = "Sending...";
-        const res = await fetch("/api/moviesave", {
+        const res = await fetch("/api/movieseriessave", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -324,14 +324,13 @@
                 movie_name: movie_field_title,
                 movie_label: movie_field_label,
                 movie_slug: movie_field_slug,
-                movie_tipe: "movie",
+                movie_tipe: "serie",
                 movie_descp: movie_field_descp,
                 movie_urlmovie: movie_field_image,
                 movie_year: parseInt(movie_field_year),
                 movie_imdb: parseFloat(movie_field_imdb),
                 movie_status: parseInt(movie_field_status),
                 movie_gender:movie_field_genre,
-                movie_source:movie_field_source
             }),
         });
         const json = await res.json();
@@ -703,7 +702,7 @@
                                 <th NOWRAP width="2%" style="text-align: center;vertical-align: top;font-weight:bold;font-size: {table_header_font};">TYPE</th>
                                 <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">YEAR</th>
                                 <th NOWRAP width="5%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">GENRE</th>
-                                <th NOWRAP width="5%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">SOURCE</th>
+                                <th NOWRAP width="5%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">SEASON</th>
                                 <th NOWRAP width="2%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">THUMBNAIL</th>
                                 <th NOWRAP width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">MOVIE</th>
                                 <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">IMDB</th>
@@ -742,13 +741,10 @@
                                         {/each}
                                     </td>
                                     <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
-                                        {#each rec.movie_source as rec2}
-                                            <span
-                                                style="text-decoration: underline;color:blue;cursor:pointer;" 
-                                                on:click={() => {
-                                                    popupwindow(rec2.moviesource_url)
-                                                }} >{rec2.moviesource_stream}</span><br>
+                                        {#each rec.movie_season as rec2}
+                                            {rec2.movieseason_name}<br>
                                         {/each}
+                                        <button type="button" class="btn btn-info btn-sm">New Season</button>
                                     </td>
                                     <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
                                         <img width="50" class="img-thumbnail" src="{rec.movie_thumbnail}" alt="">
@@ -892,37 +888,6 @@
                                         class="bi bi-trash"></i>
                                 </td>
                                 <td width="*" style="text-align:left;vertical-align:top;font-size:12px;">{rec.movie_genre_name}</td>
-                            </tr>       
-                            {/each}
-                        </tbody>
-                    </table>
-                </div>
-                <div class="mb-3">
-                    <label for="exampleForm" class="form-label">Source - 
-                        <span
-                            on:click={() => {
-                                ShowFormSource()
-                            }}  
-                            style="text-decoration: underline;cursor:pointer;color:blue;">New</span>
-                    </label>
-                    <table class="table table-sm">
-                        <tbody>
-                            {#each movie_field_source as rec }
-                            <tr>
-                                <td width="1%" style="cursor: pointer;">
-                                    <i 
-                                        on:click={() => {
-                                            handleDeleteMovieSource(rec.movie_source_id);
-                                        }} 
-                                        class="bi bi-trash"></i>
-                                </td>
-                                <td 
-                                    on:click={() => {
-                                        popupwindow(rec.movie_source_name)
-                                    }} 
-                                    width="*" style="text-align:left;vertical-align:top;font-size:12px;cursor:pointer;text-decoration:underline;color:blue;">
-                                    {rec.movie_source_name}
-                                </td>
                             </tr>       
                             {/each}
                         </tbody>

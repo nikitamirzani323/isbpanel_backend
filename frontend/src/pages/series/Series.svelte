@@ -41,7 +41,7 @@
     }
     async function initHome(e) {
         listHome = [];
-        const res = await fetch("/api/movie", {
+        const res = await fetch("/api/movieseries", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -71,12 +71,12 @@
                 }
                 for (var i = 0; i < record.length; i++) {
                     let genre = record[i]["movie_genre"]
-                    let source = record[i]["movie_source"]
+                    let season = record[i]["movie_season"]
                     if(record[i]["movie_genre"] == null){
                         genre = []
                     }
-                    if(record[i]["movie_source"] == null){
-                        source = []
+                    if(record[i]["movie_season"] == null){
+                        season = []
                     }
                     let css_type = "background-color:#0dcaf0;font-weight:bold;"
                     if(record[i]["movie_type"] == "movie"){
@@ -101,7 +101,7 @@
                             movie_imdb: record[i]["movie_imdb"],
                             movie_view: record[i]["movie_view"],
                             movie_genre: genre,
-                            movie_source: source,
+                            movie_season: season,
                             movie_status: record[i]["movie_status"],
                             movie_statuscss: record[i]["movie_statuscss"],
                             movie_create: record[i]["movie_create"],
@@ -111,7 +111,7 @@
                 }
                 if(page==1){
                     listPage = [];
-                    for(var i=1;i<totalpaging;i++){
+                    for(var i=1;i<=totalpaging;i++){
                         listPage = [
                             ...listPage,
                             {
@@ -120,6 +120,7 @@
                                 page_display: i + " Of " + perpage*i,
                             },
                         ];
+                        console.log((i*perpage)-perpage)
                     }
                 }
             }

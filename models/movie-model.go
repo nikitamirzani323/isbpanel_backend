@@ -27,17 +27,16 @@ func Fetch_movieHome(search string, page int) (helpers.Responsemovie, error) {
 
 	perpage := 50
 	totalrecord := 0
-	offset := 0
-	if page < 2 {
-		offset = 0
-	} else {
-		offset = perpage * page
+	offset := page
+	sql_selectcount := ""
+	sql_selectcount += ""
+	sql_selectcount += "SELECT "
+	sql_selectcount += "COUNT(movieid) as totalmovie  "
+	sql_selectcount += "FROM " + configs.DB_VIEW_MOVIE + "  "
+	if search != "" {
+		sql_selectcount += "WHERE movietitle LIKE '%" + search + "%' "
 	}
 
-	sql_selectcount := `SELECT 
-		COUNT(movieid) as totalmovie 
-		FROM ` + configs.DB_tbl_trx_movie + ` 
-	`
 	row_selectcount := con.QueryRowContext(ctx, sql_selectcount)
 	switch e_selectcount := row_selectcount.Scan(&totalrecord); e_selectcount {
 	case sql.ErrNoRows:
@@ -51,7 +50,7 @@ func Fetch_movieHome(search string, page int) (helpers.Responsemovie, error) {
 	sql_select += "movieid , movietitle, description, movietype, "
 	sql_select += "rating , imdb, year, views, enabled, COALESCE(posted_id,0),label, urlthumbnail, slug,   "
 	sql_select += "createmovie, COALESCE(createdatemovie,''), updatemovie, COALESCE(updatedatemovie,'') "
-	sql_select += "FROM " + configs.DB_tbl_trx_movie + "  "
+	sql_select += "FROM " + configs.DB_VIEW_MOVIE + "  "
 	if search == "" {
 		sql_select += "ORDER BY createdatemovie DESC  LIMIT " + strconv.Itoa(offset) + " , " + strconv.Itoa(perpage)
 	} else {
@@ -418,6 +417,334 @@ func Save_movie(admin, name, label, slug, tipemovie, descp, urlthum, listgenre, 
 					flag = true
 					msg = "Succes"
 					log.Println("Data SOURCE Berhasil di save")
+				}
+			})
+		}
+	}
+
+	if flag {
+		res.Status = fiber.StatusOK
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	} else {
+		res.Status = fiber.StatusBadRequest
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	}
+
+	return res, nil
+}
+func Fetch_movieseriesHome(search string, page int) (helpers.Responsemovie, error) {
+	var obj entities.Model_movieseries
+	var arraobj []entities.Model_movieseries
+	var res helpers.Responsemovie
+	msg := "Data Not Found"
+	con := db.CreateCon()
+	ctx := context.Background()
+	start := time.Now()
+
+	perpage := 50
+	totalrecord := 0
+	offset := page
+	sql_selectcount := ""
+	sql_selectcount += ""
+	sql_selectcount += "SELECT "
+	sql_selectcount += "COUNT(movieid) as totalmovie  "
+	sql_selectcount += "FROM " + configs.DB_VIEW_MOVIESERIES + "  "
+	if search != "" {
+		sql_selectcount += "WHERE movietitle LIKE '%" + search + "%' "
+	}
+
+	row_selectcount := con.QueryRowContext(ctx, sql_selectcount)
+	switch e_selectcount := row_selectcount.Scan(&totalrecord); e_selectcount {
+	case sql.ErrNoRows:
+	case nil:
+	default:
+		helpers.ErrorCheck(e_selectcount)
+	}
+	sql_select := ""
+	sql_select += ""
+	sql_select += "SELECT "
+	sql_select += "movieid , movietitle, description, movietype, "
+	sql_select += "rating , imdb, year, views, enabled, COALESCE(posted_id,0),label, urlthumbnail, slug,   "
+	sql_select += "createmovie, COALESCE(createdatemovie,''), updatemovie, COALESCE(updatedatemovie,'') "
+	sql_select += "FROM " + configs.DB_VIEW_MOVIESERIES + "  "
+	if search == "" {
+		sql_select += "ORDER BY createdatemovie DESC  LIMIT " + strconv.Itoa(offset) + " , " + strconv.Itoa(perpage)
+	} else {
+		sql_select += "WHERE movietitle LIKE '%" + search + "%' "
+		sql_select += "ORDER BY createdatemovie DESC LIMIT " + strconv.Itoa(perpage)
+	}
+	row, err := con.QueryContext(ctx, sql_select)
+	helpers.ErrorCheck(err)
+	for row.Next() {
+		var (
+			movieid_db, year_db, views_db, enabled_db, posted_id_db                         int
+			rating_db, imdb_db                                                              float32
+			movietitle_db, movietype_db, description_db, label_db, urlthumbnail_db, slug_db string
+			createmovie_db, createdatemovie_db, updatemovie_db, updatedatemovie_db          string
+		)
+
+		err = row.Scan(
+			&movieid_db, &movietitle_db, &description_db, &movietype_db, &rating_db, &imdb_db, &year_db, &views_db,
+			&enabled_db, &posted_id_db, &label_db, &urlthumbnail_db, &slug_db,
+			&createmovie_db, &createdatemovie_db, &updatemovie_db, &updatedatemovie_db)
+
+		helpers.ErrorCheck(err)
+		status := "HIDE"
+		statuscss := configs.STATUS_CANCEL
+		create := ""
+		update := ""
+		if createmovie_db != "" {
+			create = createmovie_db + ", " + createdatemovie_db
+		}
+		if updatemovie_db != "" {
+			update = updatemovie_db + ", " + updatedatemovie_db
+		}
+		if enabled_db > 0 {
+			status = "SHOW"
+			statuscss = configs.STATUS_RUNNING
+		}
+		//GENRE
+		var objmoviegenre entities.Model_moviegenre
+		var arraobjmoviegenre []entities.Model_moviegenre
+		sql_selectmoviegenre := `SELECT 
+			A.idgenre, B.nmgenre 
+			FROM ` + configs.DB_tbl_trx_moviegenre + ` as A 
+			JOIN ` + configs.DB_tbl_mst_moviegenre + ` as B ON B.idgenre = A.idgenre 
+			WHERE A.movieid = ?   
+		`
+		row_moviegenre, err := con.QueryContext(ctx, sql_selectmoviegenre, movieid_db)
+		helpers.ErrorCheck(err)
+		for row_moviegenre.Next() {
+			var (
+				idgenre_db int
+				nmgenre_db string
+			)
+			err = row_moviegenre.Scan(&idgenre_db, &nmgenre_db)
+			objmoviegenre.Moviegenre_id = idgenre_db
+			objmoviegenre.Moviegenre_name = nmgenre_db
+			arraobjmoviegenre = append(arraobjmoviegenre, objmoviegenre)
+		}
+
+		//SEASON
+		var objmovieseason entities.Model_movieseason
+		var arraobjmovieseason []entities.Model_movieseason
+		sql_selectmovieseason := `SELECT 
+			id, title, position 
+			FROM ` + configs.DB_tbl_mst_season + ` 
+			WHERE poster_id = ?   
+			ORDER BY position ASC 
+		`
+		row_movieseason, err := con.QueryContext(ctx, sql_selectmovieseason, movieid_db)
+		helpers.ErrorCheck(err)
+		for row_movieseason.Next() {
+			var (
+				id_db, position_db int
+				title_db           string
+			)
+			err = row_movieseason.Scan(&id_db, &title_db, &position_db)
+			objmovieseason.Movieseason_id = id_db
+			objmovieseason.Movieseason_name = title_db
+			objmovieseason.Movieseason_display = position_db
+			arraobjmovieseason = append(arraobjmovieseason, objmovieseason)
+		}
+
+		path_image := ""
+		if urlthumbnail_db == "" {
+			poster_image, poster_extension := _GetMedia(posted_id_db)
+			path_image = "https://duniafilm.b-cdn.net/uploads/cache/poster_thumb/uploads/" + poster_extension + "/" + poster_image
+		} else {
+			path_image = urlthumbnail_db
+		}
+
+		obj.Movie_id = movieid_db
+		obj.Movie_date = createdatemovie_db
+		obj.Movie_type = movietype_db
+		obj.Movie_title = movietitle_db
+		obj.Movie_label = label_db
+		obj.Movie_slug = slug_db
+		obj.Movie_descp = description_db
+		obj.Movie_thumbnail = path_image
+		obj.Movie_year = year_db
+		obj.Movie_rating = rating_db
+		obj.Movie_imdb = imdb_db
+		obj.Movie_view = views_db
+		obj.Movie_genre = arraobjmoviegenre
+		obj.Movie_season = arraobjmovieseason
+		obj.Movie_status = status
+		obj.Movie_statuscss = statuscss
+		obj.Movie_create = create
+		obj.Movie_update = update
+		arraobj = append(arraobj, obj)
+		msg = "Success"
+	}
+	defer row.Close()
+
+	res.Status = fiber.StatusOK
+	res.Message = msg
+	res.Record = arraobj
+	res.Perpage = perpage
+	res.Totalrecord = totalrecord
+	res.Time = time.Since(start).String()
+
+	return res, nil
+}
+func Save_movieseries(admin, name, label, slug, tipemovie, descp, urlthum, listgenre, sdata string, idrecord, year, status int, imdb float32) (helpers.Response, error) {
+	var res helpers.Response
+	msg := "Failed"
+	con := db.CreateCon()
+	ctx := context.Background()
+	tglnow, _ := goment.New()
+	render_page := time.Now()
+	flag := false
+
+	temp_idrecord := ""
+	if sdata == "New" {
+		sql_insert := `
+			insert into
+			` + configs.DB_tbl_trx_movie + ` (
+				movieid , movietitle, label, movietype, description, imdb, year, slug, enabled, urlthumbnail,    
+				createmovie, createdatemovie
+			) values (
+				?,?,?,?,?,?,?,?,?,?, 
+				?, ?
+			)
+		`
+		stmt_insert, e_insert := con.PrepareContext(ctx, sql_insert)
+		helpers.ErrorCheck(e_insert)
+		defer stmt_insert.Close()
+		field_column := configs.DB_tbl_trx_movie + tglnow.Format("YYYY")
+		idrecord_counter := Get_counter(field_column)
+		temp_idrecord = tglnow.Format("YY") + tglnow.Format("MM") + strconv.Itoa(idrecord_counter)
+		res_newrecord, e_newrecord := stmt_insert.ExecContext(
+			ctx,
+			temp_idrecord,
+			name, label, tipemovie, descp, imdb, year, slug, status, urlthum,
+			admin,
+			tglnow.Format("YYYY-MM-DD HH:mm:ss"))
+		helpers.ErrorCheck(e_newrecord)
+		insert, e := res_newrecord.RowsAffected()
+		helpers.ErrorCheck(e)
+		if insert > 0 {
+			flag = true
+			msg = "Succes"
+			log.Println("Data Berhasil di save")
+		}
+		if flag {
+			//GENRE
+			json := []byte(listgenre)
+			jsonparser.ArrayEach(json, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+				movie_genre_id, _ := jsonparser.GetInt(value, "movie_genre_id")
+				movie_genre_name, _ := jsonparser.GetString(value, "movie_genre_name")
+
+				log.Printf("%d - %s", int(movie_genre_id), movie_genre_name)
+				sql_insertgenre := `
+				insert into
+					` + configs.DB_tbl_trx_moviegenre + ` (
+						idmoviegenre , movieid, idgenre
+					) values (
+						?,?,?
+					)
+				`
+				stmt_insertgenre, e_insertgenre := con.PrepareContext(ctx, sql_insertgenre)
+				helpers.ErrorCheck(e_insertgenre)
+				defer stmt_insertgenre.Close()
+				field_column := configs.DB_tbl_trx_moviegenre + tglnow.Format("YYYY")
+				idrecord_counter := Get_counter(field_column)
+				res_newrecordgenre, e_newrecordgenre := stmt_insertgenre.ExecContext(
+					ctx,
+					tglnow.Format("YY")+tglnow.Format("MM")+strconv.Itoa(idrecord_counter),
+					temp_idrecord, movie_genre_id)
+				helpers.ErrorCheck(e_newrecordgenre)
+				insertgenre, e := res_newrecordgenre.RowsAffected()
+				helpers.ErrorCheck(e)
+				if insertgenre > 0 {
+					flag = true
+					msg = "Succes"
+					log.Println("Data GENERE Berhasil di save")
+				}
+			})
+		}
+	} else {
+		sql_update := `
+			UPDATE 
+			` + configs.DB_tbl_trx_movie + ` 
+			SET movietitle=?, description=?, slug=?, urlthumbnail=?, 
+			updatemovie=?, updatedatemovie=? 
+			WHERE movieid=? 
+		`
+		stmt_update, e_update := con.PrepareContext(ctx, sql_update)
+		helpers.ErrorCheck(e_update)
+		defer stmt_update.Close()
+		res_newrecord, e_newrecord := stmt_update.ExecContext(
+			ctx,
+			name, descp, slug, urlthum,
+			admin,
+			tglnow.Format("YYYY-MM-DD HH:mm:ss"), idrecord)
+		helpers.ErrorCheck(e_newrecord)
+		update, e := res_newrecord.RowsAffected()
+		helpers.ErrorCheck(e)
+		if update > 0 {
+			flag = true
+			msg = "Succes"
+			log.Println("Data Berhasil di update")
+		}
+		if flag {
+			//DELETE GENRE
+			stmt_genre_delete, e_genre_delete := con.PrepareContext(ctx, `
+					DELETE FROM  
+					`+configs.DB_tbl_trx_moviegenre+`   
+					WHERE movieid=?  
+			`)
+
+			helpers.ErrorCheck(e_genre_delete)
+			rec_genre_delete, e_rec_genre_delete := stmt_genre_delete.ExecContext(ctx, idrecord)
+			helpers.ErrorCheck(e_rec_genre_delete)
+
+			affect_genre_delete, err_affer_genre_delete := rec_genre_delete.RowsAffected()
+			helpers.ErrorCheck(err_affer_genre_delete)
+
+			defer stmt_genre_delete.Close()
+			if affect_genre_delete > 0 {
+				log.Printf("Delete genre : %d\n", idrecord)
+			} else {
+				log.Printf("Delete genre : %d Failed\n ", idrecord)
+			}
+
+			//GENRE
+			json := []byte(listgenre)
+			jsonparser.ArrayEach(json, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+				movie_genre_id, _ := jsonparser.GetInt(value, "movie_genre_id")
+				movie_genre_name, _ := jsonparser.GetString(value, "movie_genre_name")
+
+				log.Printf("%d - %s", int(movie_genre_id), movie_genre_name)
+				sql_insertgenre := `
+					insert into
+						` + configs.DB_tbl_trx_moviegenre + ` (
+							idmoviegenre , movieid, idgenre
+						) values (
+							?,?,?
+						)
+					`
+				stmt_insertgenre, e_insertgenre := con.PrepareContext(ctx, sql_insertgenre)
+				helpers.ErrorCheck(e_insertgenre)
+				defer stmt_insertgenre.Close()
+				field_column := configs.DB_tbl_trx_moviegenre + tglnow.Format("YYYY")
+				idrecord_counter := Get_counter(field_column)
+				res_newrecordgenre, e_newrecordgenre := stmt_insertgenre.ExecContext(
+					ctx,
+					tglnow.Format("YY")+tglnow.Format("MM")+strconv.Itoa(idrecord_counter),
+					idrecord, movie_genre_id)
+				helpers.ErrorCheck(e_newrecordgenre)
+				insertgenre, e := res_newrecordgenre.RowsAffected()
+				helpers.ErrorCheck(e)
+				if insertgenre > 0 {
+					flag = true
+					msg = "Succes"
+					log.Println("Data GENERE Berhasil di save")
 				}
 			})
 		}

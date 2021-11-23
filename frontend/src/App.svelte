@@ -9,6 +9,7 @@
 	import Tafsirmimpi from "./pages/tafsirmimpi/Tafsirmimpi.svelte";
 	import News from "./pages/news/News.svelte";
 	import Movie from "./pages/movie/Movie.svelte";
+	import Series from "./pages/series/Series.svelte";
 	import Login from "./pages/Login.svelte";
 	import NotFound from "./pages/NotFound.svelte";
 	export let table_header_font;
@@ -32,6 +33,13 @@
 					table_body_font: table_body_font,
 				},
 				component: Dashboard,
+			}),
+			"/series": wrap({
+				component: Series,
+				props: {
+					table_header_font: table_header_font,
+					table_body_font: table_body_font,
+				},
 			}),
 			"/movie": wrap({
 				component: Movie,
