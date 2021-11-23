@@ -1306,7 +1306,7 @@
                     </td>
                     <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.movieseason_no}</td>
                     <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};{genre_css}">{rec.movieseason_name}</td>
-                    <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};>{rec.movieseason_episodetotal}</td>
+                    <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.movieseason_episodetotal}</td>
                     <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.movieseason_display}</td>
                 </tr>
                 {/each}
