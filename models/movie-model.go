@@ -1084,6 +1084,131 @@ func Fetch_episode(idseason int) (helpers.Response, error) {
 
 	return res, nil
 }
+func Save_episode(admin, name, urlsource, sdata string, idrecord, idseason, display int) (helpers.Response, error) {
+	var res helpers.Response
+	msg := "Failed"
+	con := db.CreateCon()
+	ctx := context.Background()
+	tglnow, _ := goment.New()
+	render_page := time.Now()
+	flag := false
+
+	if sdata == "New" {
+		sql_insert := `
+			insert into
+			` + configs.DB_tbl_mst_episode + ` (
+				id ,season_id, title, position, enabled
+			) values (
+				? ,?, ?, ?, ? 
+			)
+		`
+		stmt_insert, e_insert := con.PrepareContext(ctx, sql_insert)
+		helpers.ErrorCheck(e_insert)
+		defer stmt_insert.Close()
+		field_column := configs.DB_tbl_mst_episode + tglnow.Format("YYYY")
+		idrecord_counter := Get_counter(field_column)
+		temp_idrecord := tglnow.Format("YY") + tglnow.Format("MM") + strconv.Itoa(idrecord_counter)
+		res_newrecord, e_newrecord := stmt_insert.ExecContext(
+			ctx,
+			temp_idrecord,
+			idseason, name, display, "1")
+		helpers.ErrorCheck(e_newrecord)
+		insert, e := res_newrecord.RowsAffected()
+		helpers.ErrorCheck(e)
+		if insert > 0 {
+			flag = true
+			msg = "Succes"
+			log.Println("Data Berhasil di save")
+		}
+
+		sql_insertsource := `
+			insert into
+				` + configs.DB_tbl_mst_moviesource + ` (
+					id , episode_id, type, url
+				) values (
+					?,?,?,?
+				)
+		`
+		stmt_insertsource, e_insertsource := con.PrepareContext(ctx, sql_insertsource)
+		helpers.ErrorCheck(e_insertsource)
+		defer stmt_insertsource.Close()
+		field_columnsource := configs.DB_tbl_mst_moviesource + tglnow.Format("YYYY")
+		idrecordsource_counter := Get_counter(field_columnsource)
+		res_newrecordsource, e_newrecordsource := stmt_insertsource.ExecContext(
+			ctx,
+			tglnow.Format("YY")+tglnow.Format("MM")+strconv.Itoa(idrecordsource_counter),
+			temp_idrecord, "embed", urlsource)
+		helpers.ErrorCheck(e_newrecordsource)
+		insertsource, e := res_newrecordsource.RowsAffected()
+		helpers.ErrorCheck(e)
+		if insertsource > 0 {
+			flag = true
+			msg = "Succes"
+			log.Println("Data SOURCE Berhasil di save")
+		}
+	}
+
+	if flag {
+		res.Status = fiber.StatusOK
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	} else {
+		res.Status = fiber.StatusBadRequest
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	}
+
+	return res, nil
+}
+func Delete_episode(admin string, idrecord, idseason int) (helpers.Response, error) {
+	var res helpers.Response
+	msg := "Failed"
+	render_page := time.Now()
+	flag := false
+
+	flag = CheckDBTwoField(configs.DB_tbl_mst_episode, "id", strconv.Itoa(idrecord), "season_id", strconv.Itoa(idseason))
+	if flag {
+		sql_deletesource := `
+			DELETE FROM
+			` + configs.DB_tbl_mst_moviesource + ` 
+			WHERE episode_id=? 
+		`
+		flag_source := Delete_SQL(sql_deletesource, configs.DB_tbl_mst_moviesource, idrecord)
+
+		if flag_source {
+			sql_delete := `
+				DELETE FROM
+				` + configs.DB_tbl_mst_episode + ` 
+				WHERE id=? AND season_id=? 
+			`
+			flag_episode := Delete_SQL(sql_delete, configs.DB_tbl_mst_episode, idrecord, idseason)
+			if flag_episode {
+				log.Println("asd")
+				msg = "Success"
+				flag = true
+			}
+		}
+
+	} else {
+		msg = "Data Not Found"
+	}
+
+	if flag {
+		res.Status = fiber.StatusOK
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	} else {
+		res.Status = fiber.StatusBadRequest
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	}
+
+	return res, nil
+}
 
 func Fetch_genre() (helpers.Response, error) {
 	var obj entities.Model_genre

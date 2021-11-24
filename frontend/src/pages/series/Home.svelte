@@ -39,6 +39,7 @@
     let episode_field_seasonid = 0;
     let episode_field_titleseason = "";
     let episode_field_name = "";
+    let episode_field_source = "";
     let episode_field_display = 0;
 
     let movie_field_idrecord = 0;
@@ -173,6 +174,19 @@
         myModal = new bootstrap.Modal(document.getElementById("modalcrudseason"));
         myModal.show();
     };
+    const ShowFormEpisode = (e,id,name,display) => {
+        sData = e
+        if(e == "Edit"){
+            episode_field_idrecord = parseInt(id);
+            episode_field_name = name;
+            episode_field_display = parseInt(display);
+        }else{
+            clearfield_season()
+        }
+        
+        myModal = new bootstrap.Modal(document.getElementById("modalcrudepisode"));
+        myModal.show();
+    };
     const ShowFormMovie = (e,id,title,label,descp,image,year,imdb,slug,status,genre) => {
         sData = e
         if(e == "Edit"){
@@ -204,10 +218,7 @@
         myModal = new bootstrap.Modal(document.getElementById("modalcrudmovie"));
         myModal.show();
     };
-    const ShowFormSource = () => {
-        myModal = new bootstrap.Modal(document.getElementById("modalformsource"));
-        myModal.show();
-    };
+    
     async function call_album(){
         listalbum = []
         const res = await fetch("/api/moviecloudualbum", {
@@ -283,6 +294,7 @@
     }
     async function call_episode(e) {
         listepisode = [];
+        episode_field_seasonid = e
         const res = await fetch("/api/movieseriesepisode", {
             method: "POST",
             headers: {
@@ -355,6 +367,67 @@
                 }
             }
         } 
+    }
+    async function handleSaveEpisode() {
+        let flag = true
+        let msg = ""
+        css_loader = "display: inline-block;";
+        msgloader = "Sending...";
+        if(sData == "New"){
+            if(episode_field_name == ""){
+                flag = false
+                msg += "The Name is required\n"
+            }
+            if(episode_field_source == ""){
+                flag = false
+                msg += "The Source is required\n"
+            }
+            if(episode_field_display == "" || parseInt(episode_field_display) == 0){
+                flag = false
+                msg += "The Display is required\n"
+            }
+        }
+        if(flag){
+            css_loader = "display: inline-block;";
+            msgloader = "Sending...";
+            const res = await fetch("/api/movieseriesepisodesave", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + token,
+                },
+                body: JSON.stringify({
+                    sdata: sData,
+                    page:"MOVIEEPISODE-SAVE",
+                    movie_page: parseInt(pagingnow),
+                    movie_id: parseInt(season_field_idmovie),
+                    movieseason_id: parseInt(episode_field_seasonid),
+                    movieepisode_id: parseInt(episode_field_idrecord),
+                    movieepisode_name: episode_field_name.toUpperCase(),
+                    movieepisode_source: episode_field_source,
+                    movieepisode_display: parseInt(episode_field_display),
+                }),
+            });
+            const json = await res.json();
+            if (json.status == 200) {
+                msgloader = json.message;
+                myModal.hide()
+                call_episode(episode_field_seasonid)
+                call_season(season_field_idmovie,season_field_titlemovie)
+                clearfield_episode()
+                RefreshHalaman()
+            } else if(json.status == 403){
+                alert(json.message)
+            } else {
+                msgloader = json.message;
+            }
+            setTimeout(function () {
+                css_loader = "display: none;";
+            }, 1000);
+        }else{
+            alert(msg)
+        }
+        
     }
     async function handleSaveSeason() {
         let flag = true
@@ -619,19 +692,7 @@
         }, 1000);
         
     }
-    async function handleDeleteMovieSource(e) {
-        let temp = movie_field_source.filter(item => item.movie_source_id !== parseInt(e))
-        movie_field_source = []
-        for(var i=0;i<temp.length;i++){
-            movie_field_source = [
-                ...movie_field_source,
-                {
-                    movie_source_id: parseInt(temp[i].movie_source_id),
-                    movie_source_name: temp[i].movie_source_name,
-                },
-            ];
-        }
-    }
+   
     async function handleDeleteMovieGenre(e) {
         let temp = movie_field_genre.filter(item => item.movie_genre_id !== parseInt(e))
         movie_field_genre = []
@@ -727,8 +788,60 @@
         }
         
     }
+    async function handleDeleteEpisode(e,idseason) {
+        let flag = true
+        let msg = ""
+        if(e == "" || parseInt(e) < 1){
+            flag = false
+            msg = "The Season is required"
+        }
+        if(parseInt(season_field_idmovie) < 1){
+            flag = false
+            msg = "The Movie ID is required"
+        }
+        if(flag){
+            css_loader = "display: inline-block;";
+            msgloader = "Sending...";
+            const res = await fetch("/api/movieseriesepisodedelete", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + token,
+                },
+                body: JSON.stringify({
+                    page:"MOVIEEPISODE-DELETE",
+                    movie_page: parseInt(pagingnow),
+                    movie_id: parseInt(season_field_idmovie),
+                    season_id: parseInt(idseason),
+                    episode_id: parseInt(e),
+                }),
+            });
+            const json = await res.json();
+            if (json.status == 200) {
+                msgloader = json.message;
+                call_episode(idseason)
+                listseason = [];
+                call_season(season_field_idmovie,season_field_titlemovie)
+                RefreshHalaman()
+            } else if(json.status == 403){
+                alert(json.message)
+            } else {
+                msgloader = json.message;
+            }
+            setTimeout(function () {
+                css_loader = "display: none;";
+            }, 1000);
+        }else{
+            alert(msg)
+        }
+        
+    }
     function callFunction(event){
         switch(event.detail){
+            case "FORMNEW_EPISODE":
+                ShowFormEpisode("New");break;
+            case "SAVE_EPISODE":
+                handleSaveEpisode();break;
             case "FORMNEW_SEASON":
                 ShowFormSeason("New");break;
             case "SAVE_SEASON":
@@ -780,6 +893,12 @@
         season_field_idrecord = 0;
         season_field_name = "";
         season_field_display = 0;
+    }
+    function clearfield_episode(){
+        episode_field_idrecord = 0;
+        episode_field_name = "";
+        episode_field_source = "";
+        episode_field_display = 0;
     }
     const handleKeyboard_checkenter = (e) => {
         let keyCode = e.which || e.keyCode;
@@ -905,7 +1024,7 @@
                                         class="bi bi-pencil"></i>
                                     </td>
                                     <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
-                                        {#if listseason.length > 0}
+                                        {#if rec.movie_season.length < 1}
                                         <i 
                                             on:click={() => {
                                                 handleDeleteMovie(rec.movie_id);
@@ -1414,9 +1533,9 @@
         <table class="table table-sm">
             <thead>
                 <tr>
-                    <th width="1%" colspan="2">&nbsp;</th>
+                    <th width="1%">&nbsp;</th>
                     <th width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NO</th>
-                    <th width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">Episode</th>
+                    <th width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">EPISODE</th>
                     <th width="5%" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">SOURCE</th>
                     <th width="5%" style="text-align: right;vertical-align: top;font-weight:bold;font-size:{table_header_font};">DISPLAY</th>
                 </tr>
@@ -1427,14 +1546,7 @@
                     <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
                         <i 
                             on:click={() => {
-                                ShowFormSeason("Edit",rec.movieepisode_id,rec.movieepisode_name,rec.movieepisode_display);
-                            }} 
-                            class="bi bi-pencil"></i>
-                    </td>
-                    <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
-                        <i 
-                            on:click={() => {
-                                handleDeleteEpisode(rec.movieepisode_id);
+                                handleDeleteEpisode(rec.movieepisode_id,rec.movieepisode_seasonid);
                             }} 
                             class="bi bi-trash"></i>
                     </td>
@@ -1459,8 +1571,52 @@
 	<slot:template slot="footer">
         <Button
             on:click={callFunction}
-            button_function="FORMNEW_SEASON"
+            button_function="FORMNEW_EPISODE"
             button_title="New"
+            button_css="btn-warning"/>
+	</slot:template>
+</Modal>
+<Modal
+	modal_id="modalcrudepisode"
+	modal_size="modal-dialog-centered"
+	modal_title="EPISODE/{sData}"
+    modal_body_css=""
+    modal_footer_css="padding:5px;"
+	modal_footer={true}>
+	<slot:template slot="body">
+        <div class="mb-3">
+            <label for="exampleForm" class="form-label">Name</label>
+			<input
+                use:uppercase
+                bind:value={episode_field_name}
+                class="required form-control"
+                type="text"
+                placeholder="Episode Name"/>
+		</div>
+        <div class="mb-3">
+            <label for="exampleForm" class="form-label">Url Source</label>
+			<input
+                bind:value={episode_field_source}
+                class="required form-control"
+                type="text"
+                placeholder="Episode Source"/>
+		</div>
+        <div class="mb-3">
+            <label for="exampleForm" class="form-label">Display</label>
+			<Input
+                bind:value={episode_field_display}
+                class="required"
+                maxlength=3
+                type="text"
+                style="text-align:right;"
+                placeholder="Episode Display"/>
+		</div>
+	</slot:template>
+	<slot:template slot="footer">
+        <Button
+            on:click={callFunction}
+            button_function="SAVE_EPISODE"
+            button_title="Save"
             button_css="btn-warning"/>
 	</slot:template>
 </Modal>

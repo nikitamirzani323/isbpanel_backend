@@ -139,3 +139,23 @@ func Get_AdminRule(tipe, idadmin string) string {
 	}
 	return result
 }
+func Delete_SQL(sql, table string, args ...interface{}) bool {
+	con := db.CreateCon()
+	ctx := context.Background()
+	flag := false
+	stmt_delete, e_delete := con.PrepareContext(ctx, sql)
+	helpers.ErrorCheck(e_delete)
+	defer stmt_delete.Close()
+	rec_delete, e_delete := stmt_delete.ExecContext(ctx, args...)
+
+	helpers.ErrorCheck(e_delete)
+	deletesource, e := rec_delete.RowsAffected()
+	helpers.ErrorCheck(e)
+	if deletesource > 0 {
+		flag = true
+		log.Printf("Data %s Berhasil di delete", table)
+	} else {
+		log.Printf("Data %s Failed di delete", table)
+	}
+	return flag
+}
