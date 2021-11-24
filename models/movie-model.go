@@ -57,7 +57,7 @@ func Fetch_movieHome(search string, page int) (helpers.Responsemovie, error) {
 		sql_select += "WHERE movietitle LIKE '%" + search + "%' "
 		sql_select += "ORDER BY createdatemovie DESC LIMIT " + strconv.Itoa(perpage)
 	}
-
+	log.Println(sql_select)
 	row, err := con.QueryContext(ctx, sql_select)
 	helpers.ErrorCheck(err)
 	for row.Next() {

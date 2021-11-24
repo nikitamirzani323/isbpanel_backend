@@ -13,7 +13,7 @@
     let record = "";
     let record_message = "";
     let perpage = 0;
-    let page = 1;
+    let page = 0;
     let totalrecordall = 0;
     let totalpaging = 0;
     let totalrecord = 0;
@@ -109,19 +109,17 @@
                         },
                     ];
                 }
-                if(page==1){
-                    listPage = [];
-                    for(var i=1;i<=totalpaging;i++){
-                        listPage = [
-                            ...listPage,
-                            {
-                                page_id: i,
-                                page_value: ((i*perpage)-perpage),
-                                page_display: i + " Of " + perpage*i,
-                            },
-                        ];
-                        console.log((i*perpage)-perpage)
-                    }
+                listPage = [];
+                for(var i=1;i<=totalpaging;i++){
+                    listPage = [
+                        ...listPage,
+                        {
+                            page_id: i,
+                            page_value: ((i*perpage)-perpage),
+                            page_display: i + " Of " + perpage*i,
+                        },
+                    ];
+                    console.log((i*perpage)-perpage)
                 }
             }
         } else {
