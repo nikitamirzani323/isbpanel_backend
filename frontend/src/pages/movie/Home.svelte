@@ -17,6 +17,8 @@
     let sData = "";
     let myModal = "";
     
+    let listmoviemini = []
+    let listslide = []
     let listalbum = []
     let listgenre = []
     let record = ""
@@ -36,14 +38,19 @@
     let movie_field_genre = [];
     let movie_field_source_count = 0;
     let movie_field_source = [];
-    let movie_field_series = [];
-    let movie_field_episode = [];
     let movie_field_year = 0;
     let movie_field_imdb = 0.0;
     let movie_field_image = "";
     let movie_field_status = "0";
 
+    let moviemini_field_idmovie = 0
+    let moviemini_field_name = ""
+    let moviemini_field_url = ""
+    let moviemini_field_display = 0
+
     let album_field_name = "";
+    let searchMovieMini = "";
+    let filterMovieMini = "";
     let searchMovie = "";
     let filterMovie = "";
     let album_flagclick = false;
@@ -71,6 +78,16 @@
         } else {
             filterMovie = [...listHome];
         }
+        if (searchMovieMini) {
+            filterMovieMini = listmoviemini.filter(
+                (item) =>
+                    item.movie_title
+                        .toLowerCase()
+                        .includes(searchMovieMini.toLowerCase()) 
+            );
+        } else {
+            filterMovieMini = [...listmoviemini];
+        }
     }
     const RefreshHalaman = () => {
         dispatch("handleRefreshData", "call");
@@ -83,7 +100,16 @@
         };
         dispatch("handlePaging", movie);
     };
-    
+    const clickMovieMini = (e,title) => {
+        moviemini_field_idmovie = e
+        moviemini_field_name = title
+        myModal.hide()
+    };
+    const ShowSlider = () => {
+        myModal = new bootstrap.Modal(document.getElementById("modalslider"));
+        myModal.show();
+        call_slider()
+    };
     const ShowGenre = (e) => {
         myModal = new bootstrap.Modal(document.getElementById("modalgenre"));
         myModal.show();
@@ -107,6 +133,19 @@
             album_flagclick = false
         }
         call_album();
+    };
+    const ShowMovie = () => {
+        myModal = new bootstrap.Modal(document.getElementById("modalmovie"));
+        myModal.show();
+        call_moviemini();
+    };
+    const ShowFormSlider = (id,name,urlimage,display) => {
+        genre_field_idrecord = parseInt(id);
+        genre_field_name = name;
+        genre_field_display = parseInt(display);
+        
+        myModal = new bootstrap.Modal(document.getElementById("modalcrudslider"));
+        myModal.show();
     };
     const ShowFormAlbum = (e,id,name,display) => {
         sData = e
@@ -182,6 +221,71 @@
         myModal = new bootstrap.Modal(document.getElementById("modalformsource"));
         myModal.show();
     };
+    async function call_moviemini() {
+        listmoviemini = [];
+        const res = await fetch("/api/moviemini", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token,
+            },
+            body: JSON.stringify({
+            }),
+        });
+        const json = await res.json();
+        if (json.status == 200) {
+            record = json.record;
+            if (record != null) {
+                let no = 0
+                for (var i = 0; i < record.length; i++) {
+                    no = no + 1;
+                    listmoviemini = [
+                        ...listmoviemini,
+                        {
+                            movie_no: no,
+                            movie_id: record[i]["movie_id"],
+                            movie_type: record[i]["movie_type"].toUpperCase(),
+                            movie_title: record[i]["movie_title"],
+                        },
+                    ];
+                }
+            }
+        } 
+    }
+    async function call_slider() {
+        listslide = [];
+        const res = await fetch("/api/slider", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token,
+            },
+            body: JSON.stringify({
+            }),
+        });
+        const json = await res.json();
+        if (json.status == 200) {
+            record = json.record;
+            if (record != null) {
+                let no = 0
+                for (var i = 0; i < record.length; i++) {
+                    no = no + 1;
+                    listslide = [
+                        ...listslide,
+                        {
+                            slide_no: no,
+                            slide_id: record[i]["slide_id"],
+                            slide_movieid: record[i]["slide_movieid"],
+                            slide_movietitle: record[i]["slide_movietitle"],
+                            slide_urlimage: record[i]["slide_urlimage"],
+                            slide_position: record[i]["slide_position"],
+                            slide_create: record[i]["slide_create"],
+                        },
+                    ];
+                }
+            }
+        } 
+    }
     async function call_album(){
         listalbum = []
         const res = await fetch("/api/moviecloudualbum", {
@@ -254,6 +358,60 @@
                 }
             }
         } 
+    }
+    async function handleSaveSlider() {
+        let flag = true
+        let msg = ""
+        css_loader = "display: inline-block;";
+        msgloader = "Sending...";
+        if(moviemini_field_idmovie == 0){
+            flag = false
+            msg += "The Movie is required\n"
+        }
+        if(moviemini_field_url == ""){
+            flag = false
+            msg += "The Cover is required\n"
+        }
+        if(moviemini_field_display == 0){
+            flag = false
+            msg += "The Cover is required\n"
+        }
+        if(flag){
+            
+            css_loader = "display: inline-block;";
+            msgloader = "Sending...";
+            const res = await fetch("/api/slidersave", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + token,
+                },
+                body: JSON.stringify({
+                    sdata: "New",
+                    page:"MOVIESLIDER-SAVE",
+                    slide_movieid: parseInt(moviemini_field_idmovie),
+                    slide_urlimage: moviemini_field_url,
+                    Slide_position: parseInt(moviemini_field_display),
+                }),
+            });
+            const json = await res.json();
+            if (json.status == 200) {
+                msgloader = json.message;
+                myModal.hide()
+                call_slider()
+                clearfield_slider()
+            } else if(json.status == 403){
+                alert(json.message)
+            } else {
+                msgloader = json.message;
+            }
+            setTimeout(function () {
+                css_loader = "display: none;";
+            }, 1000);
+        }else{
+            alert(msg)
+        }
+        
     }
     async function handleSaveGenre() {
         let flag = true
@@ -565,10 +723,53 @@
             alert(msg)
         }
     }
+    async function handleDeleteSlider(e) {
+        let flag = true
+        let msg = ""
+        if(e == ""){
+            flag = false
+            msg = "The Category is required"
+        }
+        if(flag){
+            css_loader = "display: inline-block;";
+            msgloader = "Sending...";
+            const res = await fetch("/api/sliderdelete", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + token,
+                },
+                body: JSON.stringify({
+                    page:"SLIDER-DELETE",
+                    slide_id: parseInt(e),
+                }),
+            });
+            const json = await res.json();
+            if (json.status == 200) {
+                call_slider()
+                msgloader = json.message;
+            } else if(json.status == 403){
+                alert(json.message)
+            } else {
+                msgloader = json.message;
+            }
+            setTimeout(function () {
+                css_loader = "display: none;";
+            }, 1000);
+        }else{
+            alert(msg)
+        }
+    }
     function callFunction(event){
         switch(event.detail){
+            case "CALL_SLIDER":
+                ShowSlider();break;
+            case "FORMNEW_SLIDER":
+                ShowFormSlider();break;
             case "CALL_ALBUM":
                 ShowAlbum();break;
+            case "SAVE_SLIDER":
+                handleSaveSlider();break;
             case "FORMNEW_ALBUM":
                 ShowFormAlbum("New");break;
             case "CALL_GENRE":
@@ -609,6 +810,12 @@
         genre_field_idrecord = 0;
         genre_field_name = "";
         genre_field_display = 0;
+    }
+    function clearfield_slider(){
+        moviemini_field_idmovie = 0
+        moviemini_field_name = ""
+        moviemini_field_url = ""
+        moviemini_field_display = 0
     }
     const handleKeyboard_checkenter = (e) => {
         let keyCode = e.which || e.keyCode;
@@ -657,6 +864,11 @@
                 on:click={callFunction}
                 button_function="CALL_GENRE"
                 button_title="Genre"
+                button_css="btn-primary"/>
+            <Button
+                on:click={callFunction}
+                button_function="CALL_SLIDER"
+                button_title="Slider"
                 button_css="btn-primary"/>
             <Button
                 on:click={callFunction}
@@ -1150,5 +1362,149 @@
             button_function="SAVE_GENRE"
             button_title="Save"
             button_css="btn-warning"/>
+	</slot:template>
+</Modal>
+
+<Modal
+	modal_id="modalslider"
+	modal_size="modal-dialog-centered"
+	modal_title="SLIDER"
+    modal_body_css="height:500px; overflow-y: scroll;"
+    modal_footer_css="padding:5px;"
+	modal_footer={true}>
+	<slot:template slot="body">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th width="1%" >&nbsp;</th>
+                    <th width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NO</th>
+                    <th width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">TITLE</th>
+                    <th width="5%" style="text-align: right;vertical-align: top;font-weight:bold;font-size:{table_header_font};">DISPLAY</th>
+                </tr>
+            </thead>
+            <tbody>
+                {#each listslide as rec }
+                <tr>
+                    <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
+                        <i 
+                            on:click={() => {
+                                handleDeleteSlider(rec.slide_id);
+                            }} 
+                            class="bi bi-trash"></i>
+                    </td>
+                    <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.slide_no}</td>
+                    <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};{genre_css}">{rec.slide_movietitle}</td>
+                    <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.slide_position}</td>
+                </tr>
+                {/each}
+                
+            </tbody>
+        </table>
+	</slot:template>
+	<slot:template slot="footer">
+        <Button
+            on:click={callFunction}
+            button_function="FORMNEW_SLIDER"
+            button_title="New"
+            button_css="btn-warning"/>
+	</slot:template>
+</Modal>
+<Modal
+	modal_id="modalcrudslider"
+	modal_size="modal-dialog-centered"
+	modal_title="Slider/New"
+    modal_body_css=""
+    modal_footer_css="padding:5px;"
+	modal_footer={true}>
+	<slot:template slot="body">
+        <div class="mb-3">
+            <label for="exampleForm" class="form-label">Movie</label>
+            <div class="input-group mb-3">
+                <Input
+                    bind:value={moviemini_field_name}
+                    class="required"
+                    type="text"
+                    disabled
+                    placeholder="Movie Title"/>
+                <button
+                    on:click={() => {
+                        ShowMovie();
+                    }}  
+                    type="button" class="btn btn-info">Movie</button>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="exampleForm" class="form-label">Cover</label>
+            <Input
+                bind:value={moviemini_field_url}
+                class="required"
+                type="text"
+                placeholder="Cover"/>
+            <a href="https://id.imgbb.com/" target="_blank">imgbb</a>, 
+            <a href="https://imgur.com/" target="_blank">imgur</a>
+        </div>
+        <div class="mb-3">
+            <label for="exampleForm" class="form-label">Display</label>
+			<Input
+                bind:value={moviemini_field_display}
+                class="required"
+                maxlength=3
+                type="text"
+                style="text-align:right;"
+                placeholder="Genre Display"/>
+		</div>
+	</slot:template>
+	<slot:template slot="footer">
+        <Button
+            on:click={callFunction}
+            button_function="SAVE_SLIDER"
+            button_title="Save"
+            button_css="btn-warning"/>
+	</slot:template>
+</Modal>
+
+
+<Modal
+	modal_id="modalmovie"
+	modal_size="modal-dialog-centered"
+	modal_title="MOVIE"
+    modal_body_css="height:500px; overflow-y: scroll;"
+    modal_footer_css="padding:5px;"
+	modal_footer={false}
+	modal_search={true}>
+    <slot:template slot="search">
+        <div class="col-lg-12" style="padding: 5px;">
+            <input
+                bind:value={searchMovieMini}
+                on:keypress={handleKeyboard_checkenter}
+                type="text"
+                class="form-control"
+                placeholder="Search Movie + Tekan Enter"
+                aria-label="Search"
+            />
+        </div>
+    </slot:template>
+	<slot:template slot="body">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th width="5%" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">TYPE</th>
+                    <th width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">TITLE</th>
+                </tr>
+            </thead>
+            <tbody>
+                {#each filterMovieMini as rec }
+                <tr 
+                    on:click={() => {
+                        clickMovieMini(rec.movie_id,rec.movie_title);
+                    }}  
+                    style="color:blue;text-decoration:underline;cursor:pointer;">
+                    <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.movie_type}</td>
+                    <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.movie_title}</td>
+                </tr>
+                {/each}
+                
+            </tbody>
+        </table>
 	</slot:template>
 </Modal>

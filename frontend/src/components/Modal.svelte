@@ -5,6 +5,7 @@
     export let modal_body_css = ""
     export let modal_footer_css = ""
     export let modal_footer = false
+    export let modal_search = false
 </script>
 
 <div class="modal fade" id={modal_id} tabindex="-1" data-bs-backdrop="false">
@@ -18,6 +19,9 @@
 					data-bs-dismiss="modal"
 					aria-label="Close"></button>
 			</div>
+			{#if modal_search}
+				<slot name="search" />
+			{/if}
 			<div class="modal-body" style="{modal_body_css}">
 				<slot name="body" />
 			</div>

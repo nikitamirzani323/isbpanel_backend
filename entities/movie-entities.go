@@ -72,9 +72,17 @@ type Model_genre struct {
 	Genre_update  string `json:"genre_update"`
 }
 
+type Model_minimovie struct {
+	Movie_id    int    `json:"movie_id"`
+	Movie_type  string `json:"movie_type"`
+	Movie_title string `json:"movie_title"`
+}
 type Controller_movie struct {
 	Movie_search string `json:"movie_search"`
 	Movie_page   int    `json:"movie_page"`
+}
+type Controller_moviemini struct {
+	Movie_search string `json:"movie_search"`
 }
 type Controller_moviesave struct {
 	Page           string          `json:"page" validate:"required"`

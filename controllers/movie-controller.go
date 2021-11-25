@@ -16,6 +16,7 @@ import (
 )
 
 const Fieldmovie_home_redis = "LISTMOVIE_BACKEND_ISBPANEL"
+const Fieldmoviemini_home_redis = "LISTMOVIEMINI_BACKEND_ISBPANEL"
 const Fieldgenre_home_redis = "LISTGENRE_BACKEND_ISBPANEL"
 const Fieldmovieseries_home_redis = "LISTMOVIESERIES_BACKEND_ISBPANEL"
 const Fieldmovieseriesseason_home_redis = "LISTMOVIESEASON_BACKEND_ISBPANEL"
@@ -140,6 +141,82 @@ func Moviehome(c *fiber.Ctx) error {
 		return c.JSON(result)
 	} else {
 		log.Println("MOVIE CACHE")
+		return c.JSON(fiber.Map{
+			"status":      fiber.StatusOK,
+			"message":     message_RD,
+			"record":      arraobj,
+			"perpage":     perpage_RD,
+			"totalrecord": totalrecord_RD,
+			"time":        time.Since(render_page).String(),
+		})
+	}
+}
+func Movieminihome(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_moviemini)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+	if client.Movie_search != "" {
+		val_movie := helpers.DeleteRedis(Fieldmoviemini_home_redis + "_" + client.Movie_search)
+		log.Printf("Redis Delete BACKEND MOVIE MINI : %d", val_movie)
+	}
+	var obj entities.Model_movie
+	var arraobj []entities.Model_movie
+	render_page := time.Now()
+	resultredis, flag := helpers.GetRedis(Fieldmoviemini_home_redis + "_" + client.Movie_search)
+	jsonredis := []byte(resultredis)
+	message_RD, _ := jsonparser.GetString(jsonredis, "message")
+	perpage_RD, _ := jsonparser.GetInt(jsonredis, "perpage")
+	totalrecord_RD, _ := jsonparser.GetInt(jsonredis, "totalrecord")
+	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
+	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		movie_id, _ := jsonparser.GetInt(value, "movie_id")
+		movie_type, _ := jsonparser.GetString(value, "movie_type")
+		movie_title, _ := jsonparser.GetString(value, "movie_title")
+
+		obj.Movie_id = int(movie_id)
+		obj.Movie_type = movie_type
+		obj.Movie_title = movie_title
+		arraobj = append(arraobj, obj)
+	})
+	if !flag {
+		result, err := models.Fetch_movieminiHome(client.Movie_search)
+		if err != nil {
+			c.Status(fiber.StatusBadRequest)
+			return c.JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": err.Error(),
+				"record":  nil,
+			})
+		}
+		helpers.SetRedis(Fieldmovie_home_redis+"_"+client.Movie_search, result, 10*time.Minute)
+		log.Println("MOVIE MINI MYSQL")
+		return c.JSON(result)
+	} else {
+		log.Println("MOVIE MINI CACHE")
 		return c.JSON(fiber.Map{
 			"status":      fiber.StatusOK,
 			"message":     message_RD,

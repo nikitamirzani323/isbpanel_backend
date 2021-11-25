@@ -1210,6 +1210,54 @@ func Delete_episode(admin string, idrecord, idseason int) (helpers.Response, err
 	return res, nil
 }
 
+func Fetch_movieminiHome(search string) (helpers.Response, error) {
+	var obj entities.Model_minimovie
+	var arraobj []entities.Model_minimovie
+	var res helpers.Response
+	msg := "Data Not Found"
+	con := db.CreateCon()
+	ctx := context.Background()
+	start := time.Now()
+
+	sql_select := ""
+	sql_select += "SELECT "
+	sql_select += "movieid , movietitle, movietype "
+	sql_select += "FROM " + configs.DB_VIEW_MOVIE + "  "
+	if search == "" {
+		sql_select += "ORDER BY createdatemovie DESC  LIMIT 100 "
+	} else {
+		sql_select += "WHERE movietitle LIKE '%" + search + "%' "
+		sql_select += "ORDER BY createdatemovie DESC LIMIT 100 "
+	}
+	log.Println(sql_select)
+	row, err := con.QueryContext(ctx, sql_select)
+	helpers.ErrorCheck(err)
+	for row.Next() {
+		var (
+			movieid_db                  int
+			movietitle_db, movietype_db string
+		)
+
+		err = row.Scan(&movieid_db, &movietitle_db, &movietype_db)
+
+		helpers.ErrorCheck(err)
+
+		obj.Movie_id = movieid_db
+		obj.Movie_title = movietitle_db
+		obj.Movie_type = movietype_db
+		arraobj = append(arraobj, obj)
+		msg = "Success"
+	}
+	defer row.Close()
+
+	res.Status = fiber.StatusOK
+	res.Message = msg
+	res.Record = arraobj
+	res.Time = time.Since(start).String()
+
+	return res, nil
+}
+
 func Fetch_genre() (helpers.Response, error) {
 	var obj entities.Model_genre
 	var arraobj []entities.Model_genre
