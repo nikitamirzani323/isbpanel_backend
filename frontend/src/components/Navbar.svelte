@@ -60,6 +60,9 @@
                             <li>
                                 <a class="dropdown-item" use:link href="/series" style="font-size: 13px;">SERIES</a>
                             </li>
+                            <li>
+                                <a class="dropdown-item" use:link href="/movienews" style="font-size: 13px;">NEWS</a>
+                            </li>
                         </ul>
                     </li>
                     <li class="nav-item">
