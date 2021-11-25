@@ -230,6 +230,7 @@
                 Authorization: "Bearer " + token,
             },
             body: JSON.stringify({
+                movie_search : searchMovieMini
             }),
         });
         const json = await res.json();
@@ -826,6 +827,15 @@
                     searchMovie,
                 };
                 dispatch("handleMovie", movie);
+        }  
+    };
+    const handleKeyboardmoviemini_checkenter = (e) => {
+        let keyCode = e.which || e.keyCode;
+        if (keyCode === 13) {
+                filterMovieMini = [];
+                listmoviemini = [];
+                call_moviemini()
+                
         }  
     };
     function lowercase(element) {
@@ -1476,7 +1486,7 @@
         <div class="col-lg-12" style="padding: 5px;">
             <input
                 bind:value={searchMovieMini}
-                on:keypress={handleKeyboard_checkenter}
+                on:keypress={handleKeyboardmoviemini_checkenter}
                 type="text"
                 class="form-control"
                 placeholder="Search Movie + Tekan Enter"
