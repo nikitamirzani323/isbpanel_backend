@@ -44,6 +44,9 @@
                             </li>
                         </ul>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" use:link href="/news" style="font-size: 13px;">NEWS</a>
+                    </li>
                     <li class="nav-item dropdown">
                         <a
                             class="nav-link dropdown-toggle"
@@ -61,12 +64,9 @@
                                 <a class="dropdown-item" use:link href="/series" style="font-size: 13px;">SERIES</a>
                             </li>
                             <li>
-                                <a class="dropdown-item" use:link href="/movienews" style="font-size: 13px;">NEWS</a>
+                                <a class="dropdown-item" use:link href="/movienews" style="font-size: 13px;">MOVIE TRAILER</a>
                             </li>
                         </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" aria-current="page" use:link href="/news" style="font-size: 13px;">NEWS</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a

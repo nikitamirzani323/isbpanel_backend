@@ -131,8 +131,7 @@
                 on:click={callFunction}
                 button_function="BACK"
                 button_title="Back"
-                button_css="btn-primary"
-            />
+                button_css="btn-primary"/>
         </div>
     </div>
     <div class="clearfix" />
@@ -147,8 +146,7 @@
                                 handleSubmit();
                             }}
                             class="btn btn-warning btn-sm"
-                            style="border-radius: 0px;"
-                        >
+                            style="border-radius: 0px;">
                             Save
                         </button>
                     </div>
@@ -164,8 +162,7 @@
                             maxlength="70"
                             class="form-control"
                             placeholder="Name"
-                            aria-label="Name"
-                        />
+                            aria-label="Name"/>
                     </div>
                 </div>
             </div>
@@ -180,13 +177,12 @@
                                 Updateconfig();
                             }}
                             class="btn btn-warning btn-sm"
-                            style="border-radius: 0px;"
-                        >
+                            style="border-radius: 0px;">
                             Save
                         </button>
                     </div>
                 </div>
-                <div class="card-body" style="height:550px;">
+                <div class="card-body" style="height:700px;overflow-y: scroll;">
                     <table class="table">
                         <thead>
                             <tr>
@@ -209,8 +205,9 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th colspan="2" NOWRAP>SDSB4D - DAY</th>
-                                <th colspan="2" NOWRAP>SDSB4D - NIGHT</th>
+                                <th colspan="2" NOWRAP>MOVIE</th>
+                                <th colspan="2" NOWRAP>SERIES</th>
+                                <th colspan="2" NOWRAP>NEWS MOVIE</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -219,16 +216,21 @@
                                     <input
                                         bind:group={adminrule_rule_field}
                                         type="checkbox"
-                                        value="SDSB4DDAY-VIEW"
-                                    />
+                                        value="MOVIE-VIEW">
                                 </td>
                                 <td width="*">VIEW</td>
                                 <td width="1%">
                                     <input
                                         bind:group={adminrule_rule_field}
                                         type="checkbox"
-                                        value="SDSB4DNIGHT-VIEW"
-                                    />
+                                        value="SERIES-VIEW"/>
+                                </td>
+                                <td width="*">VIEW</td>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="NEWSMOVIE-VIEW"/>
                                 </td>
                                 <td width="*">VIEW</td>
                             </tr>
@@ -237,17 +239,91 @@
                                     <input
                                         bind:group={adminrule_rule_field}
                                         type="checkbox"
-                                        value="SDSB4DDAY-SAVE"
-                                    /></td
-                                >
+                                        value="MOVIE-SAVE"/>
+                                </td>
                                 <td width="*">SAVE</td>
                                 <td width="1%">
                                     <input
                                         bind:group={adminrule_rule_field}
                                         type="checkbox"
-                                        value="SDSB4DNIGHT-SAVE"
-                                    /></td
-                                >
+                                        value="SERIES-SAVE"/>
+                                </td>
+                                <td width="*">SAVE</td>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="NEWSMOVIE-SAVE"/>
+                                </td>
+                                <td width="*">SAVE</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th colspan="2" NOWRAP>NEWS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="NEWS-VIEW">
+                                </td>
+                                <td width="*">VIEW</td>
+                            </tr>
+                            <tr>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="NEWS-SAVE"/>
+                                </td>
+                                <td width="*">SAVE</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th colspan="2" NOWRAP>KELUARAN</th>
+                                <th colspan="2" NOWRAP>TAFSIR MIMPI</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="KELUARAN-VIEW">
+                                </td>
+                                <td width="*">VIEW</td>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="TAFSIRMIMPI-VIEW"/>
+                                </td>
+                                <td width="*">VIEW</td>
+                            </tr>
+                            <tr>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="KELUARAN-SAVE"/>
+                                </td>
+                                <td width="*">SAVE</td>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="TAFSIRMIMPI-SAVE"/>
+                                </td>
                                 <td width="*">SAVE</td>
                             </tr>
                         </tbody>

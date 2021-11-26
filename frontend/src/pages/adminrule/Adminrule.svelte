@@ -11,7 +11,7 @@
     export let table_header_font = "";
     export let table_body_font = "";
     let token = localStorage.getItem("token");
-    let akses_page = true;
+    let akses_page = false;
 
     async function initapp() {
         const res = await fetch("/api/valid", {
@@ -29,8 +29,8 @@
             logout();
         } else if (json.status == 403) {
             alert(json.message);
-            akses_page = false;
         } else {
+            akses_page = true;
             initAdminrule();
         }
     }
@@ -65,29 +65,6 @@
             logout();
         }
     }
-    async function editAdminrule(e, f) {
-        // const res = await fetch("/api/editadminrule", {
-        //     method: "POST",
-        //     headers: {
-        //         "Content-Type": "application/json",
-        //         Authorization: "Bearer " + token,
-        //     },
-        //     body: JSON.stringify({
-        //         idrule: e,
-        //     }),
-        // });
-        // const json = await res.json();
-        // let record = json.record;
-        // if (json.status === 400) {
-        //     logout();
-        // } else {
-        //     for (let i = 0; i < record.length; i++) {
-        //         adminrule_rule_field = record[i]["adminrule_rule"];
-        //         adminrule_create_field = record[i]["adminrule_create"];
-        //         adminrule_update_field = record[i]["adminrule_update"];
-        //     }
-        // }
-    }
     async function logout() {
         localStorage.clear();
         window.location.href = "/";
@@ -103,8 +80,6 @@
         adminrule_idadmin = e.detail.e;
         adminrule_rule = e.detail.f;
         sData = "Edit";
-        // alert(adminrule_idadmin + "-" + adminrule_rule);
-        // editAdmin(admin_username);
     };
     const handleRefreshData = (e) => {
         listAdminrule = [];
@@ -116,24 +91,26 @@
     initapp();
 </script>
 
-{#if sData == "" && adminrule_idadmin == ""}
-    <Home
-        on:handleEditData={handleEditData}
-        on:handleRefreshData={handleRefreshData}
-        {token}
-        {table_header_font}
-        {table_body_font}
-        {listAdminrule}
-        {totalrecord}
-    />
-{:else}
-    <Entry
-        on:handleBackHalaman={handleBackHalaman}
-        {sData}
-        {token}
-        {table_header_font}
-        {table_body_font}
-        {adminrule_idadmin}
-        {adminrule_rule}
-    />
+{#if akses_page == true}
+    {#if sData == "" && adminrule_idadmin == ""}
+        <Home
+            on:handleEditData={handleEditData}
+            on:handleRefreshData={handleRefreshData}
+            {token}
+            {table_header_font}
+            {table_body_font}
+            {listAdminrule}
+            {totalrecord}
+        />
+    {:else}
+        <Entry
+            on:handleBackHalaman={handleBackHalaman}
+            {sData}
+            {token}
+            {table_header_font}
+            {table_body_font}
+            {adminrule_idadmin}
+            {adminrule_rule}
+        />
+    {/if}
 {/if}

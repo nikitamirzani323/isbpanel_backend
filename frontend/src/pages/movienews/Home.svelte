@@ -670,7 +670,7 @@
 	modal_id="modalcategory"
 	modal_size="modal-dialog-centered"
 	modal_title="CATEGORY"
-    modal_body_css="height:500px;"
+    modal_body_css="height:500px;overflow-y: scroll;"
     modal_footer_css="padding:5px;"
 	modal_footer={true}>
 	<slot:template slot="body">

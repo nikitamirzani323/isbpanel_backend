@@ -5,7 +5,7 @@
     export let table_body_font = "";
     
     let token = localStorage.getItem("token");
-    let akses_page = true;
+    let akses_page = false;
     let listHome = [];
     let sData = "";
     let search = "";
@@ -21,7 +21,7 @@
                 Authorization: "Bearer " + token,
             },
             body: JSON.stringify({
-                page: "NEWS-VIEW",
+                page: "NEWSMOVIE-VIEW",
             }),
         });
         const json = await res.json();
@@ -29,8 +29,8 @@
             logout();
         } else if (json.status == 403) {
             alert(json.message);
-            akses_page = false;
         } else {
+            akses_page = true;
             initHome("");
         }
     }
@@ -93,6 +93,7 @@
    };
     initapp()
 </script>
+{#if akses_page == true}
 <Home
     on:handleNews={handleNews}
     on:handleRefreshData={handleRefreshData}
@@ -100,5 +101,5 @@
     {table_header_font}
     {table_body_font}
     {listHome}
-    {totalrecord}
-/>
+    {totalrecord}/>
+{/if}

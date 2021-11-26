@@ -5,7 +5,7 @@
     export let table_body_font = "";
     
     let token = localStorage.getItem("token");
-    let akses_page = true;
+    let akses_page = false;
     let listHome = [];
     let listPage = [];
     let sData = "";
@@ -26,7 +26,7 @@
                 Authorization: "Bearer " + token,
             },
             body: JSON.stringify({
-                page: "MOVIE-VIEW",
+                page: "SERIES-VIEW",
             }),
         });
         const json = await res.json();
@@ -34,8 +34,8 @@
             logout();
         } else if (json.status == 403) {
             alert(json.message);
-            akses_page = false;
         } else {
+            akses_page = true;
             initHome("");
         }
     }
@@ -147,6 +147,7 @@
     };
     initapp()
 </script>
+{#if akses_page == true}
 <Home
     on:handlePaging={handlePaging}
     on:handleMovie={handleMovie}
@@ -156,5 +157,5 @@
     {table_body_font}
     {listPage}
     {listHome}
-    {totalrecord}
-/>
+    {totalrecord}/>
+{/if}
