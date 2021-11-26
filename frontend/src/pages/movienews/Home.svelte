@@ -12,7 +12,7 @@
 	export let listHome = []
 	export let totalrecord = 0
     let dispatch = createEventDispatcher();
-    let title_page = "NEWS"
+    let title_page = "NEWS MOVIE"
     let sData = "";
     let myModal = "";
     
@@ -483,11 +483,6 @@
         <div class="col-sm-6">
             <Button
                 on:click={callFunction}
-                button_function="CALL_CATEGORY"
-                button_title="Category"
-                button_css="btn-primary"/>
-            <Button
-                on:click={callFunction}
                 button_function="REFRESH"
                 button_title="Refresh"
                 button_css="btn-primary"/>
@@ -512,7 +507,7 @@
                         <table class="table table-striped table-hover table-sm">
                             <thead>
                                 <tr>
-                                    <th NOWRAP width="1%" style="text-align: center;vertical-align: top;" colspan="2">&nbsp;</th>
+                                    <th NOWRAP width="1%" style="text-align: center;vertical-align: top;">&nbsp;</th>
                                     <th NOWRAP width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NO</th>
                                     <th NOWRAP width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">NEWS</th>
                                 </tr>
@@ -521,13 +516,6 @@
                             <tbody>
                                 {#each filterNews as rec }
                                     <tr>
-                                        <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
-                                            <i 
-                                                on:click={() => {
-                                                    ShowFormNews("Edit",rec.news_id,rec.news_idcategory,rec.news_title,rec.news_descp,rec.news_url,rec.news_image)
-                                                }} 
-                                                class="bi bi-pencil"></i>
-                                        </td>
                                         <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
                                             <i 
                                                 on:click={() => {
@@ -540,6 +528,7 @@
                                             CATEGORY : {rec.news_category}<br>
                                             <a href="{rec.news_url}" target="_blank">{rec.news_title}</a><br>
                                             <img width="100" src="{rec.news_image}" class="img-thumbnail" alt="...">
+                                            
                                         </td>
                                     </tr>
                                 {/each}

@@ -16,6 +16,7 @@ import (
 const Fieldnews_home_redis = "LISTNEWS_BACKEND_ISBPANEL"
 const Fieldcategory_home_redis = "LISTCATEGORY_BACKEND_ISBPANEL"
 const Fieldnews_client_home_redis = "LISTNEWS_FRONTEND_ISBPANEL"
+const Fieldnewsmovie_client_home_redis = "LISTNEWSMOVIES_FRONTEND_ISBPANEL"
 
 func Newshome(c *fiber.Ctx) error {
 	var errors []*helpers.ErrorResponse
@@ -150,7 +151,8 @@ func Newssave(c *fiber.Ctx) error {
 	log.Printf("Redis Delete BACKEND NEWS : %d", val_news)
 	val_client_news := helpers.DeleteRedis(Fieldnews_client_home_redis)
 	log.Printf("Redis Delete CLIENT NEWS : %d", val_client_news)
-
+	val_client_newsmovie := helpers.DeleteRedis(Fieldnewsmovie_client_home_redis)
+	log.Printf("Redis Delete CLIENT NEWS MOVIE : %d", val_client_newsmovie)
 	return c.JSON(result)
 }
 func Newsdelete(c *fiber.Ctx) error {
@@ -200,6 +202,8 @@ func Newsdelete(c *fiber.Ctx) error {
 	log.Printf("Redis Delete BACKEND NEWS : %d", val_news)
 	val_client_news := helpers.DeleteRedis(Fieldnews_client_home_redis)
 	log.Printf("Redis Delete CLIENT NEWS : %d", val_client_news)
+	val_client_newsmovie := helpers.DeleteRedis(Fieldnewsmovie_client_home_redis)
+	log.Printf("Redis Delete CLIENT NEWS MOVIE : %d", val_client_newsmovie)
 	return c.JSON(result)
 }
 func Categoryhome(c *fiber.Ctx) error {
