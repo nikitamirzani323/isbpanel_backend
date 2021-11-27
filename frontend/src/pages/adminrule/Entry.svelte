@@ -331,6 +331,7 @@
                     <table class="table">
                         <thead>
                             <tr>
+                                <th colspan="2">DOMAIN MANAGEMENT</th>
                                 <th colspan="2">ADMIN MANAGEMENT</th>
                                 <th colspan="2">ADMIN RULE</th>
                             </tr>
@@ -341,16 +342,21 @@
                                     <input
                                         bind:group={adminrule_rule_field}
                                         type="checkbox"
-                                        value="ADMIN-VIEW"
-                                    />
+                                        value="DOMAIN-VIEW"/>
                                 </td>
                                 <td width="*">VIEW</td>
                                 <td width="1%">
                                     <input
                                         bind:group={adminrule_rule_field}
                                         type="checkbox"
-                                        value="ADMINRULE-VIEW"
-                                    />
+                                        value="ADMIN-VIEW"/>
+                                </td>
+                                <td width="*">VIEW</td>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="ADMINRULE-VIEW"/>
                                 </td>
                                 <td width="*">VIEW</td>
                             </tr>
@@ -359,17 +365,22 @@
                                     <input
                                         bind:group={adminrule_rule_field}
                                         type="checkbox"
-                                        value="ADMIN-SAVE"
-                                    /></td
-                                >
+                                        value="DOMAIN-SAVE"/>
+                                </td>
                                 <td width="*">SAVE</td>
                                 <td width="1%">
                                     <input
                                         bind:group={adminrule_rule_field}
                                         type="checkbox"
-                                        value="ADMINRULE-SAVE"
-                                    /></td
-                                >
+                                        value="ADMIN-SAVE"/>
+                                </td>
+                                <td width="*">SAVE</td>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="ADMINRULE-SAVE"/>
+                                </td>
                                 <td width="*">SAVE</td>
                             </tr>
                         </tbody>

@@ -11,6 +11,7 @@
 	import Movie from "./pages/movie/Movie.svelte";
 	import Series from "./pages/series/Series.svelte";
 	import Movienews from "./pages/movienews/Movienews.svelte";
+	import Domain from "./pages/domain/Domain.svelte";
 	import Login from "./pages/Login.svelte";
 	import NotFound from "./pages/NotFound.svelte";
 	export let table_header_font;
@@ -34,6 +35,13 @@
 					table_body_font: table_body_font,
 				},
 				component: Dashboard,
+			}),
+			"/domain": wrap({
+				component: Domain,
+				props: {
+					table_header_font: table_header_font,
+					table_body_font: table_body_font,
+				},
 			}),
 			"/movienews": wrap({
 				component: Movienews,

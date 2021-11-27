@@ -97,6 +97,7 @@
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <li>
+                                <a class="dropdown-item" use:link href="/domain" style="font-size: 13px;">DOMAIN MANAGEMENT</a>
                                 <a class="dropdown-item" use:link href="/admin" style="font-size: 13px;">ADMIN MANAGEMENT</a>
                                 <a class="dropdown-item" use:link href="/adminrule" style="font-size: 13px;">ADMIN RULE</a>
                             </li>
@@ -109,7 +110,6 @@
                         handleLogout();
                         }}
                         class="btn btn-warning btn-sm">LOGOUT</button>
-                    >
                 </form>
             </div>
         </div>

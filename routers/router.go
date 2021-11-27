@@ -89,5 +89,8 @@ func Init() *fiber.App {
 	app.Post("/api/slider", middleware.JWTProtected(), controllers.Sliderhome)
 	app.Post("/api/slidersave", middleware.JWTProtected(), controllers.Slidersave)
 	app.Post("/api/sliderdelete", middleware.JWTProtected(), controllers.Sliderdelete)
+
+	app.Post("/api/domain", middleware.JWTProtected(), controllers.Domainhome)
+	app.Post("/api/domainsave", middleware.JWTProtected(), controllers.DomainSave)
 	return app
 }
