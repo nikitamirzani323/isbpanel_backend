@@ -266,28 +266,40 @@ func Moviesave(c *fiber.Ctx) error {
 	claims := user.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
 	temp_decp := helpers.Decryption(name)
-	client_admin, _ := helpers.Parsing_Decry(temp_decp, "==")
+	client_admin, idruleadmin := helpers.Parsing_Decry(temp_decp, "==")
 
-	result, err := models.Save_movie(
-		client_admin,
-		client.Movie_name, client.Movie_label, client.Movie_slug, client.Movie_tipe, client.Movie_descp, client.Movie_urlmovie,
-		string(client.Movie_gender), string(client.Movie_source),
-		client.Sdata, client.Movie_id, client.Movie_year, client.Movie_status, client.Movie_imdb)
-	if err != nil {
-		c.Status(fiber.StatusBadRequest)
+	ruleadmin := models.Get_AdminRule("ruleadmingroup", idruleadmin)
+	flag := models.Get_listitemsearch(ruleadmin, ",", client.Page)
+
+	if !flag {
+		c.Status(fiber.StatusForbidden)
 		return c.JSON(fiber.Map{
-			"status":  fiber.StatusBadRequest,
-			"message": err.Error(),
+			"status":  fiber.StatusForbidden,
+			"message": "Anda tidak bisa akses halaman ini",
 			"record":  nil,
 		})
+	} else {
+		result, err := models.Save_movie(
+			client_admin,
+			client.Movie_name, client.Movie_label, client.Movie_slug, client.Movie_tipe, client.Movie_descp, client.Movie_urlmovie,
+			string(client.Movie_gender), string(client.Movie_source),
+			client.Sdata, client.Movie_id, client.Movie_year, client.Movie_status, client.Movie_imdb)
+		if err != nil {
+			c.Status(fiber.StatusBadRequest)
+			return c.JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": err.Error(),
+				"record":  nil,
+			})
+		}
+		val_movie := helpers.DeleteRedis(Fieldmovie_home_redis + "_" + strconv.Itoa(client.Movie_page) + "_")
+		log.Printf("Redis Delete BACKEND MOVIE : %d", val_movie)
+		val_movieseries := helpers.DeleteRedis(Fieldmovieseries_home_redis + "_" + strconv.Itoa(client.Movie_page) + "_")
+		log.Printf("Redis Delete BACKEND MOVIE SERIES : %d", val_movieseries)
+		val_clientmovie := helpers.DeleteRedis(Fieldmovie_client_redis)
+		log.Printf("Redis Delete CLIENT MOVIE : %d", val_clientmovie)
+		return c.JSON(result)
 	}
-	val_movie := helpers.DeleteRedis(Fieldmovie_home_redis + "_" + strconv.Itoa(client.Movie_page) + "_")
-	log.Printf("Redis Delete BACKEND MOVIE : %d", val_movie)
-	val_movieseries := helpers.DeleteRedis(Fieldmovieseries_home_redis + "_" + strconv.Itoa(client.Movie_page) + "_")
-	log.Printf("Redis Delete BACKEND MOVIE SERIES : %d", val_movieseries)
-	val_clientmovie := helpers.DeleteRedis(Fieldmovie_client_redis)
-	log.Printf("Redis Delete CLIENT MOVIE : %d", val_clientmovie)
-	return c.JSON(result)
 }
 func Moviedelete(c *fiber.Ctx) error {
 	var errors []*helpers.ErrorResponse
@@ -505,29 +517,41 @@ func Movieseriessave(c *fiber.Ctx) error {
 	claims := user.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
 	temp_decp := helpers.Decryption(name)
-	client_admin, _ := helpers.Parsing_Decry(temp_decp, "==")
+	client_admin, idruleadmin := helpers.Parsing_Decry(temp_decp, "==")
+	log.Println("RULE :" + client.Page)
+	ruleadmin := models.Get_AdminRule("ruleadmingroup", idruleadmin)
+	flag := models.Get_listitemsearch(ruleadmin, ",", client.Page)
 
-	result, err := models.Save_movieseries(
-		client_admin,
-		client.Movie_name, client.Movie_label, client.Movie_slug, client.Movie_tipe, client.Movie_descp, client.Movie_urlmovie,
-		string(client.Movie_gender),
-		client.Sdata, client.Movie_id, client.Movie_year, client.Movie_status, client.Movie_imdb)
-	if err != nil {
-		c.Status(fiber.StatusBadRequest)
+	if !flag {
+		c.Status(fiber.StatusForbidden)
 		return c.JSON(fiber.Map{
-			"status":  fiber.StatusBadRequest,
-			"message": err.Error(),
+			"status":  fiber.StatusForbidden,
+			"message": "Anda tidak bisa akses halaman ini",
 			"record":  nil,
 		})
-	}
+	} else {
+		result, err := models.Save_movieseries(
+			client_admin,
+			client.Movie_name, client.Movie_label, client.Movie_slug, client.Movie_tipe, client.Movie_descp, client.Movie_urlmovie,
+			string(client.Movie_gender),
+			client.Sdata, client.Movie_id, client.Movie_year, client.Movie_status, client.Movie_imdb)
+		if err != nil {
+			c.Status(fiber.StatusBadRequest)
+			return c.JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": err.Error(),
+				"record":  nil,
+			})
+		}
 
-	val_movie := helpers.DeleteRedis(Fieldmovie_home_redis + "_" + strconv.Itoa(client.Movie_page) + "_")
-	log.Printf("Redis Delete BACKEND MOVIE : %d", val_movie)
-	val_movieseries := helpers.DeleteRedis(Fieldmovieseries_home_redis + "_" + strconv.Itoa(client.Movie_page) + "_")
-	log.Printf("Redis Delete BACKEND MOVIE SERIES : %d", val_movieseries)
-	val_clientmovie := helpers.DeleteRedis(Fieldmovie_client_redis)
-	log.Printf("Redis Delete CLIENT MOVIE : %d", val_clientmovie)
-	return c.JSON(result)
+		val_movie := helpers.DeleteRedis(Fieldmovie_home_redis + "_" + strconv.Itoa(client.Movie_page) + "_")
+		log.Printf("Redis Delete BACKEND MOVIE : %d", val_movie)
+		val_movieseries := helpers.DeleteRedis(Fieldmovieseries_home_redis + "_" + strconv.Itoa(client.Movie_page) + "_")
+		log.Printf("Redis Delete BACKEND MOVIE SERIES : %d", val_movieseries)
+		val_clientmovie := helpers.DeleteRedis(Fieldmovie_client_redis)
+		log.Printf("Redis Delete CLIENT MOVIE : %d", val_clientmovie)
+		return c.JSON(result)
+	}
 }
 func Seasonhome(c *fiber.Ctx) error {
 	var errors []*helpers.ErrorResponse
@@ -632,24 +656,36 @@ func Seasonsave(c *fiber.Ctx) error {
 	claims := user.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
 	temp_decp := helpers.Decryption(name)
-	client_admin, _ := helpers.Parsing_Decry(temp_decp, "==")
+	client_admin, idruleadmin := helpers.Parsing_Decry(temp_decp, "==")
+	log.Println("RULE :" + client.Page)
+	ruleadmin := models.Get_AdminRule("ruleadmingroup", idruleadmin)
+	flag := models.Get_listitemsearch(ruleadmin, ",", client.Page)
 
-	result, err := models.Save_season(
-		client_admin,
-		client.Movieseason_name, client.Sdata, client.Movieseason_id, client.Movie_id, client.Movieseason_display)
-	if err != nil {
-		c.Status(fiber.StatusBadRequest)
+	if !flag {
+		c.Status(fiber.StatusForbidden)
 		return c.JSON(fiber.Map{
-			"status":  fiber.StatusBadRequest,
-			"message": err.Error(),
+			"status":  fiber.StatusForbidden,
+			"message": "Anda tidak bisa akses halaman ini",
 			"record":  nil,
 		})
+	} else {
+		result, err := models.Save_season(
+			client_admin,
+			client.Movieseason_name, client.Sdata, client.Movieseason_id, client.Movie_id, client.Movieseason_display)
+		if err != nil {
+			c.Status(fiber.StatusBadRequest)
+			return c.JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": err.Error(),
+				"record":  nil,
+			})
+		}
+		val_season := helpers.DeleteRedis(Fieldmovieseriesseason_home_redis + "_" + strconv.Itoa(client.Movie_id))
+		log.Printf("Redis Delete BACKEND MOVIE SEASON : %d", val_season)
+		val_movieseries := helpers.DeleteRedis(Fieldmovieseries_home_redis + "_" + strconv.Itoa(client.Movie_page) + "_")
+		log.Printf("Redis Delete BACKEND MOVIE SERIES : %d", val_movieseries)
+		return c.JSON(result)
 	}
-	val_season := helpers.DeleteRedis(Fieldmovieseriesseason_home_redis + "_" + strconv.Itoa(client.Movie_id))
-	log.Printf("Redis Delete BACKEND MOVIE SEASON : %d", val_season)
-	val_movieseries := helpers.DeleteRedis(Fieldmovieseries_home_redis + "_" + strconv.Itoa(client.Movie_page) + "_")
-	log.Printf("Redis Delete BACKEND MOVIE SERIES : %d", val_movieseries)
-	return c.JSON(result)
 }
 func Seasondelete(c *fiber.Ctx) error {
 	var errors []*helpers.ErrorResponse
@@ -683,22 +719,35 @@ func Seasondelete(c *fiber.Ctx) error {
 	claims := user.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
 	temp_decp := helpers.Decryption(name)
-	client_admin, _ := helpers.Parsing_Decry(temp_decp, "==")
+	client_admin, idruleadmin := helpers.Parsing_Decry(temp_decp, "==")
+	log.Println("RULE :" + client.Page)
+	ruleadmin := models.Get_AdminRule("ruleadmingroup", idruleadmin)
+	flag := models.Get_listitemsearch(ruleadmin, ",", client.Page)
 
-	result, err := models.Delete_season(client_admin, client.Movieseason_id, client.Movie_id)
-	if err != nil {
-		c.Status(fiber.StatusBadRequest)
+	if !flag {
+		c.Status(fiber.StatusForbidden)
 		return c.JSON(fiber.Map{
-			"status":  fiber.StatusBadRequest,
-			"message": err.Error(),
+			"status":  fiber.StatusForbidden,
+			"message": "Anda tidak bisa akses halaman ini",
 			"record":  nil,
 		})
+	} else {
+
+		result, err := models.Delete_season(client_admin, client.Movieseason_id, client.Movie_id)
+		if err != nil {
+			c.Status(fiber.StatusBadRequest)
+			return c.JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": err.Error(),
+				"record":  nil,
+			})
+		}
+		val_season := helpers.DeleteRedis(Fieldmovieseriesseason_home_redis + "_" + strconv.Itoa(client.Movie_id))
+		log.Printf("Redis Delete BACKEND MOVIE SEASON : %d", val_season)
+		val_movieseries := helpers.DeleteRedis(Fieldmovieseries_home_redis + "_1_")
+		log.Printf("Redis Delete BACKEND MOVIE SERIES : %d", val_movieseries)
+		return c.JSON(result)
 	}
-	val_season := helpers.DeleteRedis(Fieldmovieseriesseason_home_redis + "_" + strconv.Itoa(client.Movie_id))
-	log.Printf("Redis Delete BACKEND MOVIE SEASON : %d", val_season)
-	val_movieseries := helpers.DeleteRedis(Fieldmovieseries_home_redis + "_1_")
-	log.Printf("Redis Delete BACKEND MOVIE SERIES : %d", val_movieseries)
-	return c.JSON(result)
 }
 func Episodehome(c *fiber.Ctx) error {
 	var errors []*helpers.ErrorResponse
@@ -817,27 +866,40 @@ func Episodesave(c *fiber.Ctx) error {
 	claims := user.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
 	temp_decp := helpers.Decryption(name)
-	client_admin, _ := helpers.Parsing_Decry(temp_decp, "==")
+	client_admin, idruleadmin := helpers.Parsing_Decry(temp_decp, "==")
+	log.Println("RULE :" + client.Page)
+	ruleadmin := models.Get_AdminRule("ruleadmingroup", idruleadmin)
+	flag := models.Get_listitemsearch(ruleadmin, ",", client.Page)
 
-	result, err := models.Save_episode(
-		client_admin,
-		client.Movieepisode_name, client.Movieepisode_source, client.Sdata,
-		client.Movieepisode_id, client.Movieseason_id, client.Movieepisode_display)
-	if err != nil {
-		c.Status(fiber.StatusBadRequest)
+	if !flag {
+		c.Status(fiber.StatusForbidden)
 		return c.JSON(fiber.Map{
-			"status":  fiber.StatusBadRequest,
-			"message": err.Error(),
+			"status":  fiber.StatusForbidden,
+			"message": "Anda tidak bisa akses halaman ini",
 			"record":  nil,
 		})
+	} else {
+
+		result, err := models.Save_episode(
+			client_admin,
+			client.Movieepisode_name, client.Movieepisode_source, client.Sdata,
+			client.Movieepisode_id, client.Movieseason_id, client.Movieepisode_display)
+		if err != nil {
+			c.Status(fiber.StatusBadRequest)
+			return c.JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": err.Error(),
+				"record":  nil,
+			})
+		}
+		val_episode := helpers.DeleteRedis(Fieldmovieseriesepisode_home_redis + "_" + strconv.Itoa(client.Movieseason_id))
+		log.Printf("Redis Delete BACKEND MOVIE EPISODE : %d", val_episode)
+		val_season := helpers.DeleteRedis(Fieldmovieseriesseason_home_redis + "_" + strconv.Itoa(client.Movie_id))
+		log.Printf("Redis Delete BACKEND MOVIE SEASON : %d", val_season)
+		val_movieseries := helpers.DeleteRedis(Fieldmovieseries_home_redis + "_" + strconv.Itoa(client.Movie_page) + "_")
+		log.Printf("Redis Delete BACKEND MOVIE SERIES : %d", val_movieseries)
+		return c.JSON(result)
 	}
-	val_episode := helpers.DeleteRedis(Fieldmovieseriesepisode_home_redis + "_" + strconv.Itoa(client.Movieseason_id))
-	log.Printf("Redis Delete BACKEND MOVIE EPISODE : %d", val_episode)
-	val_season := helpers.DeleteRedis(Fieldmovieseriesseason_home_redis + "_" + strconv.Itoa(client.Movie_id))
-	log.Printf("Redis Delete BACKEND MOVIE SEASON : %d", val_season)
-	val_movieseries := helpers.DeleteRedis(Fieldmovieseries_home_redis + "_" + strconv.Itoa(client.Movie_page) + "_")
-	log.Printf("Redis Delete BACKEND MOVIE SERIES : %d", val_movieseries)
-	return c.JSON(result)
 }
 func Episodedelete(c *fiber.Ctx) error {
 	var errors []*helpers.ErrorResponse
@@ -871,24 +933,37 @@ func Episodedelete(c *fiber.Ctx) error {
 	claims := user.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
 	temp_decp := helpers.Decryption(name)
-	client_admin, _ := helpers.Parsing_Decry(temp_decp, "==")
+	client_admin, idruleadmin := helpers.Parsing_Decry(temp_decp, "==")
+	log.Println("RULE :" + client.Page)
+	ruleadmin := models.Get_AdminRule("ruleadmingroup", idruleadmin)
+	flag := models.Get_listitemsearch(ruleadmin, ",", client.Page)
 
-	result, err := models.Delete_episode(client_admin, client.Episode_id, client.Season_id)
-	if err != nil {
-		c.Status(fiber.StatusBadRequest)
+	if !flag {
+		c.Status(fiber.StatusForbidden)
 		return c.JSON(fiber.Map{
-			"status":  fiber.StatusBadRequest,
-			"message": err.Error(),
+			"status":  fiber.StatusForbidden,
+			"message": "Anda tidak bisa akses halaman ini",
 			"record":  nil,
 		})
+	} else {
+
+		result, err := models.Delete_episode(client_admin, client.Episode_id, client.Season_id)
+		if err != nil {
+			c.Status(fiber.StatusBadRequest)
+			return c.JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": err.Error(),
+				"record":  nil,
+			})
+		}
+		val_episode := helpers.DeleteRedis(Fieldmovieseriesepisode_home_redis + "_" + strconv.Itoa(client.Season_id))
+		log.Printf("Redis Delete BACKEND MOVIE EPISODE : %d", val_episode)
+		val_season := helpers.DeleteRedis(Fieldmovieseriesseason_home_redis + "_" + strconv.Itoa(client.Movie_id))
+		log.Printf("Redis Delete BACKEND MOVIE SEASON : %d", val_season)
+		val_movieseries := helpers.DeleteRedis(Fieldmovieseries_home_redis + "_1_")
+		log.Printf("Redis Delete BACKEND MOVIE SERIES : %d", val_movieseries)
+		return c.JSON(result)
 	}
-	val_episode := helpers.DeleteRedis(Fieldmovieseriesepisode_home_redis + "_" + strconv.Itoa(client.Season_id))
-	log.Printf("Redis Delete BACKEND MOVIE EPISODE : %d", val_episode)
-	val_season := helpers.DeleteRedis(Fieldmovieseriesseason_home_redis + "_" + strconv.Itoa(client.Movie_id))
-	log.Printf("Redis Delete BACKEND MOVIE SEASON : %d", val_season)
-	val_movieseries := helpers.DeleteRedis(Fieldmovieseries_home_redis + "_1_")
-	log.Printf("Redis Delete BACKEND MOVIE SERIES : %d", val_movieseries)
-	return c.JSON(result)
 }
 func Genrehome(c *fiber.Ctx) error {
 	var obj entities.Model_genre
@@ -967,22 +1042,35 @@ func Genresave(c *fiber.Ctx) error {
 	claims := user.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
 	temp_decp := helpers.Decryption(name)
-	client_admin, _ := helpers.Parsing_Decry(temp_decp, "==")
+	client_admin, idruleadmin := helpers.Parsing_Decry(temp_decp, "==")
+	log.Println("RULE :" + client.Page)
+	ruleadmin := models.Get_AdminRule("ruleadmingroup", idruleadmin)
+	flag := models.Get_listitemsearch(ruleadmin, ",", client.Page)
 
-	result, err := models.Save_genre(
-		client_admin,
-		client.Genre_name, client.Sdata, client.Genre_id, client.Genre_display)
-	if err != nil {
-		c.Status(fiber.StatusBadRequest)
+	if !flag {
+		c.Status(fiber.StatusForbidden)
 		return c.JSON(fiber.Map{
-			"status":  fiber.StatusBadRequest,
-			"message": err.Error(),
+			"status":  fiber.StatusForbidden,
+			"message": "Anda tidak bisa akses halaman ini",
 			"record":  nil,
 		})
+	} else {
+
+		result, err := models.Save_genre(
+			client_admin,
+			client.Genre_name, client.Sdata, client.Genre_id, client.Genre_display)
+		if err != nil {
+			c.Status(fiber.StatusBadRequest)
+			return c.JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": err.Error(),
+				"record":  nil,
+			})
+		}
+		val_genre := helpers.DeleteRedis(Fieldgenre_home_redis)
+		log.Printf("Redis Delete BACKEND MOVIE GENRE : %d", val_genre)
+		return c.JSON(result)
 	}
-	val_genre := helpers.DeleteRedis(Fieldgenre_home_redis)
-	log.Printf("Redis Delete BACKEND MOVIE GENRE : %d", val_genre)
-	return c.JSON(result)
 }
 func Genredelete(c *fiber.Ctx) error {
 	var errors []*helpers.ErrorResponse
@@ -1016,20 +1104,33 @@ func Genredelete(c *fiber.Ctx) error {
 	claims := user.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
 	temp_decp := helpers.Decryption(name)
-	client_admin, _ := helpers.Parsing_Decry(temp_decp, "==")
+	client_admin, idruleadmin := helpers.Parsing_Decry(temp_decp, "==")
+	log.Println("RULE :" + client.Page)
+	ruleadmin := models.Get_AdminRule("ruleadmingroup", idruleadmin)
+	flag := models.Get_listitemsearch(ruleadmin, ",", client.Page)
 
-	result, err := models.Delete_genre(client_admin, client.Genre_id)
-	if err != nil {
-		c.Status(fiber.StatusBadRequest)
+	if !flag {
+		c.Status(fiber.StatusForbidden)
 		return c.JSON(fiber.Map{
-			"status":  fiber.StatusBadRequest,
-			"message": err.Error(),
+			"status":  fiber.StatusForbidden,
+			"message": "Anda tidak bisa akses halaman ini",
 			"record":  nil,
 		})
+	} else {
+
+		result, err := models.Delete_genre(client_admin, client.Genre_id)
+		if err != nil {
+			c.Status(fiber.StatusBadRequest)
+			return c.JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": err.Error(),
+				"record":  nil,
+			})
+		}
+		val_genre := helpers.DeleteRedis(Fieldgenre_home_redis)
+		log.Printf("Redis Delete BACKEND MOVIE GENRE : %d", val_genre)
+		return c.JSON(result)
 	}
-	val_genre := helpers.DeleteRedis(Fieldgenre_home_redis)
-	log.Printf("Redis Delete BACKEND MOVIE GENRE : %d", val_genre)
-	return c.JSON(result)
 }
 
 type responseuploadcloudflare struct {
@@ -1118,25 +1219,43 @@ func Movieupdatecloud(c *fiber.Ctx) error {
 	if client.Movie_tipe == "LOCK" {
 		flag_lock = true
 	}
-	axios := resty.New()
-	resp, err := axios.R().
-		SetResult(responseuploadcloudflare{}).
-		SetError(responseuploadcloudflare{}).
-		SetAuthToken("8x02SSARJt_A5B77KnL2oW74qwDPFKA_9DORcf1-").
-		SetBody(map[string]interface{}{
-			"id":                client.Movie_id,
-			"requireSignedURLs": flag_lock,
-		}).
-		SetContentLength(true).
-		Patch("https://api.cloudflare.com/client/v4/accounts/dc5ba4b3b061907a5e1f8cdf1ae1ec96/images/v1/" + client.Movie_id)
-	if err != nil {
-		log.Println(err.Error())
+	user := c.Locals("jwt").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	temp_decp := helpers.Decryption(name)
+	_, idruleadmin := helpers.Parsing_Decry(temp_decp, "==")
+	log.Println("RULE :" + client.Page)
+	ruleadmin := models.Get_AdminRule("ruleadmingroup", idruleadmin)
+	flag := models.Get_listitemsearch(ruleadmin, ",", client.Page)
+
+	if !flag {
+		c.Status(fiber.StatusForbidden)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusForbidden,
+			"message": "Anda tidak bisa akses halaman ini",
+			"record":  nil,
+		})
+	} else {
+		axios := resty.New()
+		resp, err := axios.R().
+			SetResult(responseuploadcloudflare{}).
+			SetError(responseuploadcloudflare{}).
+			SetAuthToken("8x02SSARJt_A5B77KnL2oW74qwDPFKA_9DORcf1-").
+			SetBody(map[string]interface{}{
+				"id":                client.Movie_id,
+				"requireSignedURLs": flag_lock,
+			}).
+			SetContentLength(true).
+			Patch("https://api.cloudflare.com/client/v4/accounts/dc5ba4b3b061907a5e1f8cdf1ae1ec96/images/v1/" + client.Movie_id)
+		if err != nil {
+			log.Println(err.Error())
+		}
+		result := resp.Result().(*responseuploadcloudflare)
+		return c.JSON(fiber.Map{
+			"status": result.Status,
+			"record": result.Record,
+		})
 	}
-	result := resp.Result().(*responseuploadcloudflare)
-	return c.JSON(fiber.Map{
-		"status": result.Status,
-		"record": result.Record,
-	})
 }
 func Moviedeletecloud(c *fiber.Ctx) error {
 	var errors []*helpers.ErrorResponse
@@ -1166,21 +1285,39 @@ func Moviedeletecloud(c *fiber.Ctx) error {
 			"record":  errors,
 		})
 	}
-	axios := resty.New()
-	resp, err := axios.R().
-		SetResult(responseuploadcloudflare{}).
-		SetError(responseuploadcloudflare{}).
-		SetAuthToken("8x02SSARJt_A5B77KnL2oW74qwDPFKA_9DORcf1-").
-		SetContentLength(true).
-		Delete("https://api.cloudflare.com/client/v4/accounts/dc5ba4b3b061907a5e1f8cdf1ae1ec96/images/v1/" + client.Movie_id)
-	if err != nil {
-		log.Println(err.Error())
+	user := c.Locals("jwt").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	temp_decp := helpers.Decryption(name)
+	_, idruleadmin := helpers.Parsing_Decry(temp_decp, "==")
+	log.Println("RULE :" + client.Page)
+	ruleadmin := models.Get_AdminRule("ruleadmingroup", idruleadmin)
+	flag := models.Get_listitemsearch(ruleadmin, ",", client.Page)
+
+	if !flag {
+		c.Status(fiber.StatusForbidden)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusForbidden,
+			"message": "Anda tidak bisa akses halaman ini",
+			"record":  nil,
+		})
+	} else {
+		axios := resty.New()
+		resp, err := axios.R().
+			SetResult(responseuploadcloudflare{}).
+			SetError(responseuploadcloudflare{}).
+			SetAuthToken("8x02SSARJt_A5B77KnL2oW74qwDPFKA_9DORcf1-").
+			SetContentLength(true).
+			Delete("https://api.cloudflare.com/client/v4/accounts/dc5ba4b3b061907a5e1f8cdf1ae1ec96/images/v1/" + client.Movie_id)
+		if err != nil {
+			log.Println(err.Error())
+		}
+		result := resp.Result().(*responseuploadcloudflare)
+		return c.JSON(fiber.Map{
+			"status": result.Status,
+			"record": result.Record,
+		})
 	}
-	result := resp.Result().(*responseuploadcloudflare)
-	return c.JSON(fiber.Map{
-		"status": result.Status,
-		"record": result.Record,
-	})
 }
 func Moviecloud(c *fiber.Ctx) error {
 	axios := resty.New()

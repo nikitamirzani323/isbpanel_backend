@@ -68,7 +68,7 @@
     let genre_css = "";
     let css_loader = "display: none;";
     let msgloader = "";
-    let pagingnow = 1;
+    let pagingnow = 0;
     
     $: {
         if (searchMovie) {
@@ -399,7 +399,7 @@
                 },
                 body: JSON.stringify({
                     sdata: sData,
-                    page:"MOVIEEPISODE-SAVE",
+                    page:"MOVIE-SAVE",
                     movie_page: parseInt(pagingnow),
                     movie_id: parseInt(season_field_idmovie),
                     movieseason_id: parseInt(episode_field_seasonid),
@@ -456,7 +456,7 @@
                 },
                 body: JSON.stringify({
                     sdata: sData,
-                    page:"MOVIESEASON-SAVE",
+                    page:"MOVIE-SAVE",
                     movie_page: parseInt(pagingnow),
                     movie_id: parseInt(season_field_idmovie),
                     movieseason_id: parseInt(season_field_idrecord),
@@ -511,7 +511,7 @@
                 },
                 body: JSON.stringify({
                     sdata: sData,
-                    page:"MOVIEGENRE-SAVE",
+                    page:"MOVIE-SAVE",
                     genre_id: parseInt(genre_field_idrecord),
                     genre_name: genre_field_name.toUpperCase(),
                     genre_display: parseInt(genre_field_display),
@@ -612,7 +612,7 @@
         msgloader = "Sending...";
         const formData = new FormData();
         formData.append('sdata', sData);
-        formData.append('page', "MOVIECLOUDUPLOAD-SAVE");
+        formData.append('page', "MOVIE-SAVE");
         formData.append('file', files[0]);
         const res = await fetch("/api/moviecloudupload", {
             method: "POST",
@@ -647,7 +647,7 @@
             },
             body: JSON.stringify({
                 sdata: "Edit",
-                page:"MOVIEUPLOAD-UPDATE",
+                page:"MOVIE-SAVE",
                 movie_id: id,
                 movie_tipe: e,
             }),
@@ -677,7 +677,7 @@
             },
             body: JSON.stringify({
                 sdata: "Edit",
-                page:"MOVIECLOUD-DELETE",
+                page:"MOVIE-DELETE",
                 movie_id: id,
             }),
         });
@@ -766,7 +766,7 @@
                     Authorization: "Bearer " + token,
                 },
                 body: JSON.stringify({
-                    page:"MOVIESEASON-DELETE",
+                    page:"MOVIE-DELETE",
                     movie_page: parseInt(pagingnow),
                     movie_id: parseInt(season_field_idmovie),
                     movieseason_id: parseInt(e),
@@ -811,7 +811,7 @@
                     Authorization: "Bearer " + token,
                 },
                 body: JSON.stringify({
-                    page:"MOVIEEPISODE-DELETE",
+                    page:"MOVIE-DELETE",
                     movie_page: parseInt(pagingnow),
                     movie_id: parseInt(season_field_idmovie),
                     season_id: parseInt(idseason),

@@ -89,7 +89,7 @@ type Controller_moviemini struct {
 type Controller_moviesave struct {
 	Page           string          `json:"page" validate:"required"`
 	Sdata          string          `json:"sdata" validate:"required"`
-	Movie_page     int             `json:"movie_page" validate:"required"`
+	Movie_page     int             `json:"movie_page" `
 	Movie_id       int             `json:"movie_id"`
 	Movie_name     string          `json:"movie_name" validate:"required"`
 	Movie_label    string          `json:"movie_label" validate:"required"`
@@ -105,13 +105,13 @@ type Controller_moviesave struct {
 }
 type Controller_moviedelete struct {
 	Page       string `json:"page" validate:"required"`
-	Movie_page int    `json:"movie_page" validate:"required"`
+	Movie_page int    `json:"movie_page" `
 	Movie_id   int    `json:"movie_id" validate:"required"`
 }
 type Controller_movieseriessave struct {
 	Page           string          `json:"page" validate:"required"`
 	Sdata          string          `json:"sdata" validate:"required"`
-	Movie_page     int             `json:"movie_page" validate:"required"`
+	Movie_page     int             `json:"movie_page" `
 	Movie_id       int             `json:"movie_id"`
 	Movie_name     string          `json:"movie_name" validate:"required"`
 	Movie_label    string          `json:"movie_label" validate:"required"`
@@ -130,7 +130,7 @@ type Controller_movieseason struct {
 type Controller_movieseasonsave struct {
 	Page                string `json:"page" validate:"required"`
 	Sdata               string `json:"sdata" validate:"required"`
-	Movie_page          int    `json:"movie_page" validate:"required"`
+	Movie_page          int    `json:"movie_page" `
 	Movie_id            int    `json:"movie_id" validate:"required"`
 	Movieseason_id      int    `json:"movieseason_id"`
 	Movieseason_name    string `json:"movieseason_name" validate:"required"`
@@ -138,7 +138,7 @@ type Controller_movieseasonsave struct {
 }
 type Controller_movieseasondelete struct {
 	Page           string `json:"page" validate:"required"`
-	Movie_page     int    `json:"movie_page" validate:"required"`
+	Movie_page     int    `json:"movie_page" `
 	Movie_id       int    `json:"movie_id" validate:"required"`
 	Movieseason_id int    `json:"movieseason_id" validate:"required"`
 }
@@ -149,7 +149,7 @@ type Controller_movieepisode struct {
 type Controller_movieepisodesave struct {
 	Page                 string `json:"page" validate:"required"`
 	Sdata                string `json:"sdata" validate:"required"`
-	Movie_page           int    `json:"movie_page" validate:"required"`
+	Movie_page           int    `json:"movie_page" `
 	Movie_id             int    `json:"movie_id" validate:"required"`
 	Movieseason_id       int    `json:"movieseason_id" alidate:"required"`
 	Movieepisode_id      int    `json:"movieepisode_id"`
@@ -159,7 +159,7 @@ type Controller_movieepisodesave struct {
 }
 type Controller_movieepisodedelete struct {
 	Page       string `json:"page" validate:"required"`
-	Movie_page int    `json:"movie_page" validate:"required"`
+	Movie_page int    `json:"movie_page" `
 	Movie_id   int    `json:"movie_id" validate:"required"`
 	Season_id  int    `json:"season_id" validate:"required"`
 	Episode_id int    `json:"episode_id" validate:"required"`

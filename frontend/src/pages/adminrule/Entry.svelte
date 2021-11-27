@@ -257,6 +257,29 @@
                                 </td>
                                 <td width="*">SAVE</td>
                             </tr>
+                            <tr>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="MOVIE-DELETE"/>
+                                </td>
+                                <td width="*">DELETE</td>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="SERIES-DELETE"/>
+                                </td>
+                                <td width="*">DELETE</td>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="NEWSTRAILER-DELETE"/>
+                                </td>
+                                <td width="*">DELETE</td>
+                            </tr>
                         </tbody>
                     </table>
                     <table class="table">
@@ -283,6 +306,15 @@
                                         value="NEWS-SAVE"/>
                                 </td>
                                 <td width="*">SAVE</td>
+                            </tr>
+                            <tr>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="NEWS-DELETE"/>
+                                </td>
+                                <td width="*">DELETE</td>
                             </tr>
                         </tbody>
                     </table>
@@ -325,6 +357,22 @@
                                         value="TAFSIRMIMPI-SAVE"/>
                                 </td>
                                 <td width="*">SAVE</td>
+                            </tr>
+                            <tr>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="KELUARAN-DELETE"/>
+                                </td>
+                                <td width="*">DELETE</td>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="TAFSIRMIMPI-DELETE"/>
+                                </td>
+                                <td width="*">DELETE</td>
                             </tr>
                         </tbody>
                     </table>

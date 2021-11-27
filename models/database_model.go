@@ -177,7 +177,6 @@ func Exec_SQL(sql, table, action string, args ...interface{}) (bool, string) {
 		msg = "Data " + table + " Berhasil di " + action
 	} else {
 		msg = "Data " + table + " Failed di " + action
-		log.Printf("Data %s Failed di %s", table, action)
 	}
 	return flag, msg
 }

@@ -35,6 +35,7 @@
         }
     }
     async function initAdminrule() {
+        listAdminrule = [];
         const res = await fetch("/api/alladminrule", {
             method: "POST",
             headers: {

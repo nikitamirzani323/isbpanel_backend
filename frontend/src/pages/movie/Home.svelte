@@ -60,7 +60,7 @@
     let genre_css = "";
     let css_loader = "display: none;";
     let msgloader = "";
-    let pagingnow = 1;
+    let pagingnow = 0;
     
     $: {
         if (searchMovie) {
@@ -390,7 +390,7 @@
                 },
                 body: JSON.stringify({
                     sdata: "New",
-                    page:"MOVIESLIDER-SAVE",
+                    page:"MOVIE-SAVE",
                     slide_movieid: parseInt(moviemini_field_idmovie),
                     slide_urlimage: moviemini_field_url,
                     Slide_position: parseInt(moviemini_field_display),
@@ -442,7 +442,7 @@
                 },
                 body: JSON.stringify({
                     sdata: sData,
-                    page:"MOVIEGENRE-SAVE",
+                    page:"MOVIE-SAVE",
                     genre_id: parseInt(genre_field_idrecord),
                     genre_name: genre_field_name.toUpperCase(),
                     genre_display: parseInt(genre_field_display),
@@ -542,7 +542,7 @@
         msgloader = "Sending...";
         const formData = new FormData();
         formData.append('sdata', sData);
-        formData.append('page', "MOVIECLOUDUPLOAD-SAVE");
+        formData.append('page', "MOVIE-SAVE");
         formData.append('file', files[0]);
         const res = await fetch("/api/moviecloudupload", {
             method: "POST",
@@ -577,7 +577,7 @@
             },
             body: JSON.stringify({
                 sdata: "Edit",
-                page:"MOVIEUPLOAD-UPDATE",
+                page:"MOVIE-UPDATE",
                 movie_id: id,
                 movie_tipe: e,
             }),
@@ -607,7 +607,7 @@
             },
             body: JSON.stringify({
                 sdata: "Edit",
-                page:"MOVIECLOUD-DELETE",
+                page:"MOVIE-DELETE",
                 movie_id: id,
             }),
         });
@@ -704,7 +704,7 @@
                     Authorization: "Bearer " + token,
                 },
                 body: JSON.stringify({
-                    page:"CATEGORYNEWS-DELETE",
+                    page:"MOVIE-DELETE",
                     category_id: parseInt(e),
                 }),
             });
@@ -741,7 +741,7 @@
                     Authorization: "Bearer " + token,
                 },
                 body: JSON.stringify({
-                    page:"SLIDER-DELETE",
+                    page:"MOVIE-DELETE",
                     slide_id: parseInt(e),
                 }),
             });

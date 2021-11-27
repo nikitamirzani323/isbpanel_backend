@@ -150,21 +150,23 @@
                 totalrecordcategory = record.length;
                 let no = 0
                 for (var i = 0; i < record.length; i++) {
-                    no = no + 1;
-                    listcategory = [
+                    if(parseInt(record[i]["category_id"]) != 2112){
+                        no = no + 1;
+                        listcategory = [
                         ...listcategory,
-                        {
-                            category_no: no,
-                            category_id: record[i]["category_id"],
-                            category_name: record[i]["category_name"],
-                            category_totalnews: record[i]["category_totalnews"],
-                            category_display: record[i]["category_display"],
-                            category_status: record[i]["category_status"],
-                            category_statuscss: record[i]["category_statuscss"],
-                            category_create: record[i]["category_create"],
-                            category_update: record[i]["category_update"],
-                        },
-                    ];
+                            {
+                                category_no: no,
+                                category_id: record[i]["category_id"],
+                                category_name: record[i]["category_name"],
+                                category_totalnews: record[i]["category_totalnews"],
+                                category_display: record[i]["category_display"],
+                                category_status: record[i]["category_status"],
+                                category_statuscss: record[i]["category_statuscss"],
+                                category_create: record[i]["category_create"],
+                                category_update: record[i]["category_update"],
+                            },
+                        ];
+                    }
                 }
             }
         } 

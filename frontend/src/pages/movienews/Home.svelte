@@ -236,7 +236,7 @@
                 },
                 body: JSON.stringify({
                     sdata: sData,
-                    page:"CATEGORYNEWS-SAVE",
+                    page:"NEWSTRAILER-SAVE",
                     category_id: parseInt(category_field_idrecord),
                     category_name: category_field_name.toUpperCase(),
                     category_status: category_field_status,
@@ -275,7 +275,7 @@
             },
             body: JSON.stringify({
                 sdata: sData,
-                page:"NEWS-SAVE",
+                page:"NEWSTRAILER-SAVE",
                 news_id: news_field_idrecord,
                 news_category: news_field_category,
                 news_title: news_field_title,
@@ -315,7 +315,7 @@
                     Authorization: "Bearer " + token,
                 },
                 body: JSON.stringify({
-                    page:"NEWS-DELETE",
+                    page:"NEWSTRAILER-DELETE",
                     news_id: parseInt(e),
                 }),
             });
@@ -352,7 +352,7 @@
                     Authorization: "Bearer " + token,
                 },
                 body: JSON.stringify({
-                    page:"CATEGORYNEWS-DELETE",
+                    page:"NEWSTRAILER-DELETE",
                     category_id: parseInt(e),
                 }),
             });
