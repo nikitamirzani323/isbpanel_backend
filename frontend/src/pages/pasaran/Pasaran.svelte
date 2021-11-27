@@ -21,7 +21,7 @@
                 Authorization: "Bearer " + token,
             },
             body: JSON.stringify({
-                page: "PASARAN-VIEW",
+                page: "KELUARAN-VIEW",
             }),
         });
         const json = await res.json();
