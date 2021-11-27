@@ -10,6 +10,7 @@ type Model_movie struct {
 	Movie_label     string      `json:"movie_label"`
 	Movie_slug      string      `json:"movie_slug"`
 	Movie_descp     string      `json:"movie_descp"`
+	Movie_imgcdn    string      `json:"movie_imgcdn"`
 	Movie_thumbnail string      `json:"movie_thumbnail"`
 	Movie_year      int         `json:"movie_year"`
 	Movie_rating    float32     `json:"movie_rating"`
@@ -39,6 +40,7 @@ type Model_movieseries struct {
 	Movie_label     string      `json:"movie_label"`
 	Movie_slug      string      `json:"movie_slug"`
 	Movie_descp     string      `json:"movie_descp"`
+	Movie_imgcdn    string      `json:"movie_imgcdn"`
 	Movie_thumbnail string      `json:"movie_thumbnail"`
 	Movie_year      int         `json:"movie_year"`
 	Movie_rating    float32     `json:"movie_rating"`
@@ -102,8 +104,9 @@ type Controller_moviesave struct {
 	Movie_source   json.RawMessage `json:"movie_source" `
 }
 type Controller_moviedelete struct {
-	Page     string `json:"page" validate:"required"`
-	Movie_id int    `json:"movie_id" validate:"required"`
+	Page       string `json:"page" validate:"required"`
+	Movie_page int    `json:"movie_page" validate:"required"`
+	Movie_id   int    `json:"movie_id" validate:"required"`
 }
 type Controller_movieseriessave struct {
 	Page           string          `json:"page" validate:"required"`

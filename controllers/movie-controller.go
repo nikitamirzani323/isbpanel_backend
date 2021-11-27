@@ -77,6 +77,7 @@ func Moviehome(c *fiber.Ctx) error {
 		movie_label, _ := jsonparser.GetString(value, "movie_label")
 		movie_slug, _ := jsonparser.GetString(value, "movie_slug")
 		movie_descp, _ := jsonparser.GetString(value, "movie_descp")
+		movie_imgcdn, _ := jsonparser.GetString(value, "movie_imgcdn")
 		movie_thumbnail, _ := jsonparser.GetString(value, "movie_thumbnail")
 		movie_year, _ := jsonparser.GetInt(value, "movie_year")
 		movie_rating, _ := jsonparser.GetFloat(value, "movie_rating")
@@ -118,6 +119,7 @@ func Moviehome(c *fiber.Ctx) error {
 		obj.Movie_label = movie_label
 		obj.Movie_slug = movie_slug
 		obj.Movie_descp = movie_descp
+		obj.Movie_imgcdn = movie_imgcdn
 		obj.Movie_thumbnail = movie_thumbnail
 		obj.Movie_year = int(movie_year)
 		obj.Movie_rating = float32(movie_rating)
@@ -141,7 +143,7 @@ func Moviehome(c *fiber.Ctx) error {
 				"record":  nil,
 			})
 		}
-		helpers.SetRedis(Fieldmovie_home_redis+"_"+strconv.Itoa(client.Movie_page)+"_"+client.Movie_search, result, 5*time.Minute)
+		helpers.SetRedis(Fieldmovie_home_redis+"_"+strconv.Itoa(client.Movie_page)+"_"+client.Movie_search, result, 10*time.Minute)
 		log.Println("MOVIE MYSQL")
 		return c.JSON(result)
 	} else {
@@ -279,9 +281,9 @@ func Moviesave(c *fiber.Ctx) error {
 			"record":  nil,
 		})
 	}
-	val_movie := helpers.DeleteRedis(Fieldmovie_home_redis + "_0_")
+	val_movie := helpers.DeleteRedis(Fieldmovie_home_redis + "_" + strconv.Itoa(client.Movie_page) + "_")
 	log.Printf("Redis Delete BACKEND MOVIE : %d", val_movie)
-	val_movieseries := helpers.DeleteRedis(Fieldmovieseries_home_redis + "_0_")
+	val_movieseries := helpers.DeleteRedis(Fieldmovieseries_home_redis + "_" + strconv.Itoa(client.Movie_page) + "_")
 	log.Printf("Redis Delete BACKEND MOVIE SERIES : %d", val_movieseries)
 	val_clientmovie := helpers.DeleteRedis(Fieldmovie_client_redis)
 	log.Printf("Redis Delete CLIENT MOVIE : %d", val_clientmovie)
@@ -330,9 +332,9 @@ func Moviedelete(c *fiber.Ctx) error {
 			"record":  nil,
 		})
 	}
-	val_movie := helpers.DeleteRedis(Fieldmovie_home_redis + "_0_")
+	val_movie := helpers.DeleteRedis(Fieldmovie_home_redis + "_" + strconv.Itoa(client.Movie_page) + "_")
 	log.Printf("Redis Delete BACKEND MOVIE : %d", val_movie)
-	val_movieseries := helpers.DeleteRedis(Fieldmovieseries_home_redis + "_0_")
+	val_movieseries := helpers.DeleteRedis(Fieldmovieseries_home_redis + "_" + strconv.Itoa(client.Movie_page) + "_")
 	log.Printf("Redis Delete BACKEND MOVIE SERIES : %d", val_movieseries)
 	val_clientmovie := helpers.DeleteRedis(Fieldmovie_client_redis)
 	log.Printf("Redis Delete CLIENT MOVIE : %d", val_clientmovie)
@@ -388,6 +390,7 @@ func Moviehomeseries(c *fiber.Ctx) error {
 		movie_label, _ := jsonparser.GetString(value, "movie_label")
 		movie_slug, _ := jsonparser.GetString(value, "movie_slug")
 		movie_descp, _ := jsonparser.GetString(value, "movie_descp")
+		movie_imgcdn, _ := jsonparser.GetString(value, "movie_imgcdn")
 		movie_thumbnail, _ := jsonparser.GetString(value, "movie_thumbnail")
 		movie_year, _ := jsonparser.GetInt(value, "movie_year")
 		movie_rating, _ := jsonparser.GetFloat(value, "movie_rating")
@@ -431,6 +434,7 @@ func Moviehomeseries(c *fiber.Ctx) error {
 		obj.Movie_label = movie_label
 		obj.Movie_slug = movie_slug
 		obj.Movie_descp = movie_descp
+		obj.Movie_imgcdn = movie_imgcdn
 		obj.Movie_thumbnail = movie_thumbnail
 		obj.Movie_year = int(movie_year)
 		obj.Movie_rating = float32(movie_rating)
@@ -454,7 +458,7 @@ func Moviehomeseries(c *fiber.Ctx) error {
 				"record":  nil,
 			})
 		}
-		helpers.SetRedis(Fieldmovieseries_home_redis+"_"+strconv.Itoa(client.Movie_page)+"_"+client.Movie_search, result, 5*time.Minute)
+		helpers.SetRedis(Fieldmovieseries_home_redis+"_"+strconv.Itoa(client.Movie_page)+"_"+client.Movie_search, result, 10*time.Minute)
 		log.Println("MOVIE SERIES MYSQL")
 		return c.JSON(result)
 	} else {
@@ -517,9 +521,9 @@ func Movieseriessave(c *fiber.Ctx) error {
 		})
 	}
 
-	val_movie := helpers.DeleteRedis(Fieldmovie_home_redis + "_0_")
+	val_movie := helpers.DeleteRedis(Fieldmovie_home_redis + "_" + strconv.Itoa(client.Movie_page) + "_")
 	log.Printf("Redis Delete BACKEND MOVIE : %d", val_movie)
-	val_movieseries := helpers.DeleteRedis(Fieldmovieseries_home_redis + "_0_")
+	val_movieseries := helpers.DeleteRedis(Fieldmovieseries_home_redis + "_" + strconv.Itoa(client.Movie_page) + "_")
 	log.Printf("Redis Delete BACKEND MOVIE SERIES : %d", val_movieseries)
 	val_clientmovie := helpers.DeleteRedis(Fieldmovie_client_redis)
 	log.Printf("Redis Delete CLIENT MOVIE : %d", val_clientmovie)

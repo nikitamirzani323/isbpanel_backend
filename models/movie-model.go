@@ -33,8 +33,9 @@ func Fetch_movieHome(search string, page int) (helpers.Responsemovie, error) {
 	sql_selectcount += "SELECT "
 	sql_selectcount += "COUNT(movieid) as totalmovie  "
 	sql_selectcount += "FROM " + configs.DB_VIEW_MOVIE + "  "
+	sql_selectcount += "WHERE enabled = '1' "
 	if search != "" {
-		sql_selectcount += "WHERE movietitle LIKE '%" + search + "%' "
+		sql_selectcount += "AND movietitle LIKE '%" + search + "%' "
 	}
 
 	row_selectcount := con.QueryRowContext(ctx, sql_selectcount)
@@ -52,12 +53,13 @@ func Fetch_movieHome(search string, page int) (helpers.Responsemovie, error) {
 	sql_select += "createmovie, COALESCE(createdatemovie,''), updatemovie, COALESCE(updatedatemovie,'') "
 	sql_select += "FROM " + configs.DB_VIEW_MOVIE + "  "
 	if search == "" {
+		sql_select += "WHERE enabled = '1' "
 		sql_select += "ORDER BY createdatemovie DESC  LIMIT " + strconv.Itoa(offset) + " , " + strconv.Itoa(perpage)
 	} else {
-		sql_select += "WHERE movietitle LIKE '%" + search + "%' "
+		sql_select += "WHERE enabled = '1' "
+		sql_select += "AND movietitle LIKE '%" + search + "%' "
 		sql_select += "ORDER BY createdatemovie DESC LIMIT " + strconv.Itoa(perpage)
 	}
-	log.Println(sql_select)
 	row, err := con.QueryContext(ctx, sql_select)
 	helpers.ErrorCheck(err)
 	for row.Next() {
@@ -142,6 +144,10 @@ func Fetch_movieHome(search string, page int) (helpers.Responsemovie, error) {
 		} else {
 			path_image = urlthumbnail_db
 		}
+		imgcdn := "N"
+		if urlthumbnail_db != "" {
+			imgcdn = "Y"
+		}
 
 		obj.Movie_id = movieid_db
 		obj.Movie_date = createdatemovie_db
@@ -150,6 +156,7 @@ func Fetch_movieHome(search string, page int) (helpers.Responsemovie, error) {
 		obj.Movie_label = label_db
 		obj.Movie_slug = slug_db
 		obj.Movie_descp = description_db
+		obj.Movie_imgcdn = imgcdn
 		obj.Movie_thumbnail = path_image
 		obj.Movie_year = year_db
 		obj.Movie_rating = rating_db
@@ -541,8 +548,9 @@ func Fetch_movieseriesHome(search string, page int) (helpers.Responsemovie, erro
 	sql_selectcount += "SELECT "
 	sql_selectcount += "COUNT(movieid) as totalmovie  "
 	sql_selectcount += "FROM " + configs.DB_VIEW_MOVIESERIES + "  "
+	sql_selectcount += "WHERE enabled = '1' "
 	if search != "" {
-		sql_selectcount += "WHERE movietitle LIKE '%" + search + "%' "
+		sql_selectcount += "AND movietitle LIKE '%" + search + "%' "
 	}
 
 	row_selectcount := con.QueryRowContext(ctx, sql_selectcount)
@@ -560,9 +568,11 @@ func Fetch_movieseriesHome(search string, page int) (helpers.Responsemovie, erro
 	sql_select += "createmovie, COALESCE(createdatemovie,''), updatemovie, COALESCE(updatedatemovie,'') "
 	sql_select += "FROM " + configs.DB_VIEW_MOVIESERIES + "  "
 	if search == "" {
+		sql_select += "WHERE enabled = '1' "
 		sql_select += "ORDER BY createdatemovie DESC  LIMIT " + strconv.Itoa(offset) + " , " + strconv.Itoa(perpage)
 	} else {
-		sql_select += "WHERE movietitle LIKE '%" + search + "%' "
+		sql_select += "WHERE enabled = '1' "
+		sql_select += "AND movietitle LIKE '%" + search + "%' "
 		sql_select += "ORDER BY createdatemovie DESC LIMIT " + strconv.Itoa(perpage)
 	}
 	row, err := con.QueryContext(ctx, sql_select)
@@ -650,6 +660,10 @@ func Fetch_movieseriesHome(search string, page int) (helpers.Responsemovie, erro
 			path_image = urlthumbnail_db
 		}
 
+		imgcdn := "N"
+		if urlthumbnail_db != "" {
+			imgcdn = "Y"
+		}
 		obj.Movie_id = movieid_db
 		obj.Movie_date = createdatemovie_db
 		obj.Movie_type = movietype_db
@@ -657,6 +671,7 @@ func Fetch_movieseriesHome(search string, page int) (helpers.Responsemovie, erro
 		obj.Movie_label = label_db
 		obj.Movie_slug = slug_db
 		obj.Movie_descp = description_db
+		obj.Movie_imgcdn = imgcdn
 		obj.Movie_thumbnail = path_image
 		obj.Movie_year = year_db
 		obj.Movie_rating = rating_db

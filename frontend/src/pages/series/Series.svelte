@@ -82,6 +82,10 @@
                     if(record[i]["movie_type"] == "movie"){
                         css_type = "background-color:#ffc107;font-weight:bold;"
                     }
+                    let css_cdn = "background-color:#dc3545;font-weight:bold;color:white;"
+                    if(record[i]["movie_imgcdn"] == "Y"){
+                        css_cdn = "background-color:#ffc107;font-weight:bold;"
+                    }
                     no = parseInt(no) + 1;
                     listHome = [
                         ...listHome,
@@ -95,6 +99,8 @@
                             movie_label: record[i]["movie_label"],
                             movie_slug: record[i]["movie_slug"],
                             movie_descp: record[i]["movie_descp"],
+                            movie_imgcdn: record[i]["movie_imgcdn"],
+                            movie_css_cdn: css_cdn,
                             movie_thumbnail: record[i]["movie_thumbnail"],
                             movie_year: record[i]["movie_year"].toString(),
                             movie_rating: record[i]["movie_rating"],

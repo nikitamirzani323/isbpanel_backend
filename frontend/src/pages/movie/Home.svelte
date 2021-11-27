@@ -668,6 +668,7 @@
                 body: JSON.stringify({
                     page:"MOVIE-DELETE",
                     movie_id: parseInt(e),
+                    movie_page: parseInt(pagingnow),
                 }),
             });
             const json = await res.json();
@@ -918,10 +919,11 @@
                     <table class="table table-striped table-hover">
                         <thead>
                             <tr>
-                                <th NOWRAP width="1%" style="text-align: center;vertical-align: top;" colspan="2">&nbsp;</th>
+                                <th NOWRAP width="1%" style="text-align: center;vertical-align: top;" >&nbsp;</th>
                                 <th NOWRAP width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NO</th>
                                 <th NOWRAP width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">&nbsp;</th>
                                 <th NOWRAP width="5%" style="text-align: center;vertical-align: top;font-weight:bold;font-size: {table_header_font};">DATE</th>
+                                <th NOWRAP width="2%" style="text-align: center;vertical-align: top;font-weight:bold;font-size: {table_header_font};">CDN</th>
                                 <th NOWRAP width="2%" style="text-align: center;vertical-align: top;font-weight:bold;font-size: {table_header_font};">TYPE</th>
                                 <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">YEAR</th>
                                 <th NOWRAP width="5%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">GENRE</th>
@@ -944,16 +946,15 @@
                                         }} 
                                         class="bi bi-pencil"></i>
                                     </td>
-                                    <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
-                                        <i 
-                                            on:click={() => {
-                                                handleDeleteMovie(rec.movie_id);
-                                            }} 
-                                            class="bi bi-trash"></i>
-                                    </td>
                                     <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.movie_no}</td>
                                     <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};{rec.movie_statuscss}">{rec.movie_status}</td>
-                                    <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.movie_date}</td>
+                                    <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
+                                        CREATE : {rec.movie_date}<br>
+                                        UPDATE : {rec.movie_update}
+                                    </td>
+                                    <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">
+                                        <span style="{rec.movie_css_cdn}padding:5px 10px 5px 10px;">{rec.movie_imgcdn}</span>
+                                    </td>
                                     <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">
                                         <span style="{rec.movie_csstype}padding:5px 10px 5px 10px;">{rec.movie_type}</span>
                                     </td>
@@ -980,8 +981,8 @@
                                         <b>LABEL</b> : {rec.movie_label}<br>
                                         <b>SLUG</b> : {rec.movie_slug}
                                     </td>
-                                    <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.movie_imdb}</td>
-                                    <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.movie_view}</td>
+                                    <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};{rec.movie_imdbcss}">{rec.movie_imdb}</td>
+                                    <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};{rec.movie_viewcss}">{rec.movie_view}</td>
                                 </tr>
                             {/each}
                         </tbody>

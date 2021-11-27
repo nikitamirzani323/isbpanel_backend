@@ -60,10 +60,6 @@
             if (record != null) {
                 totalpaging = Math.ceil(parseInt(totalrecordall) / parseInt(perpage))
                 totalrecord = record.length;
-                console.log("PERPAGE :" + perpage)
-                console.log("PAGE :" + page)
-                console.log("TOTAL PAGING :" + totalpaging)
-                console.log("TOTAL ALL :" + totalrecordall)
                 let no = 0
                 if(page > 1){
                     no = parseInt(page) 
@@ -81,6 +77,18 @@
                     if(record[i]["movie_type"] == "movie"){
                         css_type = "background-color:#ffc107;font-weight:bold;"
                     }
+                    let css_cdn = "background-color:#dc3545;font-weight:bold;color:white;"
+                    if(record[i]["movie_imgcdn"] == "Y"){
+                        css_cdn = "background-color:#ffc107;font-weight:bold;"
+                    }
+                    let css_imdb = "font-weight:bold;color:red;"
+                    if(parseInt(record[i]["movie_imdb"]) > 0){
+                        css_imdb = "font-weight:bold;color:blue;"
+                    }
+                    let css_view = "font-weight:bold;color:red;"
+                    if(parseInt(record[i]["movie_view"]) > 0){
+                        css_view = "font-weight:bold;color:blue;"
+                    }
                     no = parseInt(no) + 1;
                     listHome = [
                         ...listHome,
@@ -94,11 +102,15 @@
                             movie_label: record[i]["movie_label"],
                             movie_slug: record[i]["movie_slug"],
                             movie_descp: record[i]["movie_descp"],
+                            movie_imgcdn: record[i]["movie_imgcdn"],
+                            movie_css_cdn: css_cdn,
                             movie_thumbnail: record[i]["movie_thumbnail"],
                             movie_year: record[i]["movie_year"].toString(),
                             movie_rating: record[i]["movie_rating"],
                             movie_imdb: record[i]["movie_imdb"],
+                            movie_imdbcss: css_imdb,
                             movie_view: record[i]["movie_view"],
+                            movie_viewcss: css_view,
                             movie_genre: genre,
                             movie_source: source,
                             movie_status: record[i]["movie_status"],
