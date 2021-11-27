@@ -1150,6 +1150,11 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">Preview</label><br>
+                    <img class="img-thumbnail" src="{movie_field_image}" alt="">
+                </div>
+                
             </div>
         </div>
 	</slot:template>

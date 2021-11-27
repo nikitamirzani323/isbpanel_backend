@@ -516,8 +516,13 @@ func Movieseriessave(c *fiber.Ctx) error {
 			"record":  nil,
 		})
 	}
-	val_movie := helpers.DeleteRedis(Fieldmovie_home_redis + "_1_")
+
+	val_movie := helpers.DeleteRedis(Fieldmovie_home_redis + "_0_")
 	log.Printf("Redis Delete BACKEND MOVIE : %d", val_movie)
+	val_movieseries := helpers.DeleteRedis(Fieldmovieseries_home_redis + "_0_")
+	log.Printf("Redis Delete BACKEND MOVIE SERIES : %d", val_movieseries)
+	val_clientmovie := helpers.DeleteRedis(Fieldmovie_client_redis)
+	log.Printf("Redis Delete CLIENT MOVIE : %d", val_clientmovie)
 	return c.JSON(result)
 }
 func Seasonhome(c *fiber.Ctx) error {

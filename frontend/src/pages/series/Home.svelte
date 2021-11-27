@@ -15,6 +15,7 @@
     let dispatch = createEventDispatcher();
     let title_page = "MOVIE - SERIES"
     let sData = "";
+    let sDataRoot = "";
     let myModal = "";
     
     let listalbum = []
@@ -188,7 +189,7 @@
         myModal.show();
     };
     const ShowFormMovie = (e,id,title,label,descp,image,year,imdb,slug,status,genre) => {
-        sData = e
+        sDataRoot = e
         if(e == "Edit"){
             movie_field_idrecord = parseInt(id);
             movie_field_title = title;
@@ -545,7 +546,7 @@
                 Authorization: "Bearer " + token,
             },
             body: JSON.stringify({
-                sdata: sData,
+                sdata: sDataRoot,
                 page:"MOVIE-SAVE",
                 movie_page: parseInt(pagingnow),
                 movie_id: movie_field_idrecord,
@@ -603,22 +604,22 @@
         }
         movie_field_urlvideo = ""
     }
+    let files;
     async function handleNewCloudflare() {
         css_loader = "display: inline-block;";
         msgloader = "Sending...";
         css_loader = "display: inline-block;";
         msgloader = "Sending...";
+        const formData = new FormData();
+        formData.append('sdata', sData);
+        formData.append('page', "MOVIECLOUDUPLOAD-SAVE");
+        formData.append('file', files[0]);
         const res = await fetch("/api/moviecloudupload", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
                 Authorization: "Bearer " + token,
             },
-            body: JSON.stringify({
-                sdata: sData,
-                page:"MOVIECLOUDUPLOAD-SAVE",
-                movie_raw: album_field_name,
-            }),
+            body: formData,
         });
         const json = await res.json();
         const status = json.status;
@@ -1201,6 +1202,10 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">Preview</label><br>
+                    <img class="img-thumbnail" src="{movie_field_image}" alt="">
+                </div>
             </div>
         </div>
 	</slot:template>
@@ -1290,12 +1295,7 @@
 	modal_footer={true}>
 	<slot:template slot="body">
         <div class="mb-3">
-            <label for="exampleForm" class="form-label">Path File</label>
-			<Input
-                bind:value={album_field_name}
-                class="required"
-                type="text"
-                placeholder="Path File"/>
+            <input id="fileUpload" type="file" bind:files>
 		</div>
 	</slot:template>
 	<slot:template slot="footer">
