@@ -15,6 +15,7 @@
     let dispatch = createEventDispatcher();
     let title_page = "MOVIE"
     let sData = "";
+    let sDataRoot = "";
     let myModal = "";
     
     let listmoviemini = []
@@ -174,7 +175,7 @@
         myModal.show();
     };
     const ShowFormMovie = (e,tipe,id,title,label,descp,image,year,imdb,slug,status,genre,source) => {
-        sData = e
+        sDataRoot = e
         if(tipe == "MOVIE"){
             if(e == "Edit"){
                 console.log(genre)
@@ -476,7 +477,7 @@
                 Authorization: "Bearer " + token,
             },
             body: JSON.stringify({
-                sdata: sData,
+                sdata: sDataRoot,
                 page:"MOVIE-SAVE",
                 movie_page: parseInt(pagingnow),
                 movie_id: movie_field_idrecord,
@@ -535,22 +536,20 @@
         }
         movie_field_urlvideo = ""
     }
+    let files;
     async function handleNewCloudflare() {
         css_loader = "display: inline-block;";
         msgloader = "Sending...";
-        css_loader = "display: inline-block;";
-        msgloader = "Sending...";
+        const formData = new FormData();
+        formData.append('sdata', sData);
+        formData.append('page', "MOVIECLOUDUPLOAD-SAVE");
+        formData.append('file', files[0]);
         const res = await fetch("/api/moviecloudupload", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
                 Authorization: "Bearer " + token,
             },
-            body: JSON.stringify({
-                sdata: sData,
-                page:"MOVIECLOUDUPLOAD-SAVE",
-                movie_raw: album_field_name,
-            }),
+            body: formData,
         });
         const json = await res.json();
         const status = json.status;
@@ -852,6 +851,7 @@
     function popupwindow(e){
         window.open(e, "", "width=640, height=480");
     }
+    
 </script>
 
 <div id="loader" style="margin-left:50%;{css_loader}">
@@ -1239,12 +1239,7 @@
 	modal_footer={true}>
 	<slot:template slot="body">
         <div class="mb-3">
-            <label for="exampleForm" class="form-label">Path File</label>
-			<Input
-                bind:value={album_field_name}
-                class="required"
-                type="text"
-                placeholder="Path File"/>
+            <input id="fileUpload" type="file" bind:files>
 		</div>
 	</slot:template>
 	<slot:template slot="footer">

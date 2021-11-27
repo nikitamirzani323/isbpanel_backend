@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"fmt"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/buger/jsonparser"
@@ -10,6 +12,7 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 	"github.com/nikitamirzani323/isbpanel_backend/entities"
 	"github.com/nikitamirzani323/isbpanel_backend/helpers"
 	"github.com/nikitamirzani323/isbpanel_backend/models"
@@ -21,6 +24,8 @@ const Fieldgenre_home_redis = "LISTGENRE_BACKEND_ISBPANEL"
 const Fieldmovieseries_home_redis = "LISTMOVIESERIES_BACKEND_ISBPANEL"
 const Fieldmovieseriesseason_home_redis = "LISTMOVIESEASON_BACKEND_ISBPANEL"
 const Fieldmovieseriesepisode_home_redis = "LISTMOVIEEPISODE_BACKEND_ISBPANEL"
+
+const Fieldmovie_client_redis = "LISTMOVIE_FRONTEND_ISBPANEL"
 
 func Moviehome(c *fiber.Ctx) error {
 	var errors []*helpers.ErrorResponse
@@ -274,8 +279,12 @@ func Moviesave(c *fiber.Ctx) error {
 			"record":  nil,
 		})
 	}
-	val_movie := helpers.DeleteRedis(Fieldmovie_home_redis + "_1_")
+	val_movie := helpers.DeleteRedis(Fieldmovie_home_redis + "_0_")
 	log.Printf("Redis Delete BACKEND MOVIE : %d", val_movie)
+	val_movieseries := helpers.DeleteRedis(Fieldmovieseries_home_redis + "_0_")
+	log.Printf("Redis Delete BACKEND MOVIE SERIES : %d", val_movieseries)
+	val_clientmovie := helpers.DeleteRedis(Fieldmovie_client_redis)
+	log.Printf("Redis Delete CLIENT MOVIE : %d", val_clientmovie)
 	return c.JSON(result)
 }
 func Moviedelete(c *fiber.Ctx) error {
@@ -321,10 +330,12 @@ func Moviedelete(c *fiber.Ctx) error {
 			"record":  nil,
 		})
 	}
-	val_movie := helpers.DeleteRedis(Fieldmovie_home_redis + "_1_")
+	val_movie := helpers.DeleteRedis(Fieldmovie_home_redis + "_0_")
 	log.Printf("Redis Delete BACKEND MOVIE : %d", val_movie)
-	val_movieseries := helpers.DeleteRedis(Fieldmovieseries_home_redis + "_1_")
+	val_movieseries := helpers.DeleteRedis(Fieldmovieseries_home_redis + "_0_")
 	log.Printf("Redis Delete BACKEND MOVIE SERIES : %d", val_movieseries)
+	val_clientmovie := helpers.DeleteRedis(Fieldmovie_client_redis)
+	log.Printf("Redis Delete CLIENT MOVIE : %d", val_clientmovie)
 	return c.JSON(result)
 }
 func Moviehomeseries(c *fiber.Ctx) error {
@@ -1018,34 +1029,30 @@ type responseuploadcloudflare struct {
 }
 
 func Movieuploadcloud(c *fiber.Ctx) error {
-	var errors []*helpers.ErrorResponse
-	client := new(entities.Controller_cloudflaremovieupload)
-	validate := validator.New()
-	if err := c.BodyParser(client); err != nil {
-		c.Status(fiber.StatusBadRequest)
-		return c.JSON(fiber.Map{
-			"status":  fiber.StatusBadRequest,
-			"message": err.Error(),
-			"record":  nil,
-		})
-	}
 
-	err := validate.Struct(client)
+	file, err := c.FormFile("file")
+
 	if err != nil {
-		for _, err := range err.(validator.ValidationErrors) {
-			var element helpers.ErrorResponse
-			element.Field = err.StructField()
-			element.Tag = err.Tag()
-			errors = append(errors, &element)
-		}
-		c.Status(fiber.StatusBadRequest)
-		return c.JSON(fiber.Map{
-			"status":  fiber.StatusBadRequest,
-			"message": "validation",
-			"record":  errors,
-		})
+		log.Println("image upload error --> ", err)
+		return c.JSON(fiber.Map{"status": 500, "message": "Server error", "data": nil})
+
+	}
+	log.Println("File : ", file.Filename)
+	uniqueId := uuid.New()
+	filename := strings.Replace(uniqueId.String(), "-", "", -1)
+	fileExt := strings.Split(file.Filename, ".")[1]
+	image := fmt.Sprintf("%s.%s", filename, fileExt)
+	log.Println(image)
+	// path_imagelocal := `F:\ISBPROJECT\ISBPANEL\isbpanel_backend\frontend\public\images\` + image
+	path_imageserver := `/root/go_isbpanel/frontend/public/images/`
+	err = c.SaveFile(file, fmt.Sprintf(`%s/%s`, path_imageserver, image))
+	if err != nil {
+		log.Println("image save error --> ", err)
+		return c.JSON(fiber.Map{"status": 500, "message": "Server error", "data": nil})
 	}
 
+	// path_imagelocal = `F:\ISBPROJECT\ISBPANEL\isbpanel_backend\frontend\public\images\` + image
+	path_imageserver = `/root/go_isbpanel/frontend/public/images/` + image
 	axios := resty.New()
 	resp, err := axios.R().
 		SetResult(responseuploadcloudflare{}).
@@ -1054,10 +1061,10 @@ func Movieuploadcloud(c *fiber.Ctx) error {
 		SetHeader("Accept", "*/*").
 		SetHeader("Content-Type", "image/jpeg,image/png").
 		SetFiles(map[string]string{
-			"file": client.Movie_raw,
+			"file": path_imageserver,
 		}).
 		SetFormData(map[string]string{
-			"requireSignedURLs": `true`,
+			"requireSignedURLs": `false`,
 		}).
 		SetContentLength(true).
 		Post("https://api.cloudflare.com/client/v4/accounts/dc5ba4b3b061907a5e1f8cdf1ae1ec96/images/v1")
