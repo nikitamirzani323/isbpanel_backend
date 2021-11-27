@@ -162,6 +162,7 @@ func Fetch_movieHome(search string, page int) (helpers.Responsemovie, error) {
 		obj.Movie_rating = rating_db
 		obj.Movie_imdb = imdb_db
 		obj.Movie_view = views_db
+		obj.Movie_comment = _GetTotalComment(movieid_db)
 		obj.Movie_genre = arraobjmoviegenre
 		obj.Movie_source = arraobjmoviesource
 		obj.Movie_status = status
@@ -1459,6 +1460,25 @@ func _GetTotalEpisode(idrecord int) int {
 		count(id) as total  
 		FROM ` + configs.DB_tbl_mst_episode + `  
 		WHERE season_id = ? 
+	`
+	row := con.QueryRowContext(ctx, sql_select, idrecord)
+	switch e := row.Scan(&total); e {
+	case sql.ErrNoRows:
+	case nil:
+	default:
+		helpers.ErrorCheck(e)
+	}
+	return total
+}
+func _GetTotalComment(idrecord int) int {
+	con := db.CreateCon()
+	ctx := context.Background()
+	total := 0
+
+	sql_select := `SELECT
+		count(idcomment) as total  
+		FROM ` + configs.DB_tbl_trx_comment + `  
+		WHERE idposter = ? 
 	`
 	row := con.QueryRowContext(ctx, sql_select, idrecord)
 	switch e := row.Scan(&total); e {

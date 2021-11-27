@@ -83,6 +83,7 @@ func Moviehome(c *fiber.Ctx) error {
 		movie_rating, _ := jsonparser.GetFloat(value, "movie_rating")
 		movie_imdb, _ := jsonparser.GetFloat(value, "movie_imdb")
 		movie_view, _ := jsonparser.GetInt(value, "movie_view")
+		movie_comment, _ := jsonparser.GetInt(value, "movie_comment")
 		movie_status, _ := jsonparser.GetString(value, "movie_status")
 		movie_statuscss, _ := jsonparser.GetString(value, "movie_statuscss")
 		movie_create, _ := jsonparser.GetString(value, "movie_create")
@@ -124,6 +125,7 @@ func Moviehome(c *fiber.Ctx) error {
 		obj.Movie_year = int(movie_year)
 		obj.Movie_rating = float32(movie_rating)
 		obj.Movie_imdb = float32(movie_imdb)
+		obj.Movie_comment = int(movie_comment)
 		obj.Movie_view = int(movie_view)
 		obj.Movie_status = movie_status
 		obj.Movie_statuscss = movie_statuscss
@@ -408,6 +410,7 @@ func Moviehomeseries(c *fiber.Ctx) error {
 		movie_rating, _ := jsonparser.GetFloat(value, "movie_rating")
 		movie_imdb, _ := jsonparser.GetFloat(value, "movie_imdb")
 		movie_view, _ := jsonparser.GetInt(value, "movie_view")
+		movie_comment, _ := jsonparser.GetInt(value, "movie_comment")
 		movie_status, _ := jsonparser.GetString(value, "movie_status")
 		movie_statuscss, _ := jsonparser.GetString(value, "movie_statuscss")
 		movie_create, _ := jsonparser.GetString(value, "movie_create")
@@ -452,6 +455,7 @@ func Moviehomeseries(c *fiber.Ctx) error {
 		obj.Movie_rating = float32(movie_rating)
 		obj.Movie_imdb = float32(movie_imdb)
 		obj.Movie_view = int(movie_view)
+		obj.Movie_comment = int(movie_comment)
 		obj.Movie_status = movie_status
 		obj.Movie_statuscss = movie_statuscss
 		obj.Movie_genre = arraobjmoviegenre

@@ -20,6 +20,7 @@ const (
 	DB_tbl_trx_moviegenre  string = "tbl_trx_moviegenre"
 	DB_tbl_trx_movie       string = "tbl_trx_movie"
 	DB_tbl_trx_slide       string = "tbl_trx_slide"
+	DB_tbl_trx_comment     string = "tbl_trx_comment"
 	DB_VIEW_MOVIE          string = "VIEW_MOVIE"
 	DB_VIEW_MOVIESERIES    string = "VIEW_MOVIESERIES"
 	STATUS_RUNNING         string = "background:#FFEB3B;font-weight:bold;color:black;"

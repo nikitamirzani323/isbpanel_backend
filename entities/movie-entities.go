@@ -16,6 +16,7 @@ type Model_movie struct {
 	Movie_rating    float32     `json:"movie_rating"`
 	Movie_imdb      float32     `json:"movie_imdb"`
 	Movie_view      int         `json:"movie_view"`
+	Movie_comment   int         `json:"movie_comment"`
 	Movie_genre     interface{} `json:"movie_genre"`
 	Movie_source    interface{} `json:"movie_source"`
 	Movie_status    string      `json:"movie_status"`
@@ -46,6 +47,7 @@ type Model_movieseries struct {
 	Movie_rating    float32     `json:"movie_rating"`
 	Movie_imdb      float32     `json:"movie_imdb"`
 	Movie_view      int         `json:"movie_view"`
+	Movie_comment   int         `json:"movie_comment"`
 	Movie_genre     interface{} `json:"movie_genre"`
 	Movie_season    interface{} `json:"movie_season"`
 	Movie_status    string      `json:"movie_status"`

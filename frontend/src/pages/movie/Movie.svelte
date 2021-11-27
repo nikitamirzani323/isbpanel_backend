@@ -89,6 +89,10 @@
                     if(parseInt(record[i]["movie_view"]) > 0){
                         css_view = "font-weight:bold;color:blue;"
                     }
+                    let css_comment = "font-weight:bold;color:red;"
+                    if(parseInt(record[i]["movie_comment"]) > 0){
+                        css_comment = "font-weight:bold;color:blue;"
+                    }
                     no = parseInt(no) + 1;
                     listHome = [
                         ...listHome,
@@ -111,6 +115,8 @@
                             movie_imdbcss: css_imdb,
                             movie_view: record[i]["movie_view"],
                             movie_viewcss: css_view,
+                            movie_comment: record[i]["movie_comment"],
+                            movie_commentcss: css_comment,
                             movie_genre: genre,
                             movie_source: source,
                             movie_status: record[i]["movie_status"],

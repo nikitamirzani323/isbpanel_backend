@@ -932,6 +932,7 @@
                                 <th NOWRAP width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">MOVIE</th>
                                 <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">IMDB</th>
                                 <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">VIEW</th>
+                                <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">COMMENT</th>
                             </tr>
                         </thead>
                         {#if totalrecord > 0}
@@ -983,6 +984,7 @@
                                     </td>
                                     <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};{rec.movie_imdbcss}">{rec.movie_imdb}</td>
                                     <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};{rec.movie_viewcss}">{rec.movie_view}</td>
+                                    <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};{rec.movie_commentcss}">{rec.movie_comment}</td>
                                 </tr>
                             {/each}
                         </tbody>
