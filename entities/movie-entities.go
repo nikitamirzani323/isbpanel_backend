@@ -176,11 +176,14 @@ type Controller_cloudflaremovieupdate struct {
 	Sdata      string `json:"sdata" validate:"required"`
 	Movie_id   string `json:"movie_id" validate:"required"`
 	Movie_tipe string `json:"movie_tipe" validate:"required"`
+	Album_id   int    `json:"album_id" `
 }
 type Controller_cloudflaremoviedelete struct {
-	Page     string `json:"page" validate:"required"`
-	Sdata    string `json:"sdata" validate:"required"`
-	Movie_id string `json:"movie_id" validate:"required"`
+	Page          string `json:"page" validate:"required"`
+	Sdata         string `json:"sdata" validate:"required"`
+	Cloudflare_id string `json:"cloudflare_id" validate:"required"`
+	Movie_id      int    `json:"movie_id" `
+	Album_id      int    `json:"album_id" validate:"required"`
 }
 type Controller_genresave struct {
 	Page          string `json:"page" validate:"required"`

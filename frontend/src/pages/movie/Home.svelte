@@ -564,65 +564,7 @@
         }, 1000);
         call_album()
     }
-    async function handleUpdateCloudflare(e,id) {
-        css_loader = "display: inline-block;";
-        msgloader = "Sending...";
-        css_loader = "display: inline-block;";
-        msgloader = "Sending...";
-        const res = await fetch("/api/moviecloudupdate", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token,
-            },
-            body: JSON.stringify({
-                sdata: "Edit",
-                page:"MOVIE-UPDATE",
-                movie_id: id,
-                movie_tipe: e,
-            }),
-        });
-        const json = await res.json();
-        const status = json.status;
-        if(status == true){
-            call_album()
-            msgloader = "Success";
-        }
-        
-        setTimeout(function () {
-            css_loader = "display: none;";
-        }, 1000);
-        
-    }
-    async function handleDeleteCloudflare(id) {
-        css_loader = "display: inline-block;";
-        msgloader = "Sending...";
-        css_loader = "display: inline-block;";
-        msgloader = "Sending...";
-        const res = await fetch("/api/movieclouddelete", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token,
-            },
-            body: JSON.stringify({
-                sdata: "Edit",
-                page:"MOVIE-DELETE",
-                movie_id: id,
-            }),
-        });
-        const json = await res.json();
-        const status = json.status;
-        if(status == true){
-            call_album()
-            msgloader = "Success";
-        }
-        
-        setTimeout(function () {
-            css_loader = "display: none;";
-        }, 1000);
-        
-    }
+    
     async function handleDeleteMovieSource(e) {
         let temp = movie_field_source.filter(item => item.movie_source_id !== parseInt(e))
         movie_field_source = []
@@ -1180,7 +1122,7 @@
         <table class="table table-sm">
             <thead>
                 <tr>
-                    <th width="1%" colspan="2">&nbsp;</th>
+                    <th width="1%" >&nbsp;</th>
                     <th width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NO</th>
                     <th width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">FILENAME</th>
                     <th width="5%" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">LINK</th>
@@ -1189,27 +1131,12 @@
             <tbody>
                 {#each listalbum as rec }
                 <tr>
-                    <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
+                    <td NOWRAP style="text-align: center;vertical-align: top;">
                         {#if rec.album_signed == "LOCKED"}
-                        <i 
-                            on:click={() => {
-                                handleUpdateCloudflare("UNLOCK",rec.album_id);
-                            }} 
-                            class="bi bi-lock-fill"></i>
+                        <i class="bi bi-lock-fill"></i>
                         {:else}
-                        <i 
-                            on:click={() => {
-                                handleUpdateCloudflare("LOCK",rec.album_id);
-                            }} 
-                            class="bi bi-unlock"></i>
+                        <i class="bi bi-unlock"></i>
                         {/if}
-                    </td>
-                    <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
-                        <i 
-                            on:click={() => {
-                                handleDeleteCloudflare(rec.album_id);
-                            }} 
-                            class="bi bi-trash"></i>
                     </td>
                     <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.album_no}</td>
                     {#if album_flagclick == true}

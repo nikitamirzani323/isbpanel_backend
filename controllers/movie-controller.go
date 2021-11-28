@@ -1522,7 +1522,7 @@ func Movieupdatecloud(c *fiber.Ctx) error {
 	claims := user.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
 	temp_decp := helpers.Decryption(name)
-	_, idruleadmin := helpers.Parsing_Decry(temp_decp, "==")
+	client_admin, idruleadmin := helpers.Parsing_Decry(temp_decp, "==")
 	log.Println("RULE :" + client.Page)
 	ruleadmin := models.Get_AdminRule("ruleadmingroup", idruleadmin)
 	flag := models.Get_listitemsearch(ruleadmin, ",", client.Page)
@@ -1550,6 +1550,13 @@ func Movieupdatecloud(c *fiber.Ctx) error {
 			log.Println(err.Error())
 		}
 		result := resp.Result().(*responseuploadcloudflare)
+
+		if client.Album_id > 0 {
+			flag_album := models.Update_album(client_admin, client.Movie_tipe, client.Album_id)
+			log.Printf("Update Album : %t", flag_album)
+		}
+		val_album := helpers.DeleteRedis(Fieldalbum_home_redis)
+		log.Printf("Redis Delete BACKEND ALBUM : %d", val_album)
 		return c.JSON(fiber.Map{
 			"status": result.Status,
 			"record": result.Record,
@@ -1588,7 +1595,7 @@ func Moviedeletecloud(c *fiber.Ctx) error {
 	claims := user.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
 	temp_decp := helpers.Decryption(name)
-	_, idruleadmin := helpers.Parsing_Decry(temp_decp, "==")
+	client_admin, idruleadmin := helpers.Parsing_Decry(temp_decp, "==")
 	log.Println("RULE :" + client.Page)
 	ruleadmin := models.Get_AdminRule("ruleadmingroup", idruleadmin)
 	flag := models.Get_listitemsearch(ruleadmin, ",", client.Page)
@@ -1607,11 +1614,30 @@ func Moviedeletecloud(c *fiber.Ctx) error {
 			SetError(responseuploadcloudflare{}).
 			SetAuthToken("8x02SSARJt_A5B77KnL2oW74qwDPFKA_9DORcf1-").
 			SetContentLength(true).
-			Delete("https://api.cloudflare.com/client/v4/accounts/dc5ba4b3b061907a5e1f8cdf1ae1ec96/images/v1/" + client.Movie_id)
+			Delete("https://api.cloudflare.com/client/v4/accounts/dc5ba4b3b061907a5e1f8cdf1ae1ec96/images/v1/" + client.Cloudflare_id)
 		if err != nil {
 			log.Println(err.Error())
 		}
 		result := resp.Result().(*responseuploadcloudflare)
+		log.Println("Response Info:")
+		log.Println("  Error      :", err)
+		log.Println("  Status Code:", resp.StatusCode())
+		log.Println("  Status     :", resp.Status())
+		log.Println("  Proto      :", resp.Proto())
+		log.Println("  Time       :", resp.Time())
+		log.Println("  Received At:", resp.ReceivedAt())
+		log.Println("  Body       :\n", resp)
+		log.Println()
+		if result.Status {
+			if client.Album_id > 0 {
+				flag_album := models.Delete_album(client_admin, client.Album_id, client.Movie_id)
+				log.Printf("Delete Album : %t", flag_album)
+			}
+		}
+
+		val_album := helpers.DeleteRedis(Fieldalbum_home_redis)
+		log.Printf("Redis Delete BACKEND ALBUM : %d", val_album)
+
 		return c.JSON(fiber.Map{
 			"status": result.Status,
 			"record": result.Record,
@@ -1625,6 +1651,53 @@ func Moviecloud(c *fiber.Ctx) error {
 		SetError(responseuploadcloudflare{}).
 		SetAuthToken("8x02SSARJt_A5B77KnL2oW74qwDPFKA_9DORcf1-").
 		Get("https://api.cloudflare.com/client/v4/accounts/dc5ba4b3b061907a5e1f8cdf1ae1ec96/images/v1")
+	if err != nil {
+		log.Println(err.Error())
+	}
+	result := resp.Result().(*responseuploadcloudflare)
+	return c.JSON(fiber.Map{
+		"status": result.Status,
+		"record": result.Record,
+	})
+}
+func Moviecloud2(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_albumcloudflare)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+
+	axios := resty.New()
+	perpagecloud := 100
+	pagecloud := client.Album_pagecloud
+	path_url := "https://api.cloudflare.com/client/v4/accounts/dc5ba4b3b061907a5e1f8cdf1ae1ec96/images/v1?per_page=" + strconv.Itoa(perpagecloud) + "&page=" + strconv.Itoa(pagecloud)
+	resp, err := axios.R().
+		SetResult(responseuploadcloudflare{}).
+		SetError(responseuploadcloudflare{}).
+		SetAuthToken("8x02SSARJt_A5B77KnL2oW74qwDPFKA_9DORcf1-").
+		Get(path_url)
 	if err != nil {
 		log.Println(err.Error())
 	}

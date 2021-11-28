@@ -380,6 +380,7 @@
                         <thead>
                             <tr>
                                 <th colspan="2">DOMAIN MANAGEMENT</th>
+                                <th colspan="2">ALBUM MANAGEMENT</th>
                                 <th colspan="2">ADMIN MANAGEMENT</th>
                                 <th colspan="2">ADMIN RULE</th>
                             </tr>
@@ -391,6 +392,13 @@
                                         bind:group={adminrule_rule_field}
                                         type="checkbox"
                                         value="DOMAIN-VIEW"/>
+                                </td>
+                                <td width="*">VIEW</td>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="ALBUM-VIEW"/>
                                 </td>
                                 <td width="*">VIEW</td>
                                 <td width="1%">
@@ -414,6 +422,13 @@
                                         bind:group={adminrule_rule_field}
                                         type="checkbox"
                                         value="DOMAIN-SAVE"/>
+                                </td>
+                                <td width="*">SAVE</td>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="ALBUM-SAVE"/>
                                 </td>
                                 <td width="*">SAVE</td>
                                 <td width="1%">

@@ -94,5 +94,9 @@ func Init() *fiber.App {
 
 	app.Post("/api/domain", middleware.JWTProtected(), controllers.Domainhome)
 	app.Post("/api/domainsave", middleware.JWTProtected(), controllers.DomainSave)
+
+	app.Post("/api/cloudflare", middleware.JWTProtected(), controllers.Moviecloud2)
+	app.Post("/api/album", middleware.JWTProtected(), controllers.Albumhome)
+	app.Post("/api/albumsave", middleware.JWTProtected(), controllers.Albumsave)
 	return app
 }

@@ -14,6 +14,7 @@
 	import Movietrouble from "./pages/movietrouble/Movietrouble.svelte";
 	import Seriestrouble from "./pages/seriestrouble/Seriestrouble.svelte";
 	import Domain from "./pages/domain/Domain.svelte";
+	import Album from "./pages/album/Album.svelte";
 	import Login from "./pages/Login.svelte";
 	import NotFound from "./pages/NotFound.svelte";
 	export let table_header_font;
@@ -37,6 +38,13 @@
 					table_body_font: table_body_font,
 				},
 				component: Dashboard,
+			}),
+			"/album": wrap({
+				component: Album,
+				props: {
+					table_header_font: table_header_font,
+					table_body_font: table_body_font,
+				},
 			}),
 			"/seriesrouble": wrap({
 				component: Seriestrouble,
