@@ -57,15 +57,11 @@
                             MOVIE
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li>
-                                <a class="dropdown-item" use:link href="/movie" style="font-size: 13px;">MOVIE</a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" use:link href="/series" style="font-size: 13px;">SERIES</a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" use:link href="/movienews" style="font-size: 13px;">MOVIE TRAILER</a>
-                            </li>
+                            <li><a class="dropdown-item" use:link href="/movie" style="font-size: 13px;">MOVIE</a></li>
+                            <li><a class="dropdown-item" use:link href="/series" style="font-size: 13px;">SERIES</a></li>
+                            <li><a class="dropdown-item" use:link href="/movienews" style="font-size: 13px;">MOVIE TRAILER</a></li>
+                            <li><a class="dropdown-item" use:link href="/movietrouble" style="font-size: 13px;">MOVIE TROUBLE</a></li>
+                            <li><a class="dropdown-item" use:link href="/seriesrouble" style="font-size: 13px;">SERIES TROUBLE</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">

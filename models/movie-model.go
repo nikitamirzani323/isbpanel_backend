@@ -16,7 +16,7 @@ import (
 	"github.com/nleeper/goment"
 )
 
-func Fetch_movieHome(search string, page int) (helpers.Responsemovie, error) {
+func Fetch_movieHome(search string, page, enable int) (helpers.Responsemovie, error) {
 	var obj entities.Model_movie
 	var arraobj []entities.Model_movie
 	var res helpers.Responsemovie
@@ -33,7 +33,7 @@ func Fetch_movieHome(search string, page int) (helpers.Responsemovie, error) {
 	sql_selectcount += "SELECT "
 	sql_selectcount += "COUNT(movieid) as totalmovie  "
 	sql_selectcount += "FROM " + configs.DB_VIEW_MOVIE + "  "
-	sql_selectcount += "WHERE enabled = '1' "
+	sql_selectcount += "WHERE enabled = '" + strconv.Itoa(enable) + "' "
 	if search != "" {
 		sql_selectcount += "AND movietitle LIKE '%" + search + "%' "
 	}
@@ -53,10 +53,10 @@ func Fetch_movieHome(search string, page int) (helpers.Responsemovie, error) {
 	sql_select += "createmovie, COALESCE(createdatemovie,''), updatemovie, COALESCE(updatedatemovie,'') "
 	sql_select += "FROM " + configs.DB_VIEW_MOVIE + "  "
 	if search == "" {
-		sql_select += "WHERE enabled = '1' "
+		sql_select += "WHERE enabled = '" + strconv.Itoa(enable) + "' "
 		sql_select += "ORDER BY createdatemovie DESC  LIMIT " + strconv.Itoa(offset) + " , " + strconv.Itoa(perpage)
 	} else {
-		sql_select += "WHERE enabled = '1' "
+		sql_select += "WHERE enabled = '" + strconv.Itoa(enable) + "' "
 		sql_select += "AND movietitle LIKE '%" + search + "%' "
 		sql_select += "ORDER BY createdatemovie DESC LIMIT " + strconv.Itoa(perpage)
 	}
@@ -297,26 +297,23 @@ func Save_movie(admin, name, label, slug, tipemovie, descp, urlthum, listgenre, 
 		sql_update := `
 			UPDATE 
 			` + configs.DB_tbl_trx_movie + ` 
-			SET movietitle=?, description=?, slug=?, urlthumbnail=?, 
+			SET movietitle=?, description=?, slug=?, urlthumbnail=?, enabled=? ,
 			updatemovie=?, updatedatemovie=? 
 			WHERE movieid=? 
 		`
-		stmt_update, e_update := con.PrepareContext(ctx, sql_update)
-		helpers.ErrorCheck(e_update)
-		defer stmt_update.Close()
-		res_newrecord, e_newrecord := stmt_update.ExecContext(
-			ctx,
-			name, descp, slug, urlthum,
+		flag_update, msg_update := Exec_SQL(sql_update, configs.DB_tbl_trx_movie, "UPDATE",
+			name, descp, slug, urlthum, status,
 			admin,
 			tglnow.Format("YYYY-MM-DD HH:mm:ss"), idrecord)
-		helpers.ErrorCheck(e_newrecord)
-		update, e := res_newrecord.RowsAffected()
-		helpers.ErrorCheck(e)
-		if update > 0 {
+
+		if flag_update {
 			flag = true
 			msg = "Succes"
-			log.Println("Data Berhasil di update")
+			log.Println(msg_update)
+		} else {
+			log.Println(msg_update)
 		}
+
 		if flag {
 			//DELETE GENRE
 			stmt_genre_delete, e_genre_delete := con.PrepareContext(ctx, `
@@ -532,7 +529,7 @@ func Delete_movie(admin string, idrecord int) (helpers.Response, error) {
 
 	return res, nil
 }
-func Fetch_movieseriesHome(search string, page int) (helpers.Responsemovie, error) {
+func Fetch_movieseriesHome(search string, page, enable int) (helpers.Responsemovie, error) {
 	var obj entities.Model_movieseries
 	var arraobj []entities.Model_movieseries
 	var res helpers.Responsemovie
@@ -549,7 +546,7 @@ func Fetch_movieseriesHome(search string, page int) (helpers.Responsemovie, erro
 	sql_selectcount += "SELECT "
 	sql_selectcount += "COUNT(movieid) as totalmovie  "
 	sql_selectcount += "FROM " + configs.DB_VIEW_MOVIESERIES + "  "
-	sql_selectcount += "WHERE enabled = '1' "
+	sql_selectcount += "WHERE enabled = '" + strconv.Itoa(enable) + "' "
 	if search != "" {
 		sql_selectcount += "AND movietitle LIKE '%" + search + "%' "
 	}
@@ -569,10 +566,10 @@ func Fetch_movieseriesHome(search string, page int) (helpers.Responsemovie, erro
 	sql_select += "createmovie, COALESCE(createdatemovie,''), updatemovie, COALESCE(updatedatemovie,'') "
 	sql_select += "FROM " + configs.DB_VIEW_MOVIESERIES + "  "
 	if search == "" {
-		sql_select += "WHERE enabled = '1' "
+		sql_select += "WHERE enabled = '" + strconv.Itoa(enable) + "' "
 		sql_select += "ORDER BY createdatemovie DESC  LIMIT " + strconv.Itoa(offset) + " , " + strconv.Itoa(perpage)
 	} else {
-		sql_select += "WHERE enabled = '1' "
+		sql_select += "WHERE enabled = '" + strconv.Itoa(enable) + "' "
 		sql_select += "AND movietitle LIKE '%" + search + "%' "
 		sql_select += "ORDER BY createdatemovie DESC LIMIT " + strconv.Itoa(perpage)
 	}

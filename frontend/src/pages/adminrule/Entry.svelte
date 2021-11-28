@@ -207,7 +207,7 @@
                             <tr>
                                 <th colspan="2" NOWRAP>MOVIE</th>
                                 <th colspan="2" NOWRAP>SERIES</th>
-                                <th colspan="2" NOWRAP>NEWS MOVIE</th>
+                                <th colspan="2" NOWRAP>MOVIE TRAILER</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -230,7 +230,7 @@
                                     <input
                                         bind:group={adminrule_rule_field}
                                         type="checkbox"
-                                        value="NEWSMOVIE-VIEW"/>
+                                        value="NEWSTRAILER-VIEW"/>
                                 </td>
                                 <td width="*">VIEW</td>
                             </tr>
@@ -253,7 +253,7 @@
                                     <input
                                         bind:group={adminrule_rule_field}
                                         type="checkbox"
-                                        value="NEWSMOVIE-SAVE"/>
+                                        value="NEWSTRAILER-SAVE"/>
                                 </td>
                                 <td width="*">SAVE</td>
                             </tr>

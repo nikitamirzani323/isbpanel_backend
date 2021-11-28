@@ -113,7 +113,7 @@
                             movie_descp: record[i]["movie_descp"],
                             movie_imgcdn: record[i]["movie_imgcdn"],
                             movie_css_cdn: css_cdn,
-                            movie_thumbnail: record[i]["movie_thumbnail"],
+                            movie_thumbnail: record[i]["movie_thumbnail"], 
                             movie_year: record[i]["movie_year"].toString(),
                             movie_rating: record[i]["movie_rating"],
                             movie_imdb: record[i]["movie_imdb"],

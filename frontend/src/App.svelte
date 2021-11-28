@@ -11,6 +11,8 @@
 	import Movie from "./pages/movie/Movie.svelte";
 	import Series from "./pages/series/Series.svelte";
 	import Movienews from "./pages/movienews/Movienews.svelte";
+	import Movietrouble from "./pages/movietrouble/Movietrouble.svelte";
+	import Seriestrouble from "./pages/seriestrouble/Seriestrouble.svelte";
 	import Domain from "./pages/domain/Domain.svelte";
 	import Login from "./pages/Login.svelte";
 	import NotFound from "./pages/NotFound.svelte";
@@ -35,6 +37,20 @@
 					table_body_font: table_body_font,
 				},
 				component: Dashboard,
+			}),
+			"/seriesrouble": wrap({
+				component: Seriestrouble,
+				props: {
+					table_header_font: table_header_font,
+					table_body_font: table_body_font,
+				},
+			}),
+			"/movietrouble": wrap({
+				component: Movietrouble,
+				props: {
+					table_header_font: table_header_font,
+					table_body_font: table_body_font,
+				},
 			}),
 			"/domain": wrap({
 				component: Domain,
