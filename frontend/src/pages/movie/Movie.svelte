@@ -59,7 +59,7 @@
             record_message = json.message;
             if (record != null) {
                 totalpaging = Math.ceil(parseInt(totalrecordall) / parseInt(perpage))
-                totalrecord = record.length;
+                totalrecord = totalrecordall;
                 let no = 0
                 if(page > 1){
                     no = parseInt(page) 
