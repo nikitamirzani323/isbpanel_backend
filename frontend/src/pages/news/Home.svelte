@@ -150,20 +150,23 @@
                 totalrecordcategory = record.length;
                 let no = 0
                 for (var i = 0; i < record.length; i++) {
-                    no = no + 1;
-                    listcategory = [
+                    if(parseInt(record[i]["category_id"]) != 2112){
+                        no = no + 1;
+                        listcategory = [
                         ...listcategory,
-                        {
-                            category_no: no,
-                            category_id: record[i]["category_id"],
-                            category_name: record[i]["category_name"],
-                            category_display: record[i]["category_display"],
-                            category_status: record[i]["category_status"],
-                            category_statuscss: record[i]["category_statuscss"],
-                            category_create: record[i]["category_create"],
-                            category_update: record[i]["category_update"],
-                        },
-                    ];
+                            {
+                                category_no: no,
+                                category_id: record[i]["category_id"],
+                                category_name: record[i]["category_name"],
+                                category_totalnews: record[i]["category_totalnews"],
+                                category_display: record[i]["category_display"],
+                                category_status: record[i]["category_status"],
+                                category_statuscss: record[i]["category_statuscss"],
+                                category_create: record[i]["category_create"],
+                                category_update: record[i]["category_update"],
+                            },
+                        ];
+                    }
                 }
             }
         } 
@@ -634,6 +637,7 @@
                     <th width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NO</th>
                     <th width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">STATUS</th>
                     <th width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">CATEGORY</th>
+                    <th width="5%" style="text-align: right;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NEWS</th>
                     <th width="5%" style="text-align: right;vertical-align: top;font-weight:bold;font-size:{table_header_font};">DISPLAY</th>
                 </tr>
             </thead>
@@ -657,6 +661,7 @@
                     <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.category_no}</td>
                     <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};{rec.category_statuscss}">{rec.category_status}</td>
                     <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.category_name}</td>
+                    <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.category_totalnews}</td>
                     <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.category_display}</td>
                 </tr>
                 {/each}

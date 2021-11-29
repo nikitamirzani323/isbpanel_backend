@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"database/sql"
 	"log"
 	"strconv"
 	"time"
@@ -86,8 +87,6 @@ func Fetch_newsHome(search string) (helpers.Response, error) {
 func Save_news(admin, sdata, title, descp, url, image string, idrecord, category int) (helpers.Response, error) {
 	var res helpers.Response
 	msg := "Failed"
-	con := db.CreateCon()
-	ctx := context.Background()
 	tglnow, _ := goment.New()
 	render_page := time.Now()
 	flag := false
@@ -103,24 +102,20 @@ func Save_news(admin, sdata, title, descp, url, image string, idrecord, category
 				?, ?
 			)
 		`
-		stmt_insert, e_insert := con.PrepareContext(ctx, sql_insert)
-		helpers.ErrorCheck(e_insert)
-		defer stmt_insert.Close()
 		field_column := configs.DB_tbl_trx_news + tglnow.Format("YYYY")
 		idrecord_counter := Get_counter(field_column)
-		res_newrecord, e_newrecord := stmt_insert.ExecContext(
-			ctx,
+		flag_insert, msg_insert := Exec_SQL(sql_insert, configs.DB_tbl_trx_news, "INSERT",
 			tglnow.Format("YY")+strconv.Itoa(idrecord_counter),
 			category, title, descp, url, image,
 			admin,
 			tglnow.Format("YYYY-MM-DD HH:mm:ss"))
-		helpers.ErrorCheck(e_newrecord)
-		insert, e := res_newrecord.RowsAffected()
-		helpers.ErrorCheck(e)
-		if insert > 0 {
+
+		if flag_insert {
 			flag = true
 			msg = "Succes"
-			log.Println("Data Berhasil di save")
+			log.Println(msg_insert)
+		} else {
+			log.Println(msg_insert)
 		}
 	} else {
 		sql_update := `
@@ -131,21 +126,17 @@ func Save_news(admin, sdata, title, descp, url, image string, idrecord, category
 			updatenews=?, updatedatenews=? 
 			WHERE idnews=? 
 		`
-		stmt_update, e_update := con.PrepareContext(ctx, sql_update)
-		helpers.ErrorCheck(e_update)
-		defer stmt_update.Close()
-		res_newrecord, e_newrecord := stmt_update.ExecContext(
-			ctx,
+		flag_update, msg_update := Exec_SQL(sql_update, configs.DB_tbl_trx_news, "UPDATE",
 			category, title, descp, url, image,
 			admin,
 			tglnow.Format("YYYY-MM-DD HH:mm:ss"), idrecord)
-		helpers.ErrorCheck(e_newrecord)
-		update, e := res_newrecord.RowsAffected()
-		helpers.ErrorCheck(e)
-		if update > 0 {
+
+		if flag_update {
 			flag = true
 			msg = "Succes"
-			log.Println("Data Berhasil di update")
+			log.Println(msg_update)
+		} else {
+			log.Println(msg_update)
 		}
 	}
 
@@ -166,8 +157,6 @@ func Save_news(admin, sdata, title, descp, url, image string, idrecord, category
 func Delete_news(admin string, idnews int) (helpers.Response, error) {
 	var res helpers.Response
 	msg := "Failed"
-	con := db.CreateCon()
-	ctx := context.Background()
 	render_page := time.Now()
 	flag := false
 
@@ -178,18 +167,15 @@ func Delete_news(admin string, idnews int) (helpers.Response, error) {
 			` + configs.DB_tbl_trx_news + ` 
 			WHERE idnews=? 
 		`
-		stmt_delete, e_delete := con.PrepareContext(ctx, sql_delete)
-		helpers.ErrorCheck(e_delete)
-		defer stmt_delete.Close()
-		rec_delete, e_delete := stmt_delete.ExecContext(ctx, idnews)
 
-		helpers.ErrorCheck(e_delete)
-		delete, e := rec_delete.RowsAffected()
-		helpers.ErrorCheck(e)
-		if delete > 0 {
+		flag_delete, msg_delete := Exec_SQL(sql_delete, configs.DB_tbl_trx_news, "DELETE", idnews)
+
+		if flag_delete {
 			flag = true
 			msg = "Succes"
-			log.Println("Data Berhasil di delete")
+			log.Println(msg_delete)
+		} else {
+			log.Println(msg_delete)
 		}
 	} else {
 		msg = "Data Not Found"
@@ -254,6 +240,7 @@ func Fetch_category() (helpers.Response, error) {
 
 		obj.Category_id = idcatenews_db
 		obj.Category_name = nmcatenews_db
+		obj.Category_totalnews = _GetTotalNews(idcatenews_db)
 		obj.Category_display = displaycatenews_db
 		obj.Category_status = statuscategory_db
 		obj.Category_statuscss = statuscss
@@ -274,8 +261,6 @@ func Fetch_category() (helpers.Response, error) {
 func Save_category(admin, name, status, sdata string, idrecord, display int) (helpers.Response, error) {
 	var res helpers.Response
 	msg := "Failed"
-	con := db.CreateCon()
-	ctx := context.Background()
 	tglnow, _ := goment.New()
 	render_page := time.Now()
 	flag := false
@@ -291,24 +276,20 @@ func Save_category(admin, name, status, sdata string, idrecord, display int) (he
 				?, ?
 			)
 		`
-		stmt_insert, e_insert := con.PrepareContext(ctx, sql_insert)
-		helpers.ErrorCheck(e_insert)
-		defer stmt_insert.Close()
 		field_column := configs.DB_tbl_mst_category + tglnow.Format("YYYY")
 		idrecord_counter := Get_counter(field_column)
-		res_newrecord, e_newrecord := stmt_insert.ExecContext(
-			ctx,
+		flag_insert, msg_insert := Exec_SQL(sql_insert, configs.DB_tbl_mst_category, "INSERT",
 			tglnow.Format("YY")+strconv.Itoa(idrecord_counter),
 			name, display, status,
 			admin,
 			tglnow.Format("YYYY-MM-DD HH:mm:ss"))
-		helpers.ErrorCheck(e_newrecord)
-		insert, e := res_newrecord.RowsAffected()
-		helpers.ErrorCheck(e)
-		if insert > 0 {
+
+		if flag_insert {
 			flag = true
 			msg = "Succes"
-			log.Println("Data Berhasil di save")
+			log.Println(msg_insert)
+		} else {
+			log.Println(msg_insert)
 		}
 	} else {
 		sql_update := `
@@ -318,21 +299,17 @@ func Save_category(admin, name, status, sdata string, idrecord, display int) (he
 			updatecatenews=?, updatedatecatenews=? 
 			WHERE idcatenews=? 
 		`
-		stmt_update, e_update := con.PrepareContext(ctx, sql_update)
-		helpers.ErrorCheck(e_update)
-		defer stmt_update.Close()
-		res_newrecord, e_newrecord := stmt_update.ExecContext(
-			ctx,
+		flag_update, msg_update := Exec_SQL(sql_update, configs.DB_tbl_mst_category, "UPDATE",
 			name, display, status,
 			admin,
 			tglnow.Format("YYYY-MM-DD HH:mm:ss"), idrecord)
-		helpers.ErrorCheck(e_newrecord)
-		update, e := res_newrecord.RowsAffected()
-		helpers.ErrorCheck(e)
-		if update > 0 {
+
+		if flag_update {
 			flag = true
 			msg = "Succes"
-			log.Println("Data Berhasil di update")
+			log.Println(msg_update)
+		} else {
+			log.Println(msg_update)
 		}
 	}
 
@@ -353,30 +330,30 @@ func Save_category(admin, name, status, sdata string, idrecord, display int) (he
 func Delete_category(admin string, idrecord int) (helpers.Response, error) {
 	var res helpers.Response
 	msg := "Failed"
-	con := db.CreateCon()
-	ctx := context.Background()
 	render_page := time.Now()
 	flag := false
+	flag_tblnews := false
 
 	flag = CheckDB(configs.DB_tbl_mst_category, "idcatenews", strconv.Itoa(idrecord))
 	if flag {
-		sql_delete := `
-			DELETE FROM
-			` + configs.DB_tbl_mst_category + ` 
-			WHERE idcatenews=? 
-		`
-		stmt_delete, e_delete := con.PrepareContext(ctx, sql_delete)
-		helpers.ErrorCheck(e_delete)
-		defer stmt_delete.Close()
-		rec_delete, e_delete := stmt_delete.ExecContext(ctx, idrecord)
+		flag_tblnews = CheckDB(configs.DB_tbl_trx_news, "idcatenews", strconv.Itoa(idrecord))
+		if !flag_tblnews {
+			sql_delete := `
+				DELETE FROM
+				` + configs.DB_tbl_mst_category + ` 
+				WHERE idcatenews=? 
+			`
+			flag_delete, msg_delete := Exec_SQL(sql_delete, configs.DB_tbl_mst_category, "DELETE", idrecord)
 
-		helpers.ErrorCheck(e_delete)
-		delete, e := rec_delete.RowsAffected()
-		helpers.ErrorCheck(e)
-		if delete > 0 {
-			flag = true
-			msg = "Succes"
-			log.Println("Data Berhasil di delete")
+			if flag_delete {
+				flag = true
+				msg = "Succes"
+				log.Println(msg_delete)
+			} else {
+				log.Println(msg_delete)
+			}
+		} else {
+			msg = "Cannot Delete"
 		}
 	} else {
 		msg = "Data Not Found"
@@ -395,4 +372,23 @@ func Delete_category(admin string, idrecord int) (helpers.Response, error) {
 	}
 
 	return res, nil
+}
+func _GetTotalNews(idrecord int) int {
+	con := db.CreateCon()
+	ctx := context.Background()
+	total := 0
+
+	sql_select := `SELECT
+		count(	idnews) as total  
+		FROM ` + configs.DB_tbl_trx_news + `  
+		WHERE idcatenews = ? 
+	`
+	row := con.QueryRowContext(ctx, sql_select, idrecord)
+	switch e := row.Scan(&total); e {
+	case sql.ErrNoRows:
+	case nil:
+	default:
+		helpers.ErrorCheck(e)
+	}
+	return total
 }

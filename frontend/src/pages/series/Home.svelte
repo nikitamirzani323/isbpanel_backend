@@ -15,6 +15,7 @@
     let dispatch = createEventDispatcher();
     let title_page = "MOVIE - SERIES"
     let sData = "";
+    let sDataRoot = "";
     let myModal = "";
     
     let listalbum = []
@@ -67,7 +68,7 @@
     let genre_css = "";
     let css_loader = "display: none;";
     let msgloader = "";
-    let pagingnow = 1;
+    let pagingnow = 0;
     
     $: {
         if (searchMovie) {
@@ -188,7 +189,7 @@
         myModal.show();
     };
     const ShowFormMovie = (e,id,title,label,descp,image,year,imdb,slug,status,genre) => {
-        sData = e
+        sDataRoot = e
         if(e == "Edit"){
             movie_field_idrecord = parseInt(id);
             movie_field_title = title;
@@ -398,7 +399,7 @@
                 },
                 body: JSON.stringify({
                     sdata: sData,
-                    page:"MOVIEEPISODE-SAVE",
+                    page:"MOVIE-SAVE",
                     movie_page: parseInt(pagingnow),
                     movie_id: parseInt(season_field_idmovie),
                     movieseason_id: parseInt(episode_field_seasonid),
@@ -455,7 +456,7 @@
                 },
                 body: JSON.stringify({
                     sdata: sData,
-                    page:"MOVIESEASON-SAVE",
+                    page:"MOVIE-SAVE",
                     movie_page: parseInt(pagingnow),
                     movie_id: parseInt(season_field_idmovie),
                     movieseason_id: parseInt(season_field_idrecord),
@@ -510,7 +511,7 @@
                 },
                 body: JSON.stringify({
                     sdata: sData,
-                    page:"MOVIEGENRE-SAVE",
+                    page:"MOVIE-SAVE",
                     genre_id: parseInt(genre_field_idrecord),
                     genre_name: genre_field_name.toUpperCase(),
                     genre_display: parseInt(genre_field_display),
@@ -545,7 +546,7 @@
                 Authorization: "Bearer " + token,
             },
             body: JSON.stringify({
-                sdata: sData,
+                sdata: sDataRoot,
                 page:"MOVIE-SAVE",
                 movie_page: parseInt(pagingnow),
                 movie_id: movie_field_idrecord,
@@ -603,22 +604,22 @@
         }
         movie_field_urlvideo = ""
     }
+    let files;
     async function handleNewCloudflare() {
         css_loader = "display: inline-block;";
         msgloader = "Sending...";
         css_loader = "display: inline-block;";
         msgloader = "Sending...";
+        const formData = new FormData();
+        formData.append('sdata', sData);
+        formData.append('page', "MOVIE-SAVE");
+        formData.append('file', files[0]);
         const res = await fetch("/api/moviecloudupload", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
                 Authorization: "Bearer " + token,
             },
-            body: JSON.stringify({
-                sdata: sData,
-                page:"MOVIECLOUDUPLOAD-SAVE",
-                movie_raw: album_field_name,
-            }),
+            body: formData,
         });
         const json = await res.json();
         const status = json.status;
@@ -633,65 +634,7 @@
         }, 1000);
         call_album()
     }
-    async function handleUpdateCloudflare(e,id) {
-        css_loader = "display: inline-block;";
-        msgloader = "Sending...";
-        css_loader = "display: inline-block;";
-        msgloader = "Sending...";
-        const res = await fetch("/api/moviecloudupdate", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token,
-            },
-            body: JSON.stringify({
-                sdata: "Edit",
-                page:"MOVIEUPLOAD-UPDATE",
-                movie_id: id,
-                movie_tipe: e,
-            }),
-        });
-        const json = await res.json();
-        const status = json.status;
-        if(status == true){
-            call_album()
-            msgloader = "Success";
-        }
-        
-        setTimeout(function () {
-            css_loader = "display: none;";
-        }, 1000);
-        
-    }
-    async function handleDeleteCloudflare(id) {
-        css_loader = "display: inline-block;";
-        msgloader = "Sending...";
-        css_loader = "display: inline-block;";
-        msgloader = "Sending...";
-        const res = await fetch("/api/movieclouddelete", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token,
-            },
-            body: JSON.stringify({
-                sdata: "Edit",
-                page:"MOVIECLOUD-DELETE",
-                movie_id: id,
-            }),
-        });
-        const json = await res.json();
-        const status = json.status;
-        if(status == true){
-            call_album()
-            msgloader = "Success";
-        }
-        
-        setTimeout(function () {
-            css_loader = "display: none;";
-        }, 1000);
-        
-    }
+    
    
     async function handleDeleteMovieGenre(e) {
         let temp = movie_field_genre.filter(item => item.movie_genre_id !== parseInt(e))
@@ -725,6 +668,7 @@
                 body: JSON.stringify({
                     page:"MOVIE-DELETE",
                     movie_id: parseInt(e),
+                    movie_page: parseInt(pagingnow),
                 }),
             });
             const json = await res.json();
@@ -764,7 +708,7 @@
                     Authorization: "Bearer " + token,
                 },
                 body: JSON.stringify({
-                    page:"MOVIESEASON-DELETE",
+                    page:"MOVIE-DELETE",
                     movie_page: parseInt(pagingnow),
                     movie_id: parseInt(season_field_idmovie),
                     movieseason_id: parseInt(e),
@@ -809,7 +753,7 @@
                     Authorization: "Bearer " + token,
                 },
                 body: JSON.stringify({
-                    page:"MOVIEEPISODE-DELETE",
+                    page:"MOVIE-DELETE",
                     movie_page: parseInt(pagingnow),
                     movie_id: parseInt(season_field_idmovie),
                     season_id: parseInt(idseason),
@@ -997,10 +941,11 @@
                     <table class="table table-striped table-hover">
                         <thead>
                             <tr>
-                                <th NOWRAP width="1%" style="text-align: center;vertical-align: top;" colspan="2">&nbsp;</th>
+                                <th NOWRAP width="1%" style="text-align: center;vertical-align: top;" >&nbsp;</th>
                                 <th NOWRAP width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NO</th>
                                 <th NOWRAP width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">&nbsp;</th>
                                 <th NOWRAP width="5%" style="text-align: center;vertical-align: top;font-weight:bold;font-size: {table_header_font};">DATE</th>
+                                <th NOWRAP width="2%" style="text-align: center;vertical-align: top;font-weight:bold;font-size: {table_header_font};">CDN</th>
                                 <th NOWRAP width="2%" style="text-align: center;vertical-align: top;font-weight:bold;font-size: {table_header_font};">TYPE</th>
                                 <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">YEAR</th>
                                 <th NOWRAP width="5%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">GENRE</th>
@@ -1009,6 +954,7 @@
                                 <th NOWRAP width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">MOVIE</th>
                                 <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">IMDB</th>
                                 <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">VIEW</th>
+                                <th NOWRAP width="2%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">COMMENT</th>
                             </tr>
                         </thead>
                         {#if totalrecord > 0}
@@ -1023,18 +969,15 @@
                                         }} 
                                         class="bi bi-pencil"></i>
                                     </td>
-                                    <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
-                                        {#if rec.movie_season.length < 1}
-                                        <i 
-                                            on:click={() => {
-                                                handleDeleteMovie(rec.movie_id);
-                                            }} 
-                                            class="bi bi-trash"></i>
-                                        {/if}
-                                    </td>
                                     <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.movie_no}</td>
                                     <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};{rec.movie_statuscss}">{rec.movie_status}</td>
-                                    <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.movie_date}</td>
+                                    <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
+                                        CREATE : {rec.movie_date}<br>
+                                        UPDATE : {rec.movie_update}
+                                    </td>
+                                    <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">
+                                        <span style="{rec.movie_css_cdn}padding:5px 10px 5px 10px;">{rec.movie_imgcdn}</span>
+                                    </td>
                                     <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">
                                         <span style="{rec.movie_csstype}padding:5px 10px 5px 10px;">{rec.movie_type}</span>
                                     </td>
@@ -1062,8 +1005,9 @@
                                         <b>LABEL</b> : {rec.movie_label}<br>
                                         <b>SLUG</b> : {rec.movie_slug}
                                     </td>
-                                    <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.movie_imdb}</td>
-                                    <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.movie_view}</td>
+                                    <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};{rec.movie_imdbcss}">{rec.movie_imdb}</td>
+                                    <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};{rec.movie_viewcss}">{rec.movie_view}</td>
+                                    <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};{rec.movie_commentcss}">{rec.movie_comment}</td>
                                 </tr>
                             {/each}
                         </tbody>
@@ -1201,6 +1145,10 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="mb-3">
+                    <label for="exampleForm" class="form-label">Preview</label><br>
+                    <img class="img-thumbnail" src="{movie_field_image}" alt="">
+                </div>
             </div>
         </div>
 	</slot:template>
@@ -1223,7 +1171,7 @@
         <table class="table table-sm">
             <thead>
                 <tr>
-                    <th width="1%" colspan="2">&nbsp;</th>
+                    <th width="1%" >&nbsp;</th>
                     <th width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NO</th>
                     <th width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">FILENAME</th>
                     <th width="5%" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">LINK</th>
@@ -1232,27 +1180,12 @@
             <tbody>
                 {#each listalbum as rec }
                 <tr>
-                    <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
+                    <td NOWRAP style="text-align: center;vertical-align: top;">
                         {#if rec.album_signed == "LOCKED"}
-                        <i 
-                            on:click={() => {
-                                handleUpdateCloudflare("UNLOCK",rec.album_id);
-                            }} 
-                            class="bi bi-lock-fill"></i>
+                        <i class="bi bi-lock-fill"></i>
                         {:else}
-                        <i 
-                            on:click={() => {
-                                handleUpdateCloudflare("LOCK",rec.album_id);
-                            }} 
-                            class="bi bi-unlock"></i>
+                        <i class="bi bi-unlock"></i>
                         {/if}
-                    </td>
-                    <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
-                        <i 
-                            on:click={() => {
-                                handleDeleteCloudflare(rec.album_id);
-                            }} 
-                            class="bi bi-trash"></i>
                     </td>
                     <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.album_no}</td>
                     {#if album_flagclick == true}
@@ -1290,12 +1223,7 @@
 	modal_footer={true}>
 	<slot:template slot="body">
         <div class="mb-3">
-            <label for="exampleForm" class="form-label">Path File</label>
-			<Input
-                bind:value={album_field_name}
-                class="required"
-                type="text"
-                placeholder="Path File"/>
+            <input id="fileUpload" type="file" bind:files>
 		</div>
 	</slot:template>
 	<slot:template slot="footer">

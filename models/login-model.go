@@ -12,13 +12,12 @@ import (
 	"github.com/nleeper/goment"
 )
 
-func Login_Model(username, password, ipaddress, timezone string) (bool, int, error) {
+func Login_Model(username, password, ipaddress, timezone string) (bool, string, error) {
 	con := db.CreateCon()
 	ctx := context.Background()
 	flag := false
 	tglnow, _ := goment.New()
 	var passwordDB, idadminDB string
-	var idruleadminDB int
 	sql_select := `
 			SELECT
 			password, idadmin    
@@ -30,18 +29,18 @@ func Login_Model(username, password, ipaddress, timezone string) (bool, int, err
 	row := con.QueryRowContext(ctx, sql_select, username)
 	switch e := row.Scan(&passwordDB, &idadminDB); e {
 	case sql.ErrNoRows:
-		return false, 0, errors.New("Username and Password Not Found")
+		return false, "", errors.New("Username and Password Not Found")
 	case nil:
 		flag = true
 	default:
-		return false, 0, errors.New("Username and Password Not Found")
+		return false, "", errors.New("Username and Password Not Found")
 	}
 
 	hashpass := helpers.HashPasswordMD5(password)
 	log.Println("Password : " + hashpass)
 	log.Println("Hash : " + passwordDB)
 	if hashpass != passwordDB {
-		return false, 0, nil
+		return false, "", nil
 	}
 
 	if flag {
@@ -52,23 +51,21 @@ func Login_Model(username, password, ipaddress, timezone string) (bool, int, err
 			WHERE username  = ? 
 			AND statuslogin = "Y" 
 		`
-		rows_update, err_update := con.PrepareContext(ctx, sql_update)
-		helpers.ErrorCheck(err_update)
-		res_update, err_update := rows_update.ExecContext(ctx,
+		flag_update, msg_update := Exec_SQL(sql_update, configs.DB_tbl_admin, "UPDATE",
 			tglnow.Format("YYYY-MM-DD HH:mm:ss"),
 			ipaddress,
 			timezone,
 			username,
 			tglnow.Format("YYYY-MM-DD HH:mm:ss"),
 			username)
-		helpers.ErrorCheck(err_update)
-		update, e := res_update.RowsAffected()
-		helpers.ErrorCheck(e)
-		if update > 0 {
+
+		if flag_update {
 			flag = true
-			log.Println("LOGIN Data Berhasil di update")
+			log.Println(msg_update)
+		} else {
+			log.Println(msg_update)
 		}
 	}
 
-	return true, idruleadminDB, nil
+	return true, idadminDB, nil
 }

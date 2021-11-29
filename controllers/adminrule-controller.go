@@ -13,13 +13,14 @@ import (
 	"github.com/nikitamirzani323/isbpanel_backend/models"
 )
 
+const Fieldadminrule_home_redis = "LISTADMINRULE_BACKEND_ISBPANEL"
+
 func Adminrulehome(c *fiber.Ctx) error {
-	field_redis := "LISTADMINRULE_SDSB4D_BACKEND"
 
 	var obj entities.Responseredis_adminruleall
 	var arraobj []entities.Responseredis_adminruleall
 	render_page := time.Now()
-	resultredis, flag := helpers.GetRedis(field_redis)
+	resultredis, flag := helpers.GetRedis(Fieldadminrule_home_redis)
 	jsonredis := []byte(resultredis)
 	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
 	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
@@ -41,7 +42,7 @@ func Adminrulehome(c *fiber.Ctx) error {
 				"record":  nil,
 			})
 		}
-		helpers.SetRedis(field_redis, result, 0)
+		helpers.SetRedis(Fieldadminrule_home_redis, result, 60*time.Minute)
 		log.Println("ADMIN RULE MYSQL")
 		return c.JSON(result)
 	} else {
@@ -97,8 +98,8 @@ func AdminruleSave(c *fiber.Ctx) error {
 			"record":  nil,
 		})
 	}
-	field_redis := "LISTADMINRULE_SDSB4D_BACKEND"
-	val_master := helpers.DeleteRedis(field_redis)
-	log.Printf("Redis Delete BACKEND LISTADMINRULE_SDSB4D_BACKEND : %d", val_master)
+
+	val_master := helpers.DeleteRedis(Fieldadminrule_home_redis)
+	log.Printf("Redis Delete BACKEND ADMIN RULE : %d", val_master)
 	return c.JSON(result)
 }

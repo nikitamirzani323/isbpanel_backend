@@ -148,7 +148,7 @@
                 },
                 body: JSON.stringify({
                     sdata: sData,
-                    page:"PASARAN-SAVE",
+                    page:"KELUARAN-SAVE",
                     pasaran_id: idrecord,
                     pasaran_name: pasaran_nama,
                     pasaran_url: pasaran_url,
@@ -287,7 +287,7 @@
                 },
                 body: JSON.stringify({
                     sdata: sData,
-                    page:"PREDIKSI-SAVE",
+                    page:"KELUARAN-SAVE",
                     pasaran_id: idrecord,
                     prediksi_tanggal: tanggal_prediksi,
                     Prediksi_bbfs: bbfs_prediksi,
@@ -330,7 +330,7 @@
                     Authorization: "Bearer " + token,
                 },
                 body: JSON.stringify({
-                    page:"PREDIKSI-DELETE",
+                    page:"KELUARAN-DELETE",
                     pasaran_id: idrecord,
                     prediksi_id: e,
                 }),
@@ -363,7 +363,7 @@
                 Authorization: "Bearer " + token,
             },
             body: JSON.stringify({
-                page:"PASARAN-SAVE",
+                page:"KELUARAN-view",
                 pasaran_id: idrecord,
             }),
         });
@@ -402,7 +402,7 @@
                 Authorization: "Bearer " + token,
             },
             body: JSON.stringify({
-                page:"PASARAN-SAVE",
+                page:"KELUARAN-VIEW",
                 pasaran_id: idrecord,
             }),
         });

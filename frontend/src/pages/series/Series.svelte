@@ -5,7 +5,7 @@
     export let table_body_font = "";
     
     let token = localStorage.getItem("token");
-    let akses_page = true;
+    let akses_page = false;
     let listHome = [];
     let listPage = [];
     let sData = "";
@@ -26,7 +26,7 @@
                 Authorization: "Bearer " + token,
             },
             body: JSON.stringify({
-                page: "MOVIE-VIEW",
+                page: "SERIES-VIEW",
             }),
         });
         const json = await res.json();
@@ -34,8 +34,8 @@
             logout();
         } else if (json.status == 403) {
             alert(json.message);
-            akses_page = false;
         } else {
+            akses_page = true;
             initHome("");
         }
     }
@@ -82,6 +82,22 @@
                     if(record[i]["movie_type"] == "movie"){
                         css_type = "background-color:#ffc107;font-weight:bold;"
                     }
+                    let css_cdn = "background-color:#dc3545;font-weight:bold;color:white;"
+                    if(record[i]["movie_imgcdn"] == "Y"){
+                        css_cdn = "background-color:#ffc107;font-weight:bold;"
+                    }
+                    let css_imdb = "font-weight:bold;color:red;"
+                    if(parseInt(record[i]["movie_imdb"]) > 0){
+                        css_imdb = "font-weight:bold;color:blue;"
+                    }
+                    let css_view = "font-weight:bold;color:red;"
+                    if(parseInt(record[i]["movie_view"]) > 0){
+                        css_view = "font-weight:bold;color:blue;"
+                    }
+                    let css_comment = "font-weight:bold;color:red;"
+                    if(parseInt(record[i]["movie_comment"]) > 0){
+                        css_comment = "font-weight:bold;color:blue;"
+                    }
                     no = parseInt(no) + 1;
                     listHome = [
                         ...listHome,
@@ -95,11 +111,17 @@
                             movie_label: record[i]["movie_label"],
                             movie_slug: record[i]["movie_slug"],
                             movie_descp: record[i]["movie_descp"],
-                            movie_thumbnail: record[i]["movie_thumbnail"],
+                            movie_imgcdn: record[i]["movie_imgcdn"],
+                            movie_css_cdn: css_cdn,
+                            movie_thumbnail: record[i]["movie_thumbnail"], 
                             movie_year: record[i]["movie_year"].toString(),
                             movie_rating: record[i]["movie_rating"],
                             movie_imdb: record[i]["movie_imdb"],
+                            movie_imdbcss: css_imdb,
                             movie_view: record[i]["movie_view"],
+                            movie_viewcss: css_view,
+                            movie_comment: record[i]["movie_comment"],
+                            movie_commentcss: css_comment,
                             movie_genre: genre,
                             movie_season: season,
                             movie_status: record[i]["movie_status"],
@@ -147,6 +169,7 @@
     };
     initapp()
 </script>
+{#if akses_page == true}
 <Home
     on:handlePaging={handlePaging}
     on:handleMovie={handleMovie}
@@ -156,5 +179,5 @@
     {table_body_font}
     {listPage}
     {listHome}
-    {totalrecord}
-/>
+    {totalrecord}/>
+{/if}

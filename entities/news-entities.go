@@ -14,6 +14,7 @@ type Model_news struct {
 type Model_category struct {
 	Category_id        int    `json:"category_id"`
 	Category_name      string `json:"category_name"`
+	Category_totalnews int    `json:"category_totalnews"`
 	Category_display   int    `json:"category_display"`
 	Category_status    string `json:"category_status"`
 	Category_statuscss string `json:"category_statuscss"`
