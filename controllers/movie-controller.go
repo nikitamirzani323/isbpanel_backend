@@ -3,6 +3,8 @@ package controllers
 import (
 	"fmt"
 	"log"
+	"os"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -1438,9 +1440,15 @@ type responseuploadcloudflare struct {
 }
 
 func Movieuploadcloud(c *fiber.Ctx) error {
-
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+	dir_img := "/frontend/public/images/"
+	if runtime.GOOS == "windows" {
+		dir_img = strings.Replace(dir_img, "/", "\\", -1)
+	}
 	file, err := c.FormFile("file")
-
 	if err != nil {
 		log.Println("image upload error --> ", err)
 		return c.JSON(fiber.Map{"status": 500, "message": "Server error", "data": nil})
@@ -1453,7 +1461,8 @@ func Movieuploadcloud(c *fiber.Ctx) error {
 	image := fmt.Sprintf("%s.%s", filename, fileExt)
 	log.Println(image)
 	// path_imagelocal := `F:\ISBPROJECT\ISBPANEL\isbpanel_backend\frontend\public\images\` + image
-	path_imageserver := `/root/go_isbpanel/frontend/public/images/`
+	// path_imageserver := `/root/go_isbpanel/frontend/public/images/`
+	path_imageserver := dir + dir_img
 	err = c.SaveFile(file, fmt.Sprintf(`%s/%s`, path_imageserver, image))
 	if err != nil {
 		log.Println("image save error --> ", err)
@@ -1461,7 +1470,8 @@ func Movieuploadcloud(c *fiber.Ctx) error {
 	}
 
 	// path_imagelocal = `F:\ISBPROJECT\ISBPANEL\isbpanel_backend\frontend\public\images\` + image
-	path_imageserver = `/root/go_isbpanel/frontend/public/images/` + image
+	// path_imageserver = `/root/go_isbpanel/frontend/public/images/` + image
+	path_imageserver = dir + dir_img + image
 	axios := resty.New()
 	resp, err := axios.R().
 		SetResult(responseuploadcloudflare{}).
