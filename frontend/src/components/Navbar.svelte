@@ -44,6 +44,9 @@
                             </li>
                         </ul>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" use:link href="/news" style="font-size: 13px;">NEWS</a>
+                    </li>
                     <li class="nav-item dropdown">
                         <a
                             class="nav-link dropdown-toggle"
@@ -54,19 +57,12 @@
                             MOVIE
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li>
-                                <a class="dropdown-item" use:link href="/movie" style="font-size: 13px;">MOVIE</a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" use:link href="/series" style="font-size: 13px;">SERIES</a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" use:link href="/movienews" style="font-size: 13px;">NEWS</a>
-                            </li>
+                            <li><a class="dropdown-item" use:link href="/movie" style="font-size: 13px;">MOVIE</a></li>
+                            <li><a class="dropdown-item" use:link href="/series" style="font-size: 13px;">SERIES</a></li>
+                            <li><a class="dropdown-item" use:link href="/movienews" style="font-size: 13px;">MOVIE TRAILER</a></li>
+                            <li><a class="dropdown-item" use:link href="/movietrouble" style="font-size: 13px;">MOVIE TROUBLE</a></li>
+                            <li><a class="dropdown-item" use:link href="/seriesrouble" style="font-size: 13px;">SERIES TROUBLE</a></li>
                         </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" aria-current="page" use:link href="/news" style="font-size: 13px;">NEWS</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a
@@ -97,6 +93,8 @@
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <li>
+                                <a class="dropdown-item" use:link href="/domain" style="font-size: 13px;">DOMAIN MANAGEMENT</a>
+                                <a class="dropdown-item" use:link href="/album" style="font-size: 13px;">ALBUM MANAGEMENT</a>
                                 <a class="dropdown-item" use:link href="/admin" style="font-size: 13px;">ADMIN MANAGEMENT</a>
                                 <a class="dropdown-item" use:link href="/adminrule" style="font-size: 13px;">ADMIN RULE</a>
                             </li>
@@ -109,7 +107,6 @@
                         handleLogout();
                         }}
                         class="btn btn-warning btn-sm">LOGOUT</button>
-                    >
                 </form>
             </div>
         </div>

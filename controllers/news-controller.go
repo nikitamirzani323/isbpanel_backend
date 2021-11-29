@@ -198,7 +198,7 @@ func Newsdelete(c *fiber.Ctx) error {
 			"record":  nil,
 		})
 	}
-	val_news := helpers.DeleteRedis(Fieldnews_home_redis)
+	val_news := helpers.DeleteRedis(Fieldnews_home_redis + "_")
 	log.Printf("Redis Delete BACKEND NEWS : %d", val_news)
 	val_client_news := helpers.DeleteRedis(Fieldnews_client_home_redis)
 	log.Printf("Redis Delete CLIENT NEWS : %d", val_client_news)
@@ -217,6 +217,7 @@ func Categoryhome(c *fiber.Ctx) error {
 	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		category_id, _ := jsonparser.GetInt(value, "category_id")
 		category_name, _ := jsonparser.GetString(value, "category_name")
+		category_totalnews, _ := jsonparser.GetInt(value, "category_totalnews")
 		category_display, _ := jsonparser.GetInt(value, "category_display")
 		category_status, _ := jsonparser.GetString(value, "category_status")
 		category_statuscss, _ := jsonparser.GetString(value, "category_statuscss")
@@ -225,6 +226,7 @@ func Categoryhome(c *fiber.Ctx) error {
 
 		obj.Category_id = int(category_id)
 		obj.Category_name = category_name
+		obj.Category_totalnews = int(category_totalnews)
 		obj.Category_display = int(category_display)
 		obj.Category_status = category_status
 		obj.Category_statuscss = category_statuscss

@@ -171,8 +171,6 @@ func Fetch_adminDetail(username string) (helpers.ResponseAdmin, error) {
 func Save_adminHome(admin, username, password, nama, rule, status, sData string) (helpers.Response, error) {
 	var res helpers.Response
 	msg := "Failed"
-	con := db.CreateCon()
-	ctx := context.Background()
 	tglnow, _ := goment.New()
 	render_page := time.Now()
 	flag := false
@@ -181,33 +179,29 @@ func Save_adminHome(admin, username, password, nama, rule, status, sData string)
 		flag = CheckDB(configs.DB_tbl_admin, "username", username)
 		if !flag {
 			sql_insert := `
-			insert into
-			` + configs.DB_tbl_admin + ` (
-				username , password, idadmin, name, statuslogin, joindate, 
-				createadmin, createdateadmin
-			) values (
-				?, ?, ?, ?, ?, ?, 
-				?, ?
-			)
-		`
-			stmt_insert, e_insert := con.PrepareContext(ctx, sql_insert)
-			helpers.ErrorCheck(e_insert)
-			defer stmt_insert.Close()
+				insert into
+				` + configs.DB_tbl_admin + ` (
+					username , password, idadmin, name, statuslogin, joindate, 
+					createadmin, createdateadmin
+				) values (
+					?, ?, ?, ?, ?, ?, 
+					?, ?
+				)
+			`
 			hashpass := helpers.HashPasswordMD5(password)
-			res_newpasaran, e_newpasaran := stmt_insert.ExecContext(
-				ctx,
+			flag_insert, msg_insert := Exec_SQL(sql_insert, configs.DB_tbl_admin, "INSERT",
 				username, hashpass,
-				rule, nama, "Y",
+				rule, nama, status,
 				tglnow.Format("YYYY-MM-DD HH:mm:ss"),
 				admin,
 				tglnow.Format("YYYY-MM-DD HH:mm:ss"))
-			helpers.ErrorCheck(e_newpasaran)
-			insert, e := res_newpasaran.RowsAffected()
-			helpers.ErrorCheck(e)
-			if insert > 0 {
+
+			if flag_insert {
 				flag = true
 				msg = "Succes"
-				log.Println("Data Berhasil di save")
+				log.Println(msg_insert)
+			} else {
+				log.Println(msg_insert)
 			}
 		} else {
 			msg = "Duplicate Entry"
@@ -221,27 +215,21 @@ func Save_adminHome(admin, username, password, nama, rule, status, sData string)
 				updateadmin=?, updatedateadmin=? 
 				WHERE username =? 
 			`
-			stmt_admin, e := con.PrepareContext(ctx, sql_update)
-			helpers.ErrorCheck(e)
-			rec_admin, e_admin := stmt_admin.ExecContext(
-				ctx,
+
+			flag_update, msg_update := Exec_SQL(sql_update, configs.DB_tbl_admin, "UPDATE",
 				nama,
 				rule,
 				status,
 				admin,
 				tglnow.Format("YYYY-MM-DD HH:mm:ss"),
 				username)
-			helpers.ErrorCheck(e_admin)
-			update_admin, e_admin := rec_admin.RowsAffected()
-			helpers.ErrorCheck(e_admin)
 
-			defer stmt_admin.Close()
-			if update_admin > 0 {
+			if flag_update {
 				flag = true
 				msg = "Succes"
-				log.Printf("Update tbl_admin Success : %s\n", username)
+				log.Println(msg_update)
 			} else {
-				log.Println("Update tbl_admin failed")
+				log.Println(msg_update)
 			}
 		} else {
 			hashpass := helpers.HashPasswordMD5(password)
@@ -252,10 +240,7 @@ func Save_adminHome(admin, username, password, nama, rule, status, sData string)
 				updateadmin=?, updatedateadmin=? 
 				WHERE username =? 
 			`
-			stmt_admin, e := con.PrepareContext(ctx, sql_update2)
-			helpers.ErrorCheck(e)
-			rec_admin, e_admin := stmt_admin.ExecContext(
-				ctx,
+			flag_update, msg_update := Exec_SQL(sql_update2, configs.DB_tbl_admin, "UPDATE",
 				nama,
 				hashpass,
 				rule,
@@ -263,18 +248,13 @@ func Save_adminHome(admin, username, password, nama, rule, status, sData string)
 				admin,
 				tglnow.Format("YYYY-MM-DD HH:mm:ss"),
 				username)
-			helpers.ErrorCheck(e_admin)
 
-			update_admin, e_admin := rec_admin.RowsAffected()
-			helpers.ErrorCheck(e_admin)
-
-			defer stmt_admin.Close()
-			if update_admin > 0 {
+			if flag_update {
 				flag = true
 				msg = "Succes"
-				log.Println("Update tbl_admin Success")
+				log.Println(msg_update)
 			} else {
-				log.Println("Update tbl_admin failed")
+				log.Println(msg_update)
 			}
 		}
 	}

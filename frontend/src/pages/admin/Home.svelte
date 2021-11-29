@@ -16,40 +16,72 @@
     let dispatch = createEventDispatcher();
 	let title_page = "Admin"
     let sData = "";
+    let username_flag = false;
     let myModal_newentry = ""
     let css_loader = "display: none;";
     let msgloader = "";
-
+    let schema  = "";
     
-    const schema = yup.object().shape({
-        username: yup.string().required("The Username is required").
-                    matches(/^[a-zA-z0-9]+$/, "Username must Character A-Z or a-z or 1-9 ").
-                    min(3,"The Username minimal 3 Character").
-                    max(30,"The Username mmaximal 30 Character"),
-        password: yup.string().required("The Password is required").
-                    min(4,"The Password minimal 3 Character").
-                    max(30,"The Password mmaximal 30 Character"),
-        rule: yup.string().required("The Rule is required"),
-        name: yup.string().required("The Name is required").
-                    matches(/^[a-zA-z0-9 ]+$/, "Name must Character A-Z or a-z or 1-9 ").
-                    min(3,"The Name minimal 3 Character").
-                    max(30,"The Name mmaximal 30 Character"),
-    });
+    if(sData == "New"){
+        schema = yup.object().shape({
+            username: yup.string().required("The Username is required").
+                        matches(/^[a-zA-z0-9]+$/, "Username must Character A-Z or a-z or 1-9 ").
+                        min(3,"The Username minimal 3 Character").
+                        max(30,"The Username mmaximal 30 Character"),
+            password: yup.string().required("The Password is required").
+                        min(4,"The Password minimal 3 Character").
+                        max(30,"The Password mmaximal 30 Character"),
+            rule: yup.string().required("The Rule is required"),
+            name: yup.string().required("The Name is required").
+                        matches(/^[a-zA-z0-9 ]+$/, "Name must Character A-Z or a-z or 1-9 ").
+                        min(3,"The Name minimal 3 Character").
+                        max(30,"The Name mmaximal 30 Character"),
+            status: yup.string(),
+        });
+    }else if(sData == "Edit"){
+        schema = yup.object().shape({
+            username: yup.string(),
+            password: yup.string().
+                        max(30,"The Password mmaximal 30 Character"),
+            rule: yup.string().required("The Rule is required"),
+            name: yup.string().required("The Name is required").
+                        matches(/^[a-zA-z0-9 ]+$/, "Name must Character A-Z or a-z or 1-9 ").
+                        min(3,"The Name minimal 3 Character").
+                        max(30,"The Name mmaximal 30 Character"),
+            status: yup.string(),
+        });
+    }
+    
     const { form, errors, handleChange, handleSubmit } = createForm({
         initialValues: {
             username: "",
             password: "",
             rule:"",
-            name:""
+            name:"",
+            status:"Y"
         },
         validationSchema: schema,
         onSubmit:(values) => {
-            handleSave(values.username,values.password,values.rule,values.name)
+            handleSave(values.username,values.password,values.rule,values.name,values.status)
         }
     })
-    const NewData = () => {
-        clearField()
-        sData = "New"
+    const NewData = (e,username,pass,rule,name,status) => {
+        sData = e
+        if(sData == "New"){
+            clearField()
+        }else{
+            username_flag = true
+            $form.username = username
+            $form.password = pass
+            $form.rule = rule
+            $form.name = name
+            if(status == "ACTIVE"){
+                status = "Y"
+            }else{
+                status = "N"
+            }
+            $form.status = status
+        }
         myModal_newentry = new bootstrap.Modal(document.getElementById("modalentry"));
         myModal_newentry.show();
         
@@ -57,13 +89,7 @@
     const RefreshHalaman = () => {
         dispatch("handleRefreshData", "call");
     };
-    const EditData = (e) => {
-        const admin = {
-            e,
-        };
-        dispatch("handleEditData", admin);
-    };
-    async function handleSave(username,password,rule,name) {
+    async function handleSave(username,password,rule,name,status) {
         const res = await fetch("/api/saveadmin", {
             method: "POST",
             headers: {
@@ -77,7 +103,7 @@
                 admin_username: username,
                 admin_password: password,
                 admin_nama: name,
-                admin_status: "ACTIVE",
+                admin_status: status,
             }),
         });
         const json = await res.json();
@@ -95,27 +121,38 @@
         }, 1000);
     }
     function clearField(){
+        username_flag = false
         $form.username = ""
         $form.password = ""
         $form.rule = ""
         $form.name = ""
+        $form.status = "Y"
     }
     $:{
-        if ($errors.username || $errors.password || $errors.rule || $errors.name){
-            alert($errors.username+"\n"+$errors.password+"\n"+$errors.rule+"\n"+$errors.name)
-            $form.username = ""
-            $form.password = ""
-            $form.rule = ""
-            $form.name = ""
-            
-            
+        if(sData == "New"){
+            if ($errors.username || $errors.password || $errors.rule || $errors.name || $errors.status){
+                alert($errors.username+"\n"+$errors.password+"\n"+$errors.rule+"\n"+$errors.name+"\n"+$errors.status)
+                $form.username = ""
+                $form.password = ""
+                $form.rule = ""
+                $form.name = ""
+                $form.status = "Y"
+            }
+        }else{
+            if ($errors.username || $errors.rule || $errors.name || $errors.status){
+                alert($errors.username+"\n"+$errors.rule+"\n"+$errors.name+"\n"+$errors.status)
+                $form.username = ""
+                $form.rule = ""
+                $form.name = ""
+                $form.status = "Y"
+            }
         }
     }
     
     function callFunction(event){
         switch(event.detail){
             case "NEW":
-                NewData();
+                NewData("New","","","","","");
                 break;
             case "REFRESH":
                 RefreshHalaman();break;
@@ -166,7 +203,7 @@
                                         <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
                                             <i 
                                                 on:click={() => {
-                                                    EditData(rec.admin_username);
+                                                    NewData("Edit",rec.admin_username,"",rec.admin_rule,rec.admin_nama,rec.admin_status);
                                                 }} 
                                                 class="bi bi-pencil"></i>
                                         </td>
@@ -227,6 +264,7 @@
                 on:change="{handleChange}"
                 bind:value={$form.username}
                 invalid={$errors.username.length > 0}
+                disabled='{username_flag}'
                 type="text"
                 class="form-control required"
                 placeholder="Username"
@@ -253,6 +291,17 @@
                 class="form-control required"
                 placeholder="Name"
                 aria-label="Name"/>
+        </div>
+        <div class="mb-3">
+            <label for="exampleForm" class="form-label">Status</label>
+            <select
+                class="form-control required"
+                on:change="{handleChange}"
+                bind:value={$form.status}
+                invalid={$errors.status.length > 0} >
+                <option value="Y">ACTIVE</option>
+                <option value="N">DEACTIVE</option>
+            </select>
         </div>
 	</slot:template>
 	<slot:template slot="footer">

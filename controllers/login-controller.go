@@ -59,7 +59,7 @@ func CheckLogin(c *fiber.Ctx) error {
 			})
 
 	} else {
-		dataclient := client.Username + "==" + strconv.Itoa(ruleadmin)
+		dataclient := client.Username + "==" + ruleadmin
 		dataclient_encr, keymap := helpers.Encryption(dataclient)
 		dataclient_encr_final := dataclient_encr + "|" + strconv.Itoa(keymap)
 		t, err := helpers.GenerateNewAccessToken(dataclient_encr_final)
@@ -89,13 +89,26 @@ func Home(c *fiber.Ctx) error {
 	claims := user.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
 	temp_decp := helpers.Decryption(name)
+	client_username, idruleadmin := helpers.Parsing_Decry(temp_decp, "==")
+	log.Println(client_username)
+	log.Println(idruleadmin)
+	log.Println(client.Page)
 
-	log.Println(temp_decp)
-
-	c.Status(fiber.StatusOK)
-	return c.JSON(fiber.Map{
-		"status":  fiber.StatusOK,
-		"message": "Success",
-		"record":  nil,
-	})
+	ruleadmin := models.Get_AdminRule("ruleadmingroup", idruleadmin)
+	flag := models.Get_listitemsearch(ruleadmin, ",", client.Page)
+	if !flag {
+		c.Status(fiber.StatusForbidden)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusForbidden,
+			"message": "Anda tidak bisa akses halaman ini",
+			"record":  nil,
+		})
+	} else {
+		c.Status(fiber.StatusOK)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusOK,
+			"message": "ADMIN",
+			"record":  nil,
+		})
+	}
 }

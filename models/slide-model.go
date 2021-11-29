@@ -85,8 +85,6 @@ func Fetch_slideHome() (helpers.Response, error) {
 func Save_slide(admin, sdata, url string, idmovie, position int) (helpers.Response, error) {
 	var res helpers.Response
 	msg := "Failed"
-	con := db.CreateCon()
-	ctx := context.Background()
 	tglnow, _ := goment.New()
 	render_page := time.Now()
 	flag := false
@@ -102,24 +100,20 @@ func Save_slide(admin, sdata, url string, idmovie, position int) (helpers.Respon
 				?, ?
 			)
 		`
-		stmt_insert, e_insert := con.PrepareContext(ctx, sql_insert)
-		helpers.ErrorCheck(e_insert)
-		defer stmt_insert.Close()
 		field_column := configs.DB_tbl_trx_slide + tglnow.Format("YYYY")
 		idrecord_counter := Get_counter(field_column)
-		res_newrecord, e_newrecord := stmt_insert.ExecContext(
-			ctx,
+		flag_insert, msg_insert := Exec_SQL(sql_insert, configs.DB_tbl_trx_slide, "INSERT",
 			tglnow.Format("YY")+strconv.Itoa(idrecord_counter),
 			idmovie, url, position,
 			admin,
 			tglnow.Format("YYYY-MM-DD HH:mm:ss"))
-		helpers.ErrorCheck(e_newrecord)
-		insert, e := res_newrecord.RowsAffected()
-		helpers.ErrorCheck(e)
-		if insert > 0 {
+
+		if flag_insert {
 			flag = true
 			msg = "Succes"
-			log.Println("Data Berhasil di save")
+			log.Println(msg_insert)
+		} else {
+			log.Println(msg_insert)
 		}
 	}
 

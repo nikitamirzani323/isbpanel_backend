@@ -1,16 +1,13 @@
 <script>
     import Home from "../admin/Home.svelte";
-    import Entry from "../admin/Entry.svelte";
     let listAdmin = [];
     let listAdminrule = [];
-    let sData = "";
     let record = "";
     let totalrecord = 0;
-    let admin_username = "";
     export let table_header_font = "";
 	export let table_body_font = "";
     let token = localStorage.getItem("token");
-    let akses_page = true;
+    let akses_page = false;
     
     async function initapp() {
         const res = await fetch("/api/valid", {
@@ -28,8 +25,8 @@
             logout();
         } else if (json.status == 403) {
             alert(json.message);
-            akses_page = false;
         } else {
+            akses_page = true;
             initAdmin();
         }
     }
@@ -93,12 +90,7 @@
         localStorage.clear();
         window.location.href = "/";
     }
-    const handleEditData = (e) => {
-        admin_username = e.detail.e;
-        sData = "Edit";
-        alert(admin_username)
-        // editAdmin(admin_username);
-    };
+    
     const handleRefreshData = (e) => {
         listAdmin = [];
         listAdminrule = [];
@@ -109,13 +101,13 @@
     };
     initapp()
 </script>
+{#if akses_page == true}
 <Home
-    on:handleEditData={handleEditData}
     on:handleRefreshData={handleRefreshData}
     {token}
     {table_header_font}
     {table_body_font}
     {listAdmin}
     {listAdminrule}
-    {totalrecord}
-/>
+    {totalrecord}/>
+{/if}

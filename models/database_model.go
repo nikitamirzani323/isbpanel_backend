@@ -117,7 +117,7 @@ func Get_AdminRule(tipe, idadmin string) string {
 	ruleadmingroup := ""
 
 	sql_select := `SELECT
-	ruleadmingroup  
+		ruleadmingroup  
 		FROM ` + configs.DB_tbl_admingroup + `  
 		WHERE idadmin = ? 
 	`
@@ -158,4 +158,25 @@ func Delete_SQL(sql, table string, args ...interface{}) bool {
 		log.Printf("Data %s Failed di delete", table)
 	}
 	return flag
+}
+func Exec_SQL(sql, table, action string, args ...interface{}) (bool, string) {
+	con := db.CreateCon()
+	ctx := context.Background()
+	flag := false
+	msg := ""
+	stmt_exec, e_exec := con.PrepareContext(ctx, sql)
+	helpers.ErrorCheck(e_exec)
+	defer stmt_exec.Close()
+	rec_exec, e_exec := stmt_exec.ExecContext(ctx, args...)
+
+	helpers.ErrorCheck(e_exec)
+	exec, e := rec_exec.RowsAffected()
+	helpers.ErrorCheck(e)
+	if exec > 0 {
+		flag = true
+		msg = "Data " + table + " Berhasil di " + action
+	} else {
+		msg = "Data " + table + " Failed di " + action
+	}
+	return flag, msg
 }
