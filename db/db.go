@@ -7,7 +7,6 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/joho/godotenv"
 	"github.com/nikitamirzani323/isbpanel_backend/helpers"
 )
 
@@ -16,11 +15,6 @@ var err error
 
 func Init() {
 	var conString string = ""
-
-	err := godotenv.Load()
-	if err != nil {
-		panic("Failed to load env file")
-	}
 
 	dbDriver := os.Getenv("DB_DRIVER")
 	dbUser := os.Getenv("DB_USER")
