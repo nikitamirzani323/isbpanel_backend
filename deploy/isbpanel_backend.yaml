@@ -63,8 +63,8 @@ spec:
                   name: prod-db-credentials
                   key: jwt-isbpanel
             - name: JWT_SECRET_KEY_EXPIRE_MINUTES_COUNT
-              value: 1440
-        - name: cloud-sql-proxy
+              value: '1440'
+        - name: isbpanel-redis
           image: redis:alpine
           resources:
             requests:
