@@ -5,10 +5,6 @@ steps:
         'build',
         '-t',
         'asia.gcr.io/dazzling-pillar-328210/bitbucket.org/isbtotogroup/isbpanel_backend:latest',
-        '-t',
-        'asia.gcr.io/dazzling-pillar-328210/bitbucket.org/isbtotogroup/isbpanel_backend:$TAG_NAME',
-        '-t',
-        'asia.gcr.io/dazzling-pillar-328210/bitbucket.org/isbtotogroup/isbpanel_backend:$SHORT_SHA',
         '.',
       ]
   - name: gcr.io/cloud-builders/docker
