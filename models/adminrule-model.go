@@ -5,11 +5,11 @@ import (
 	"log"
 	"time"
 
+	"bitbucket.org/isbtotogroup/isbpanel_backend/configs"
+	"bitbucket.org/isbtotogroup/isbpanel_backend/db"
+	"bitbucket.org/isbtotogroup/isbpanel_backend/entities"
+	"bitbucket.org/isbtotogroup/isbpanel_backend/helpers"
 	"github.com/gofiber/fiber/v2"
-	"github.com/nikitamirzani323/isbpanel_backend/configs"
-	"github.com/nikitamirzani323/isbpanel_backend/db"
-	"github.com/nikitamirzani323/isbpanel_backend/entities"
-	"github.com/nikitamirzani323/isbpanel_backend/helpers"
 )
 
 func Fetch_adminruleHome() (helpers.Response, error) {

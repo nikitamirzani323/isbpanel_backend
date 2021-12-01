@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
+	"bitbucket.org/isbtotogroup/isbpanel_backend/helpers"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/nikitamirzani323/isbpanel_backend/helpers"
 )
 
 var db *sql.DB

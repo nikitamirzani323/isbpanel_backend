@@ -9,15 +9,15 @@ import (
 	"strings"
 	"time"
 
+	"bitbucket.org/isbtotogroup/isbpanel_backend/entities"
+	"bitbucket.org/isbtotogroup/isbpanel_backend/helpers"
+	"bitbucket.org/isbtotogroup/isbpanel_backend/models"
 	"github.com/buger/jsonparser"
 	"github.com/go-playground/validator/v10"
 	"github.com/go-resty/resty/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
-	"github.com/nikitamirzani323/isbpanel_backend/entities"
-	"github.com/nikitamirzani323/isbpanel_backend/helpers"
-	"github.com/nikitamirzani323/isbpanel_backend/models"
 )
 
 const Fieldmovie_home_redis = "LISTMOVIE_BACKEND_ISBPANEL"
