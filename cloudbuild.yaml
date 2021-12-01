@@ -17,12 +17,3 @@ steps:
         'push',
         'asia.gcr.io/dazzling-pillar-328210/bitbucket.org/isbtotogroup/isbpanel_backend',
       ]
-  - name: gcr.io/cloud-builders/gke-deploy
-    args:
-      - run
-      - '--filename=$_K8S_YAML_PATH'
-      - >-
-        --image=asia.gcr.io/dazzling-pillar-328210/bitbucket.org/isbtotogroup/isbpanel_backend:latest
-      - '--location=$_GKE_LOCATION'
-      - '--cluster=$_GKE_CLUSTER'
-      - '--namespace=$_K8S_NAMESPACE'
