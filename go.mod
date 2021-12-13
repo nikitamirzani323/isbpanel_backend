@@ -17,9 +17,12 @@ require (
 	github.com/gofiber/jwt/v3 v3.1.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.1.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
+	github.com/jinzhu/gorm v1.9.16 // indirect
+	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/joho/godotenv v1.4.0 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
+	github.com/lib/pq v1.1.1 // indirect
 	github.com/nleeper/goment v1.4.2 // indirect
 	github.com/tkuchiki/go-timezone v0.2.2 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect

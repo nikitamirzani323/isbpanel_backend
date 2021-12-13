@@ -28,7 +28,7 @@ func Fetch_pasaranHome() (helpers.Response, error) {
 	sql_select := `SELECT 
 			idpasarantogel , nmpasarantogel, 
 			urlpasaran , pasarandiundi, jamjadwal, displaypasaran, statuspasaran, 
-			createpasarantogel, COALESCE(createdatepasarantogel,""), updatepasarantogel, COALESCE(updatedatepasarantogel,"")  
+			createpasarantogel, COALESCE(createdatepasarantogel,now()), updatepasarantogel, COALESCE(updatedatepasarantogel,now())  
 			FROM ` + configs.DB_tbl_mst_pasaran + ` 
 			ORDER BY displaypasaran ASC  
 		`
@@ -68,7 +68,7 @@ func Fetch_pasaranHome() (helpers.Response, error) {
 		sql_selectpasaran := `SELECT 
 			datekeluaran , nomorkeluaran
 			FROM ` + configs.DB_tbl_trx_keluaran + ` 
-			WHERE idpasarantogel = ? 
+			WHERE idpasarantogel = $1 
 			ORDER BY datekeluaran DESC LIMIT 1
 		`
 		row_keluaran := con.QueryRowContext(ctx, sql_selectpasaran, idpasarantogel_db)
@@ -85,7 +85,7 @@ func Fetch_pasaranHome() (helpers.Response, error) {
 		sql_selectprediksi := `SELECT 
 			dateprediksi , bbfsprediksi, nomorprediksi
 			FROM ` + configs.DB_tbl_trx_prediksi + ` 
-			WHERE idpasarantogel = ? 
+			WHERE idpasarantogel = $1 
 			ORDER BY dateprediksi DESC LIMIT 1
 		`
 		row_prediksi := con.QueryRowContext(ctx, sql_selectprediksi, idpasarantogel_db)
@@ -138,8 +138,8 @@ func Save_pasaran(admin, idrecord, nmpasarantogel, urlpasaran, pasarandiundi, ja
 					idpasarantogel , nmpasarantogel, urlpasaran, pasarandiundi, jamjadwal, displaypasaran, statuspasaran, 
 					createpasarantogel, createdatepasarantogel
 				) values (
-					? ,?, ?, ?, ?, ?, ?,
-					?, ?
+					$1 ,$2, $3, $4, $5, $6, $7,
+					$8, $9
 				)
 			`
 			stmt_insert, e_insert := con.PrepareContext(ctx, sql_insert)
@@ -165,9 +165,9 @@ func Save_pasaran(admin, idrecord, nmpasarantogel, urlpasaran, pasarandiundi, ja
 		sql_update := `
 				UPDATE 
 				` + configs.DB_tbl_mst_pasaran + `  
-				SET nmpasarantogel=?,urlpasaran=?,pasarandiundi=?, jamjadwal=?, displaypasaran=?, statuspasaran=?,
-				updatepasarantogel=?, updatedatepasarantogel=? 
-				WHERE idpasarantogel =? 
+				SET nmpasarantogel=$1,urlpasaran=$2,pasarandiundi=$3, jamjadwal=$4, displaypasaran=$5, statuspasaran=$6,
+				updatepasarantogel=$7, updatedatepasarantogel=$8 
+				WHERE idpasarantogel =$9 
 			`
 		stmt_record, e := con.PrepareContext(ctx, sql_update)
 		helpers.ErrorCheck(e)
@@ -218,7 +218,7 @@ func Fetch_keluaran(idpasaran string) (helpers.Response, error) {
 			idtrxkeluaran , datekeluaran, 
 			periodekeluaran , nomorkeluaran
 			FROM ` + configs.DB_tbl_trx_keluaran + ` 
-			WHERE idpasarantogel=? 
+			WHERE idpasarantogel=$1 
 			ORDER BY datekeluaran DESC LIMIT 365 
 		`
 
@@ -268,8 +268,8 @@ func Save_keluaran(admin, idpasaran, tanggal, nomor string) (helpers.Response, e
 				idtrxkeluaran , idpasarantogel, datekeluaran, periodekeluaran, nomorkeluaran, 
 				createkeluaran, createdatekeluaran
 			) values (
-				? ,?, ?, ?, ?,
-				?, ?
+				$1 ,$2, $3, $4, $5,
+				$6, $7
 			)
 		`
 		stmt_insert, e_insert := con.PrepareContext(ctx, sql_insert)
@@ -324,7 +324,7 @@ func Delete_keluaran(admin, idpasaran string, idtrxkeluaran int) (helpers.Respon
 		sql_delete := `
 			DELETE FROM
 			` + configs.DB_tbl_trx_keluaran + ` 
-			WHERE idtrxkeluaran=? AND idpasarantogel=? 
+			WHERE idtrxkeluaran=$1 AND idpasarantogel=$2 
 		`
 		stmt_delete, e_delete := con.PrepareContext(ctx, sql_delete)
 		helpers.ErrorCheck(e_delete)
@@ -370,7 +370,7 @@ func Fetch_prediksi(idpasaran string) (helpers.Response, error) {
 			idprediksi, dateprediksi, 
 			bbfsprediksi , nomorprediksi
 			FROM ` + configs.DB_tbl_trx_prediksi + ` 
-			WHERE idpasarantogel=? 
+			WHERE idpasarantogel=$1 
 			ORDER BY dateprediksi DESC LIMIT 181  
 		`
 
@@ -419,8 +419,8 @@ func Save_prediksi(admin, idpasaran, tanggal, bbfs, nomor string) (helpers.Respo
 				idprediksi  , idpasarantogel, dateprediksi, bbfsprediksi, nomorprediksi, 
 				createprediksi, createdateprediksi
 			) values (
-				? ,?, ?, ?, ?,
-				?, ?
+				$1 ,$2, $3, $4, $5,
+				$6, $7
 			)
 		`
 		stmt_insert, e_insert := con.PrepareContext(ctx, sql_insert)
@@ -473,7 +473,7 @@ func Delete_prediksi(admin, idpasaran string, idprediksi int) (helpers.Response,
 		sql_delete := `
 			DELETE FROM
 			` + configs.DB_tbl_trx_prediksi + ` 
-			WHERE idprediksi =? AND idpasarantogel=? 
+			WHERE idprediksi =$1 AND idpasarantogel=$2 
 		`
 		stmt_delete, e_delete := con.PrepareContext(ctx, sql_delete)
 		helpers.ErrorCheck(e_delete)

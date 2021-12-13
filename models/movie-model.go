@@ -50,16 +50,17 @@ func Fetch_movieHome(search string, page, enable int) (helpers.Responsemovie, er
 	sql_select += "SELECT "
 	sql_select += "movieid , movietitle, description, movietype, "
 	sql_select += "rating , imdb, year, views, enabled, COALESCE(posted_id,0),label, urlthumbnail, slug,   "
-	sql_select += "createmovie, COALESCE(createdatemovie,''), updatemovie, COALESCE(updatedatemovie,'') "
+	sql_select += "createmovie, COALESCE(createdatemovie,now()), updatemovie, COALESCE(updatedatemovie,now()) "
 	sql_select += "FROM " + configs.DB_VIEW_MOVIE + "  "
 	if search == "" {
 		sql_select += "WHERE enabled = '" + strconv.Itoa(enable) + "' "
-		sql_select += "ORDER BY createdatemovie DESC  LIMIT " + strconv.Itoa(offset) + " , " + strconv.Itoa(perpage)
+		sql_select += "ORDER BY createdatemovie DESC  OFFSET " + strconv.Itoa(offset) + " LIMIT " + strconv.Itoa(perpage)
 	} else {
 		sql_select += "WHERE enabled = '" + strconv.Itoa(enable) + "' "
 		sql_select += "AND movietitle LIKE '%" + search + "%' "
 		sql_select += "ORDER BY createdatemovie DESC LIMIT " + strconv.Itoa(perpage)
 	}
+	log.Println(sql_select)
 	row, err := con.QueryContext(ctx, sql_select)
 	helpers.ErrorCheck(err)
 	for row.Next() {
@@ -97,7 +98,7 @@ func Fetch_movieHome(search string, page, enable int) (helpers.Responsemovie, er
 			A.idgenre, B.nmgenre 
 			FROM ` + configs.DB_tbl_trx_moviegenre + ` as A 
 			JOIN ` + configs.DB_tbl_mst_moviegenre + ` as B ON B.idgenre = A.idgenre 
-			WHERE A.movieid = ?   
+			WHERE A.movieid = $1   
 		`
 		row_moviegenre, err := con.QueryContext(ctx, sql_selectmoviegenre, movieid_db)
 		helpers.ErrorCheck(err)
@@ -118,7 +119,7 @@ func Fetch_movieHome(search string, page, enable int) (helpers.Responsemovie, er
 			sql_selectmoviesource := `SELECT 
 				id, url 
 				FROM ` + configs.DB_tbl_mst_moviesource + ` 
-				WHERE poster_id = ?   
+				WHERE poster_id = $1  
 			`
 			row_moviesource, err := con.QueryContext(ctx, sql_selectmoviesource, movieid_db)
 			helpers.ErrorCheck(err)
@@ -200,8 +201,8 @@ func Save_movie(admin, name, label, slug, tipemovie, descp, urlthum, listgenre, 
 				movieid , movietitle, label, movietype, description, imdb, year, slug, enabled, urlthumbnail,    
 				createmovie, createdatemovie
 			) values (
-				?,?,?,?,?,?,?,?,?,?, 
-				?, ?
+				$1,$2,$3,$4,$5,$6,$7,$8,$9,$10, 
+				$11, $12
 			)
 		`
 		stmt_insert, e_insert := con.PrepareContext(ctx, sql_insert)
@@ -237,7 +238,7 @@ func Save_movie(admin, name, label, slug, tipemovie, descp, urlthum, listgenre, 
 					` + configs.DB_tbl_trx_moviegenre + ` (
 						idmoviegenre , movieid, idgenre
 					) values (
-						?,?,?
+						$1,$2,$3
 					)
 				`
 				stmt_insertgenre, e_insertgenre := con.PrepareContext(ctx, sql_insertgenre)
@@ -271,7 +272,7 @@ func Save_movie(admin, name, label, slug, tipemovie, descp, urlthum, listgenre, 
 					` + configs.DB_tbl_mst_moviesource + ` (
 						id , poster_id, type, url
 					) values (
-						?,?,?,?
+						$1,$2,$3,$4
 					)
 				`
 				stmt_insertsource, e_insertsource := con.PrepareContext(ctx, sql_insertsource)
@@ -297,9 +298,9 @@ func Save_movie(admin, name, label, slug, tipemovie, descp, urlthum, listgenre, 
 		sql_update := `
 			UPDATE 
 			` + configs.DB_tbl_trx_movie + ` 
-			SET movietitle=?, description=?, slug=?, urlthumbnail=?, enabled=? ,
-			updatemovie=?, updatedatemovie=? 
-			WHERE movieid=? 
+			SET movietitle=$1, description=$2, slug=$3, urlthumbnail=$4, enabled=$5 ,
+			updatemovie=$6, updatedatemovie=$7 
+			WHERE movieid=$8 
 		`
 		flag_update, msg_update := Exec_SQL(sql_update, configs.DB_tbl_trx_movie, "UPDATE",
 			name, descp, slug, urlthum, status,
@@ -319,7 +320,7 @@ func Save_movie(admin, name, label, slug, tipemovie, descp, urlthum, listgenre, 
 			stmt_genre_delete, e_genre_delete := con.PrepareContext(ctx, `
 					DELETE FROM  
 					`+configs.DB_tbl_trx_moviegenre+`   
-					WHERE movieid=?  
+					WHERE movieid=$1  
 			`)
 
 			helpers.ErrorCheck(e_genre_delete)
@@ -340,7 +341,7 @@ func Save_movie(admin, name, label, slug, tipemovie, descp, urlthum, listgenre, 
 			stmt_source_delete, e_source_delete := con.PrepareContext(ctx, `
 					DELETE FROM  
 					`+configs.DB_tbl_mst_moviesource+`   
-					WHERE poster_id=?  
+					WHERE poster_id=$1  
 			`)
 
 			helpers.ErrorCheck(e_source_delete)
@@ -369,7 +370,7 @@ func Save_movie(admin, name, label, slug, tipemovie, descp, urlthum, listgenre, 
 						` + configs.DB_tbl_trx_moviegenre + ` (
 							idmoviegenre , movieid, idgenre
 						) values (
-							?,?,?
+							$1,$2,$3
 						)
 					`
 				stmt_insertgenre, e_insertgenre := con.PrepareContext(ctx, sql_insertgenre)
@@ -403,7 +404,7 @@ func Save_movie(admin, name, label, slug, tipemovie, descp, urlthum, listgenre, 
 					` + configs.DB_tbl_mst_moviesource + ` (
 						id , poster_id, type, url
 					) values (
-						?,?,?,?
+						$1,$2,$3,$4
 					)
 				`
 				stmt_insertsource, e_insertsource := con.PrepareContext(ctx, sql_insertsource)
@@ -456,7 +457,7 @@ func Delete_movie(admin string, idrecord int) (helpers.Response, error) {
 		sql_deletegenre := `
 			DELETE FROM
 			` + configs.DB_tbl_trx_moviegenre + ` 
-			WHERE movieid=? 
+			WHERE movieid=$1 
 		`
 		stmt_deletegenre, e_deletegenre := con.PrepareContext(ctx, sql_deletegenre)
 		helpers.ErrorCheck(e_deletegenre)
@@ -476,7 +477,7 @@ func Delete_movie(admin string, idrecord int) (helpers.Response, error) {
 		sql_deletesource := `
 			DELETE FROM
 			` + configs.DB_tbl_mst_moviesource + ` 
-			WHERE poster_id=? 
+			WHERE poster_id=$1 
 		`
 		stmt_deletesource, e_deletesource := con.PrepareContext(ctx, sql_deletesource)
 		helpers.ErrorCheck(e_deletesource)
@@ -496,7 +497,7 @@ func Delete_movie(admin string, idrecord int) (helpers.Response, error) {
 		sql_delete := `
 			DELETE FROM
 			` + configs.DB_tbl_trx_movie + ` 
-			WHERE movieid=? 
+			WHERE movieid=$1 
 		`
 		stmt_delete, e_delete := con.PrepareContext(ctx, sql_delete)
 		helpers.ErrorCheck(e_delete)
@@ -563,11 +564,11 @@ func Fetch_movieseriesHome(search string, page, enable int) (helpers.Responsemov
 	sql_select += "SELECT "
 	sql_select += "movieid , movietitle, description, movietype, "
 	sql_select += "rating , imdb, year, views, enabled, COALESCE(posted_id,0),label, urlthumbnail, slug,   "
-	sql_select += "createmovie, COALESCE(createdatemovie,''), updatemovie, COALESCE(updatedatemovie,'') "
+	sql_select += "createmovie, COALESCE(createdatemovie,now()), updatemovie, COALESCE(updatedatemovie,now()) "
 	sql_select += "FROM " + configs.DB_VIEW_MOVIESERIES + "  "
 	if search == "" {
 		sql_select += "WHERE enabled = '" + strconv.Itoa(enable) + "' "
-		sql_select += "ORDER BY createdatemovie DESC  LIMIT " + strconv.Itoa(offset) + " , " + strconv.Itoa(perpage)
+		sql_select += "ORDER BY createdatemovie DESC  OFFSET " + strconv.Itoa(offset) + " LIMIT " + strconv.Itoa(perpage)
 	} else {
 		sql_select += "WHERE enabled = '" + strconv.Itoa(enable) + "' "
 		sql_select += "AND movietitle LIKE '%" + search + "%' "
@@ -610,7 +611,7 @@ func Fetch_movieseriesHome(search string, page, enable int) (helpers.Responsemov
 			A.idgenre, B.nmgenre 
 			FROM ` + configs.DB_tbl_trx_moviegenre + ` as A 
 			JOIN ` + configs.DB_tbl_mst_moviegenre + ` as B ON B.idgenre = A.idgenre 
-			WHERE A.movieid = ?   
+			WHERE A.movieid = $1   
 		`
 		row_moviegenre, err := con.QueryContext(ctx, sql_selectmoviegenre, movieid_db)
 		helpers.ErrorCheck(err)
@@ -631,7 +632,7 @@ func Fetch_movieseriesHome(search string, page, enable int) (helpers.Responsemov
 		sql_selectmovieseason := `SELECT 
 			id, title, position 
 			FROM ` + configs.DB_tbl_mst_season + ` 
-			WHERE poster_id = ?   
+			WHERE poster_id = $1   
 			ORDER BY position ASC 
 		`
 		row_movieseason, err := con.QueryContext(ctx, sql_selectmovieseason, movieid_db)
@@ -712,8 +713,8 @@ func Save_movieseries(admin, name, label, slug, tipemovie, descp, urlthum, listg
 				movieid , movietitle, label, movietype, description, imdb, year, slug, enabled, urlthumbnail,    
 				createmovie, createdatemovie
 			) values (
-				?,?,?,?,?,?,?,?,?,?, 
-				?, ?
+				$1,$2,$3,$4,$5,$6,$7,$8,$9,$10, 
+				$11, $12
 			)
 		`
 		stmt_insert, e_insert := con.PrepareContext(ctx, sql_insert)
@@ -749,7 +750,7 @@ func Save_movieseries(admin, name, label, slug, tipemovie, descp, urlthum, listg
 					` + configs.DB_tbl_trx_moviegenre + ` (
 						idmoviegenre , movieid, idgenre
 					) values (
-						?,?,?
+						$1,$2,$3
 					)
 				`
 				stmt_insertgenre, e_insertgenre := con.PrepareContext(ctx, sql_insertgenre)
@@ -775,9 +776,9 @@ func Save_movieseries(admin, name, label, slug, tipemovie, descp, urlthum, listg
 		sql_update := `
 			UPDATE 
 			` + configs.DB_tbl_trx_movie + ` 
-			SET movietitle=?, description=?, slug=?, urlthumbnail=?, 
-			updatemovie=?, updatedatemovie=? 
-			WHERE movieid=? 
+			SET movietitle=$1, description=$2, slug=$3, urlthumbnail=$4, 
+			updatemovie=$5, updatedatemovie=$6 
+			WHERE movieid=$7 
 		`
 		stmt_update, e_update := con.PrepareContext(ctx, sql_update)
 		helpers.ErrorCheck(e_update)
@@ -800,7 +801,7 @@ func Save_movieseries(admin, name, label, slug, tipemovie, descp, urlthum, listg
 			stmt_genre_delete, e_genre_delete := con.PrepareContext(ctx, `
 					DELETE FROM  
 					`+configs.DB_tbl_trx_moviegenre+`   
-					WHERE movieid=?  
+					WHERE movieid=$1  
 			`)
 
 			helpers.ErrorCheck(e_genre_delete)
@@ -829,7 +830,7 @@ func Save_movieseries(admin, name, label, slug, tipemovie, descp, urlthum, listg
 						` + configs.DB_tbl_trx_moviegenre + ` (
 							idmoviegenre , movieid, idgenre
 						) values (
-							?,?,?
+							$1,$2,$3
 						)
 					`
 				stmt_insertgenre, e_insertgenre := con.PrepareContext(ctx, sql_insertgenre)
@@ -879,7 +880,7 @@ func Fetch_season(idmovie int) (helpers.Response, error) {
 	sql_select := `SELECT 
 			id , title, position
 			FROM ` + configs.DB_tbl_mst_season + ` 
-			WHERE poster_id=? 
+			WHERE poster_id=$1 
 			ORDER BY position ASC   
 		`
 
@@ -924,7 +925,7 @@ func Save_season(admin, name, sdata string, idrecord, idmovie, display int) (hel
 			` + configs.DB_tbl_mst_season + ` (
 				id ,poster_id, title, position
 			) values (
-				? ,?, ?, ?
+				$1 ,$2, $3, $4
 			)
 		`
 		field_column := configs.DB_tbl_mst_season + tglnow.Format("YYYY")
@@ -944,8 +945,8 @@ func Save_season(admin, name, sdata string, idrecord, idmovie, display int) (hel
 		sql_update := `
 			UPDATE 
 			` + configs.DB_tbl_mst_season + ` 
-			SET title=?, position=? 
-			WHERE id=? 
+			SET title=$1, position=$2 
+			WHERE id=$3 
 		`
 		flag_update, msg_update := Exec_SQL(sql_update, configs.DB_tbl_mst_season, "UPDATE", name, display, idrecord)
 
@@ -983,7 +984,7 @@ func Delete_season(admin string, idrecord, idmovie int) (helpers.Response, error
 		sql_delete := `
 			DELETE FROM
 			` + configs.DB_tbl_mst_season + ` 
-			WHERE id=? AND poster_id=? 
+			WHERE id=$1 AND poster_id=$2 
 		`
 
 		flag_delete, msg_delete := Exec_SQL(sql_delete, configs.DB_tbl_mst_season, "DELETE", idrecord, idmovie)
@@ -1025,7 +1026,7 @@ func Fetch_episode(idseason int) (helpers.Response, error) {
 	sql_select := `SELECT 
 			id , title, position
 			FROM ` + configs.DB_tbl_mst_episode + ` 
-			WHERE season_id=? 
+			WHERE season_id=$1 
 			ORDER BY position ASC   
 		`
 
@@ -1046,7 +1047,7 @@ func Fetch_episode(idseason int) (helpers.Response, error) {
 		sql_selectmoviesource := `SELECT 
 			id, url 
 			FROM ` + configs.DB_tbl_mst_moviesource + ` 
-			WHERE episode_id = ?   
+			WHERE episode_id = $1   
 		`
 		row_moviesource, err := con.QueryContext(ctx, sql_selectmoviesource, id_db)
 		helpers.ErrorCheck(err)
@@ -1094,7 +1095,7 @@ func Save_episode(admin, name, urlsource, sdata string, idrecord, idseason, disp
 			` + configs.DB_tbl_mst_episode + ` (
 				id ,season_id, title, position, enabled
 			) values (
-				? ,?, ?, ?, ? 
+				$1 ,$2, $3, $4, $5 
 			)
 		`
 		field_column := configs.DB_tbl_mst_episode + tglnow.Format("YYYY")
@@ -1117,7 +1118,7 @@ func Save_episode(admin, name, urlsource, sdata string, idrecord, idseason, disp
 				` + configs.DB_tbl_mst_moviesource + ` (
 					id , episode_id, type, url
 				) values (
-					?,?,?,?
+					$1,$2,$3,$4
 				)
 		`
 		field_columnsource := configs.DB_tbl_mst_moviesource + tglnow.Format("YYYY")
@@ -1161,7 +1162,7 @@ func Delete_episode(admin string, idrecord, idseason int) (helpers.Response, err
 		sql_deletesource := `
 			DELETE FROM
 			` + configs.DB_tbl_mst_moviesource + ` 
-			WHERE episode_id=? 
+			WHERE episode_id=$1 
 		`
 
 		flag_deletesource, msg_deletesource := Exec_SQL(sql_deletesource, configs.DB_tbl_mst_moviesource, "DELETE", idrecord)
@@ -1174,7 +1175,7 @@ func Delete_episode(admin string, idrecord, idseason int) (helpers.Response, err
 			sql_delete := `
 				DELETE FROM
 				` + configs.DB_tbl_mst_episode + ` 
-				WHERE id=? AND season_id=? 
+				WHERE id=$1 AND season_id=$2 
 			`
 
 			flag_episode, msg_episode := Exec_SQL(sql_delete, configs.DB_tbl_mst_episode, "DELETE", idrecord, idseason)
@@ -1268,7 +1269,7 @@ func Fetch_genre() (helpers.Response, error) {
 
 	sql_select := `SELECT 
 			idgenre , nmgenre, genredisplay, 
-			creategenre, COALESCE(createdategenre,""), updategenre, COALESCE(updatedategenre,"")  
+			creategenre, COALESCE(createdategenre,now()), updategenre, COALESCE(updatedategenre,now())  
 			FROM ` + configs.DB_tbl_mst_moviegenre + ` 
 			ORDER BY genredisplay ASC   
 		`
@@ -1327,8 +1328,8 @@ func Save_genre(admin, name, sdata string, idrecord, display int) (helpers.Respo
 				idgenre , nmgenre, genredisplay,  
 				creategenre, createdategenre
 			) values (
-				? ,?, ?, 
-				?, ?
+				$1 ,$2, $3, 
+				$4, $5
 			)
 		`
 		field_column := configs.DB_tbl_mst_moviegenre + tglnow.Format("YYYY")
@@ -1350,9 +1351,9 @@ func Save_genre(admin, name, sdata string, idrecord, display int) (helpers.Respo
 		sql_update := `
 			UPDATE 
 			` + configs.DB_tbl_mst_moviegenre + ` 
-			SET nmgenre=?, genredisplay=?, 
-			updategenre=?, updatedategenre=? 
-			WHERE idgenre=? 
+			SET nmgenre=$1, genredisplay=$2, 
+			updategenre=$3, updatedategenre=$4 
+			WHERE idgenre=$5 
 		`
 		flag_update, msg_update := Exec_SQL(sql_update, configs.DB_tbl_mst_moviegenre, "UPDATE",
 			name, display,
@@ -1396,7 +1397,7 @@ func Delete_genre(admin string, idrecord int) (helpers.Response, error) {
 			sql_delete := `
 				DELETE FROM
 				` + configs.DB_tbl_mst_moviegenre + ` 
-				WHERE idgenre=? 
+				WHERE idgenre=$1 
 			`
 			flag_delete, msg_delete := Exec_SQL(sql_delete, configs.DB_tbl_mst_moviegenre, "DELETE", idrecord)
 
@@ -1437,7 +1438,7 @@ func _GetMedia(idrecord int) (string, string) {
 	sql_select := `SELECT
 		url, extension   
 		FROM ` + configs.DB_tbl_mst_mediatable + `  
-		WHERE idmediatable = ? 
+		WHERE idmediatable = $1 
 	`
 	row := con.QueryRowContext(ctx, sql_select, idrecord)
 	switch e := row.Scan(&url, &extension); e {
@@ -1456,7 +1457,7 @@ func _GetTotalEpisode(idrecord int) int {
 	sql_select := `SELECT
 		count(id) as total  
 		FROM ` + configs.DB_tbl_mst_episode + `  
-		WHERE season_id = ? 
+		WHERE season_id = $1 
 	`
 	row := con.QueryRowContext(ctx, sql_select, idrecord)
 	switch e := row.Scan(&total); e {
@@ -1475,7 +1476,7 @@ func _GetTotalComment(idrecord int) int {
 	sql_select := `SELECT
 		count(idcomment) as total  
 		FROM ` + configs.DB_tbl_trx_comment + `  
-		WHERE idposter = ? 
+		WHERE idposter = $1 
 	`
 	row := con.QueryRowContext(ctx, sql_select, idrecord)
 	switch e := row.Scan(&total); e {

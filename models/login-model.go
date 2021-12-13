@@ -22,10 +22,11 @@ func Login_Model(username, password, ipaddress, timezone string) (bool, string, 
 			SELECT
 			password, idadmin    
 			FROM ` + configs.DB_tbl_admin + ` 
-			WHERE username  = ?
-			AND statuslogin = "Y" 
+			WHERE username  = $1
+			AND statuslogin = 'Y' 
 		`
 
+	log.Println(sql_select, username)
 	row := con.QueryRowContext(ctx, sql_select, username)
 	switch e := row.Scan(&passwordDB, &idadminDB); e {
 	case sql.ErrNoRows:
@@ -46,10 +47,10 @@ func Login_Model(username, password, ipaddress, timezone string) (bool, string, 
 	if flag {
 		sql_update := `
 			UPDATE ` + configs.DB_tbl_admin + ` 
-			SET lastlogin=?, ipaddress=? , timezone=?, 
-			updateadmin=?,  updatedateadmin=?  
-			WHERE username  = ? 
-			AND statuslogin = "Y" 
+			SET lastlogin=$1, ipaddress=$2 , timezone=$3, 
+			updateadmin=$4,  updatedateadmin=$5  
+			WHERE username  = $6 
+			AND statuslogin = 'Y' 
 		`
 		flag_update, msg_update := Exec_SQL(sql_update, configs.DB_tbl_admin, "UPDATE",
 			tglnow.Format("YYYY-MM-DD HH:mm:ss"),

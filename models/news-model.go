@@ -29,7 +29,7 @@ func Fetch_newsHome(search string) (helpers.Response, error) {
 	sql_select += "SELECT "
 	sql_select += "A.idnews , A.title_news, A.descp_news, "
 	sql_select += "A.url_news , A.img_news, B.nmcatenews, A.idcatenews, "
-	sql_select += "A.createnews, COALESCE(A.createdatenews,''), A.updatenews, COALESCE(A.updatedatenews,'') "
+	sql_select += "A.createnews, COALESCE(A.createdatenews,now()), A.updatenews, COALESCE(A.updatedatenews,now()) "
 	sql_select += "FROM " + configs.DB_tbl_trx_news + " as A "
 	sql_select += "JOIN " + configs.DB_tbl_mst_category + " as B ON B.idcatenews = A.idcatenews "
 	if search == "" {
@@ -98,8 +98,8 @@ func Save_news(admin, sdata, title, descp, url, image string, idrecord, category
 				idnews , idcatenews, title_news, descp_news, url_news, img_news, 
 				createnews, createdatenews
 			) values (
-				? ,?, ?, ?, ?, ?, 
-				?, ?
+				$1 ,$2, $3, $4, $5, $6, 
+				$7, $8
 			)
 		`
 		field_column := configs.DB_tbl_trx_news + tglnow.Format("YYYY")
@@ -121,10 +121,10 @@ func Save_news(admin, sdata, title, descp, url, image string, idrecord, category
 		sql_update := `
 			UPDATE 
 			` + configs.DB_tbl_trx_news + ` 
-			SET idcatenews=?, title_news=?, descp_news=?, 
-			url_news=?,img_news=?,
-			updatenews=?, updatedatenews=? 
-			WHERE idnews=? 
+			SET idcatenews=$1, title_news=$2, descp_news=$3, 
+			url_news=$4,img_news=$5,
+			updatenews=$6, updatedatenews=$7 
+			WHERE idnews=$8 
 		`
 		flag_update, msg_update := Exec_SQL(sql_update, configs.DB_tbl_trx_news, "UPDATE",
 			category, title, descp, url, image,
@@ -165,7 +165,7 @@ func Delete_news(admin string, idnews int) (helpers.Response, error) {
 		sql_delete := `
 			DELETE FROM
 			` + configs.DB_tbl_trx_news + ` 
-			WHERE idnews=? 
+			WHERE idnews=$1 
 		`
 
 		flag_delete, msg_delete := Exec_SQL(sql_delete, configs.DB_tbl_trx_news, "DELETE", idnews)
@@ -206,7 +206,7 @@ func Fetch_category() (helpers.Response, error) {
 
 	sql_select := `SELECT 
 			idcatenews , nmcatenews, displaycatenews,statuscategory, 
-			createcatenews, COALESCE(createdatecatenews,""), updatecatenews, COALESCE(updatedatecatenews,"")  
+			createcatenews, COALESCE(createdatecatenews,now()), updatecatenews, COALESCE(updatedatecatenews,now())  
 			FROM ` + configs.DB_tbl_mst_category + ` 
 			ORDER BY displaycatenews ASC   
 		`
@@ -272,8 +272,8 @@ func Save_category(admin, name, status, sdata string, idrecord, display int) (he
 				idcatenews , nmcatenews, displaycatenews, statuscategory, 
 				createcatenews, createdatecatenews
 			) values (
-				? ,?, ?, ?, 
-				?, ?
+				$1 ,$2, $3, $4, 
+				$5, $6
 			)
 		`
 		field_column := configs.DB_tbl_mst_category + tglnow.Format("YYYY")
@@ -295,9 +295,9 @@ func Save_category(admin, name, status, sdata string, idrecord, display int) (he
 		sql_update := `
 			UPDATE 
 			` + configs.DB_tbl_mst_category + ` 
-			SET nmcatenews=?, displaycatenews=?, statuscategory=?, 
-			updatecatenews=?, updatedatecatenews=? 
-			WHERE idcatenews=? 
+			SET nmcatenews=$1, displaycatenews=$2, statuscategory=$3, 
+			updatecatenews=$4, updatedatecatenews=$5 
+			WHERE idcatenews=$6 
 		`
 		flag_update, msg_update := Exec_SQL(sql_update, configs.DB_tbl_mst_category, "UPDATE",
 			name, display, status,
@@ -341,7 +341,7 @@ func Delete_category(admin string, idrecord int) (helpers.Response, error) {
 			sql_delete := `
 				DELETE FROM
 				` + configs.DB_tbl_mst_category + ` 
-				WHERE idcatenews=? 
+				WHERE idcatenews=$1 
 			`
 			flag_delete, msg_delete := Exec_SQL(sql_delete, configs.DB_tbl_mst_category, "DELETE", idrecord)
 
@@ -381,7 +381,7 @@ func _GetTotalNews(idrecord int) int {
 	sql_select := `SELECT
 		count(	idnews) as total  
 		FROM ` + configs.DB_tbl_trx_news + `  
-		WHERE idcatenews = ? 
+		WHERE idcatenews = $1 
 	`
 	row := con.QueryRowContext(ctx, sql_select, idrecord)
 	switch e := row.Scan(&total); e {

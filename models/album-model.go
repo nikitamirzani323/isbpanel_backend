@@ -27,7 +27,7 @@ func Fetch_albumHome() (helpers.Response, error) {
 
 	sql_select := `SELECT 
 			idalbum , idcloudflare, filenamecloudflare, signedurl, link1,  
-			COALESCE(createdatealbum,"") 
+			COALESCE(createdatealbum,now()) 
 			FROM ` + configs.DB_tbl_trx_albumcloudflare + `  
 			ORDER BY idalbum DESC    
 	`
@@ -101,7 +101,7 @@ func Save_album(admin, datacloudflare, sData string) (helpers.Response, error) {
 					` + configs.DB_tbl_trx_albumcloudflare + ` (
 						idalbum , idcloudflare, filenamecloudflare, signedurl, link1,createdatealbum
 					) values (
-						?, ?, ?, ?, ?, ?
+						$1, $2, $3, $4, $5, $6
 					)
 				`
 				field_column := configs.DB_tbl_trx_albumcloudflare + tglnow.Format("YYYY")
@@ -142,8 +142,8 @@ func Update_album(admin, signedurl string, idrecord int) bool {
 	sql_update := `
 			UPDATE 
 			` + configs.DB_tbl_trx_albumcloudflare + `  
-			SET signedurl =? 
-			WHERE idalbum =? 
+			SET signedurl =$1 
+			WHERE idalbum =$2 
 		`
 
 	flag_update, msg_update := Exec_SQL(sql_update, configs.DB_tbl_trx_albumcloudflare, "UPDATE", signedurl, idrecord)
@@ -164,7 +164,7 @@ func Delete_album(admin string, idrecord, idmovie int) bool {
 	sql_delete := `
 				DELETE FROM
 				` + configs.DB_tbl_trx_albumcloudflare + ` 
-				WHERE idalbum=? 
+				WHERE idalbum=$1 
 			`
 	flag_delete, msg_delete := Exec_SQL(sql_delete, configs.DB_tbl_trx_albumcloudflare, "DELETE", idrecord)
 
@@ -177,8 +177,8 @@ func Delete_album(admin string, idrecord, idmovie int) bool {
 			sql_update := `
 				UPDATE 
 				` + configs.DB_tbl_trx_movie + `  
-				SET urlthumbnail =? , updatemovie=?, updatedatemovie=?  
-				WHERE movieid =? 
+				SET urlthumbnail =$1 , updatemovie=$2, updatedatemovie=$3  
+				WHERE movieid =$4 
 			`
 
 			flag_update, msg_update := Exec_SQL(sql_update, configs.DB_tbl_trx_movie, "UPDATE",
@@ -207,7 +207,7 @@ func _GetMovie(urlthum string) (int, string, int) {
 	sql_select := `SELECT
 		movieid, movietitle, enabled   
 		FROM ` + configs.DB_tbl_trx_movie + `  
-		WHERE urlthumbnail = ? 
+		WHERE urlthumbnail = $1 
 	`
 	row := con.QueryRowContext(ctx, sql_select, urlthum)
 	switch e := row.Scan(&movieid, &movietitle, &enabled); e {

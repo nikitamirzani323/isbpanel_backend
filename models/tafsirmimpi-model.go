@@ -30,7 +30,7 @@ func Fetch_tafsirmimpiHome(search string) (helpers.Response, error) {
 	sql_select += "createtafsirmimpi , createdatetafsirmimpi, updatetafsirmimpi, updatedatetafsirmimpi "
 	sql_select += "FROM " + configs.DB_tbl_mst_tafsirmimpi + " "
 	if search == "" {
-		sql_select += "ORDER BY RAND() LIMIT 500  "
+		sql_select += "ORDER BY random() LIMIT 500  "
 	} else {
 		sql_select += "WHERE mimpi LIKE '%" + search + "%' "
 		sql_select += "OR artimimpi LIKE '%" + search + "%' "
@@ -102,8 +102,8 @@ func Save_tafsirmimpi(admin, mimpi, artimimpi, angka2d, angka3d, angka4d, status
 				idtafsirmimpi , mimpi, artimimpi, angka2d, angka3d, angka4d, statustafsirmimpi, 
 				createtafsirmimpi, createdatetafsirmimpi
 			) values (
-				? ,?, ?, ?, ?, ?, ?,
-				?, ?
+				$1 ,$2, $3, $4, $5, $6, $7,
+				$8, $9
 			)
 		`
 		stmt_insert, e_insert := con.PrepareContext(ctx, sql_insert)
@@ -129,9 +129,9 @@ func Save_tafsirmimpi(admin, mimpi, artimimpi, angka2d, angka3d, angka4d, status
 		sql_update := `
 				UPDATE 
 				` + configs.DB_tbl_mst_tafsirmimpi + `  
-				SET mimpi=?,artimimpi=?, angka2d=?, angka3d=?, angka4d=?, statustafsirmimpi=?,
-				updatetafsirmimpi=?, updatedatetafsirmimpi=? 
-				WHERE idtafsirmimpi =? 
+				SET mimpi=$1,artimimpi=$2, angka2d=$3, angka3d=$4, angka4d=$5, statustafsirmimpi=$6,
+				updatetafsirmimpi=$7, updatedatetafsirmimpi=$8 
+				WHERE idtafsirmimpi =$9 
 			`
 		stmt_record, e := con.PrepareContext(ctx, sql_update)
 		helpers.ErrorCheck(e)

@@ -25,7 +25,7 @@ func Fetch_domainHome() (helpers.Response, error) {
 
 	sql_select := `SELECT 
 			iddomain , nmdomain, statusdomain,  
-			createdomain, COALESCE(createdatedomain,""), updatedomain, COALESCE(updatedatedomain,"")
+			createdomain, COALESCE(createdatedomain,now()), updatedomain, COALESCE(updatedatedomain,now())
 			FROM ` + configs.DB_tbl_mst_domain + `  
 			ORDER BY iddomain DESC   
 	`
@@ -85,8 +85,8 @@ func Save_domain(admin, nmdomain, status, sData string, idrecord int) (helpers.R
 					iddomain , nmdomain, statusdomain, 
 					createdomain, createdatedomain
 				) values (
-					?, ?, ?, 
-					?, ?
+					$1, $2, $3, 
+					$4, $5
 				)
 			`
 			field_column := configs.DB_tbl_mst_domain + tglnow.Format("YYYY")
@@ -110,9 +110,9 @@ func Save_domain(admin, nmdomain, status, sData string, idrecord int) (helpers.R
 		sql_update := `
 				UPDATE 
 				` + configs.DB_tbl_mst_domain + `  
-				SET nmdomain =?, statusdomain=?, 
-				updatedomain=?, updatedatedomain=? 
-				WHERE iddomain =? 
+				SET nmdomain =$1, statusdomain=$2, 
+				updatedomain=$3, updatedatedomain=$4 
+				WHERE iddomain =$5 
 			`
 
 		flag_update, msg_update := Exec_SQL(sql_update, configs.DB_tbl_mst_domain, "UPDATE",

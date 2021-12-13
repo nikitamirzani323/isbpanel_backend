@@ -18,7 +18,7 @@ func Get_counter(field_column string) int {
 	sqlcounter := `SELECT 
 					counter 
 					FROM ` + configs.DB_tbl_counter + ` 
-					WHERE nmcounter = ? 
+					WHERE nmcounter = $1 
 				`
 	var counter int = 0
 	row := con.QueryRowContext(ctx, sqlcounter, field_column)
@@ -32,7 +32,7 @@ func Get_counter(field_column string) int {
 	}
 	if counter > 0 {
 		idrecord_counter = int(counter) + 1
-		stmt, e := con.PrepareContext(ctx, "UPDATE "+configs.DB_tbl_counter+" SET counter=? WHERE nmcounter=? ")
+		stmt, e := con.PrepareContext(ctx, "UPDATE "+configs.DB_tbl_counter+" SET counter=$1 WHERE nmcounter=$2 ")
 		helpers.ErrorCheck(e)
 		res, e := stmt.ExecContext(ctx, idrecord_counter, field_column)
 		helpers.ErrorCheck(e)
@@ -42,7 +42,7 @@ func Get_counter(field_column string) int {
 			log.Println("COUNTER - UPDATE")
 		}
 	} else {
-		stmt, e := con.PrepareContext(ctx, "insert into "+configs.DB_tbl_counter+" (nmcounter, counter) values (?, ?)")
+		stmt, e := con.PrepareContext(ctx, "insert into "+configs.DB_tbl_counter+" (nmcounter, counter) values ($1, $2)")
 		helpers.ErrorCheck(e)
 		res, e := stmt.ExecContext(ctx, field_column, 1)
 		helpers.ErrorCheck(e)
@@ -72,7 +72,7 @@ func CheckDB(table, field, value string) bool {
 	sql_db := `SELECT 
 					` + field + ` 
 					FROM ` + table + ` 
-					WHERE ` + field + ` = ? 
+					WHERE ` + field + ` = $1 
 				`
 	row := con.QueryRowContext(ctx, sql_db, value)
 	switch e := row.Scan(&field); e {
@@ -93,8 +93,8 @@ func CheckDBTwoField(table, field_1, value_1, field_2, value_2 string) bool {
 	sql_db := `SELECT 
 					` + field_1 + ` 
 					FROM ` + table + ` 
-					WHERE ` + field_1 + ` = ? 
-					AND ` + field_2 + ` = ? 
+					WHERE ` + field_1 + ` = $1 
+					AND ` + field_2 + ` = $2
 				`
 	log.Println(sql_db)
 	row := con.QueryRowContext(ctx, sql_db, value_1, value_2)
@@ -119,7 +119,7 @@ func Get_AdminRule(tipe, idadmin string) string {
 	sql_select := `SELECT
 		ruleadmingroup  
 		FROM ` + configs.DB_tbl_admingroup + `  
-		WHERE idadmin = ? 
+		WHERE idadmin = $1 
 	`
 	row := con.QueryRowContext(ctx, sql_select, idadmin)
 	switch e := row.Scan(&ruleadmingroup); e {

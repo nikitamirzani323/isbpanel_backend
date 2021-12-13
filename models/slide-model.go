@@ -26,7 +26,7 @@ func Fetch_slideHome() (helpers.Response, error) {
 
 	sql_select := `SELECT 
 			idslide , movieid, url, position,  
-			createslide, COALESCE(createdateslide,"")
+			createslide, COALESCE(createdateslide,now())
 			FROM ` + configs.DB_tbl_trx_slide + `  
 			ORDER BY position ASC  
 	`
@@ -54,7 +54,7 @@ func Fetch_slideHome() (helpers.Response, error) {
 		sql_selectmovie := `SELECT 
 			movietitle 
 			FROM ` + configs.DB_tbl_trx_movie + ` 
-			WHERE movieid = ? 
+			WHERE movieid = $1 
 		`
 		row_movie := con.QueryRowContext(ctx, sql_selectmovie, movieid_db)
 		switch e_movie := row_movie.Scan(&movietitle_db); e_movie {
@@ -96,8 +96,8 @@ func Save_slide(admin, sdata, url string, idmovie, position int) (helpers.Respon
 				idslide , movieid, url, position,
 				createslide, createdateslide
 			) values (
-				? ,?, ?, ?,  
-				?, ?
+				$1 ,$2, $3, $4,  
+				$5, $6
 			)
 		`
 		field_column := configs.DB_tbl_trx_slide + tglnow.Format("YYYY")
@@ -144,7 +144,7 @@ func Delete_slider(admin string, idslide int) (helpers.Response, error) {
 		sql_delete := `
 			DELETE FROM
 			` + configs.DB_tbl_trx_slide + ` 
-			WHERE idslide=? 
+			WHERE idslide=$1 
 		`
 		stmt_delete, e_delete := con.PrepareContext(ctx, sql_delete)
 		helpers.ErrorCheck(e_delete)

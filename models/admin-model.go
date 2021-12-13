@@ -112,7 +112,7 @@ func Fetch_adminDetail(username string) (helpers.ResponseAdmin, error) {
 		idadmin, name, statuslogin  
 		createadmin, createdateadmin, updateadmin, updatedateadmin  
 		FROM ` + configs.DB_tbl_admin + `
-		WHERE username = ? 
+		WHERE username = $1 
 	`
 	var (
 		idadmin_db, name_db, statuslogin_db                                    string
@@ -184,8 +184,8 @@ func Save_adminHome(admin, username, password, nama, rule, status, sData string)
 					username , password, idadmin, name, statuslogin, joindate, 
 					createadmin, createdateadmin
 				) values (
-					?, ?, ?, ?, ?, ?, 
-					?, ?
+					$1, $2, $3, $4, $5, $6, 
+					$7, $8
 				)
 			`
 			hashpass := helpers.HashPasswordMD5(password)
@@ -211,9 +211,9 @@ func Save_adminHome(admin, username, password, nama, rule, status, sData string)
 			sql_update := `
 				UPDATE 
 				` + configs.DB_tbl_admin + `  
-				SET name =?, idadmin=?, statuslogin=?,  
-				updateadmin=?, updatedateadmin=? 
-				WHERE username =? 
+				SET name =$1, idadmin=$2, statuslogin=$3,  
+				updateadmin=$4, updatedateadmin=$5 
+				WHERE username =$6 
 			`
 
 			flag_update, msg_update := Exec_SQL(sql_update, configs.DB_tbl_admin, "UPDATE",
@@ -236,9 +236,9 @@ func Save_adminHome(admin, username, password, nama, rule, status, sData string)
 			sql_update2 := `
 				UPDATE 
 				` + configs.DB_tbl_admin + `   
-				SET name =?, password=?, idadmin=?, statuslogin=?,  
-				updateadmin=?, updatedateadmin=? 
-				WHERE username =? 
+				SET name =$1, password=$2, idadmin=$3, statuslogin=$4,  
+				updateadmin=$5, updatedateadmin=$6 
+				WHERE username =$7 
 			`
 			flag_update, msg_update := Exec_SQL(sql_update2, configs.DB_tbl_admin, "UPDATE",
 				nama,

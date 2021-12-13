@@ -69,7 +69,7 @@ func Save_adminrule(admin, idadmin, rule, sData string) (helpers.Response, error
 				` + configs.DB_tbl_admingroup + ` (
 					idadmin 
 				) values (
-					?
+					$1
 				) 
 			`
 			flag_insert, msg_insert := Exec_SQL(sql_insert, configs.DB_tbl_admingroup, "INSERT", idadmin)
@@ -88,8 +88,8 @@ func Save_adminrule(admin, idadmin, rule, sData string) (helpers.Response, error
 		sql_update := `
 				UPDATE 
 				` + configs.DB_tbl_admingroup + `   
-				SET ruleadmingroup=? 
-				WHERE idadmin=? 
+				SET ruleadmingroup=$1 
+				WHERE idadmin=$2 
 			`
 		log.Println(idadmin)
 		log.Println(rule)
