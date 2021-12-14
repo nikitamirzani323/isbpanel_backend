@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"strconv"
 	"time"
@@ -60,7 +61,6 @@ func Fetch_movieHome(search string, page, enable int) (helpers.Responsemovie, er
 		sql_select += "AND movietitle LIKE '%" + search + "%' "
 		sql_select += "ORDER BY createdatemovie DESC LIMIT " + strconv.Itoa(perpage)
 	}
-	log.Println(sql_select)
 	row, err := con.QueryContext(ctx, sql_select)
 	helpers.ErrorCheck(err)
 	for row.Next() {
@@ -81,11 +81,14 @@ func Fetch_movieHome(search string, page, enable int) (helpers.Responsemovie, er
 		statuscss := configs.STATUS_CANCEL
 		create := ""
 		update := ""
+		createdt, _ := goment.New(createdatemovie_db)
+		updatedt, _ := goment.New(updatedatemovie_db)
+
 		if createmovie_db != "" {
-			create = createmovie_db + ", " + createdatemovie_db
+			create = fmt.Sprintf("%s, %s", createmovie_db, createdt.Format("YYYY-MM-DD HH:mm:ss"))
 		}
 		if updatemovie_db != "" {
-			update = updatemovie_db + ", " + updatedatemovie_db
+			update = fmt.Sprintf("%s, %s", updatemovie_db, updatedt.Format("YYYY-MM-DD HH:mm:ss"))
 		}
 		if enabled_db > 0 {
 			status = "SHOW"
@@ -151,7 +154,7 @@ func Fetch_movieHome(search string, page, enable int) (helpers.Responsemovie, er
 		}
 
 		obj.Movie_id = movieid_db
-		obj.Movie_date = createdatemovie_db
+		obj.Movie_date = createdt.Format("YYYY-MM-DD HH:mm:ss")
 		obj.Movie_type = movietype_db
 		obj.Movie_title = movietitle_db
 		obj.Movie_label = label_db
@@ -594,11 +597,14 @@ func Fetch_movieseriesHome(search string, page, enable int) (helpers.Responsemov
 		statuscss := configs.STATUS_CANCEL
 		create := ""
 		update := ""
+		createdt, _ := goment.New(createdatemovie_db)
+		updatedt, _ := goment.New(updatedatemovie_db)
+
 		if createmovie_db != "" {
-			create = createmovie_db + ", " + createdatemovie_db
+			create = fmt.Sprintf("%s, %s", createmovie_db, createdt.Format("YYYY-MM-DD HH:mm:ss"))
 		}
 		if updatemovie_db != "" {
-			update = updatemovie_db + ", " + updatedatemovie_db
+			update = fmt.Sprintf("%s, %s", updatemovie_db, updatedt.Format("YYYY-MM-DD HH:mm:ss"))
 		}
 		if enabled_db > 0 {
 			status = "SHOW"
@@ -664,7 +670,7 @@ func Fetch_movieseriesHome(search string, page, enable int) (helpers.Responsemov
 			imgcdn = "Y"
 		}
 		obj.Movie_id = movieid_db
-		obj.Movie_date = createdatemovie_db
+		obj.Movie_date = createdt.Format("YYYY-MM-DD HH:mm:ss")
 		obj.Movie_type = movietype_db
 		obj.Movie_title = movietitle_db
 		obj.Movie_label = label_db

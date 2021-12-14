@@ -27,7 +27,7 @@ func Fetch_pasaranHome() (helpers.Response, error) {
 
 	sql_select := `SELECT 
 			idpasarantogel , nmpasarantogel, 
-			urlpasaran , pasarandiundi, jamjadwal, displaypasaran, statuspasaran, 
+			urlpasaran , pasarandiundi, jamjadwal::text, displaypasaran, statuspasaran, 
 			createpasarantogel, COALESCE(createdatepasarantogel,now()), updatepasarantogel, COALESCE(updatedatepasarantogel,now())  
 			FROM ` + configs.DB_tbl_mst_pasaran + ` 
 			ORDER BY displaypasaran ASC  
@@ -63,16 +63,16 @@ func Fetch_pasaranHome() (helpers.Response, error) {
 		}
 
 		var (
-			datekeluaran_db, nomorkeluaran_db string
+			hasil_db string
 		)
 		sql_selectpasaran := `SELECT 
-			datekeluaran , nomorkeluaran
+			Concat(datekeluaran , ' - ', nomorkeluaran) as hasil
 			FROM ` + configs.DB_tbl_trx_keluaran + ` 
 			WHERE idpasarantogel = $1 
 			ORDER BY datekeluaran DESC LIMIT 1
 		`
 		row_keluaran := con.QueryRowContext(ctx, sql_selectpasaran, idpasarantogel_db)
-		switch e_keluaran := row_keluaran.Scan(&datekeluaran_db, &nomorkeluaran_db); e_keluaran {
+		switch e_keluaran := row_keluaran.Scan(&hasil_db); e_keluaran {
 		case sql.ErrNoRows:
 		case nil:
 		default:
@@ -80,16 +80,16 @@ func Fetch_pasaranHome() (helpers.Response, error) {
 		}
 
 		var (
-			dateprediksi_db, bbfsprediksi_db, nomorprediksi_db string
+			hasil_prediksi_db string
 		)
-		sql_selectprediksi := `SELECT 
-			dateprediksi , bbfsprediksi, nomorprediksi
+		sql_selectprediksi := `SELECT concat( 
+			dateprediksi , ' - ',  bbfsprediksi, ' - ', nomorprediksi ) as hasil_prediksi
 			FROM ` + configs.DB_tbl_trx_prediksi + ` 
 			WHERE idpasarantogel = $1 
 			ORDER BY dateprediksi DESC LIMIT 1
 		`
 		row_prediksi := con.QueryRowContext(ctx, sql_selectprediksi, idpasarantogel_db)
-		switch e_prediksi := row_prediksi.Scan(&dateprediksi_db, &bbfsprediksi_db, &nomorprediksi_db); e_prediksi {
+		switch e_prediksi := row_prediksi.Scan(&hasil_prediksi_db); e_prediksi {
 		case sql.ErrNoRows:
 		case nil:
 		default:
@@ -104,8 +104,8 @@ func Fetch_pasaranHome() (helpers.Response, error) {
 		obj.Pasaran_display = displaypasaran_db
 		obj.Pasaran_status = statuspasaran
 		obj.Pasaran_statuscss = statuspasarancss
-		obj.Pasaran_keluaran = datekeluaran_db + " - " + nomorkeluaran_db
-		obj.Pasaran_prediksi = dateprediksi_db + " - " + bbfsprediksi_db + " - " + nomorprediksi_db
+		obj.Pasaran_keluaran = hasil_db
+		obj.Pasaran_prediksi = hasil_prediksi_db
 		obj.Pasaran_create = create
 		obj.Pasaran_update = update
 		arraobj = append(arraobj, obj)
@@ -277,7 +277,7 @@ func Save_keluaran(admin, idpasaran, tanggal, nomor string) (helpers.Response, e
 		defer stmt_insert.Close()
 		field_column := configs.DB_tbl_trx_keluaran + tglnow.Format("YYYY")
 		idrecord_counter := Get_counter(field_column)
-		field_column_periode := idpasaran + "-" + tglnow.Format("YYYY")
+		field_column_periode := strings.TrimSpace(idpasaran) + "-" + tglnow.Format("YYYY")
 		idperiode_counter := Get_counter(field_column_periode)
 		res_newrecord, e_newrecord := stmt_insert.ExecContext(
 			ctx,

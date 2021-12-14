@@ -6,7 +6,7 @@ metadata:
   name: isbpanel-backend-mono
   namespace: sdsb4d
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: isbpanel-backend-mono
@@ -23,7 +23,16 @@ spec:
       serviceAccountName: default
       containers:
         - name: isbpanel-backend-mono
-          image: asia.gcr.io/dazzling-pillar-328210/bitbucket.org/isbtotogroup/isbpanel_backend:latest
+          image: asia.gcr.io/dazzling-pillar-328210/bitbucket.org/isbtotogroup/isbpanel_backend:7c16034
+          resources:
+            limits:
+              cpu: 100m
+              ephemeral-storage: 100Mi
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              ephemeral-storage: 100Mi
+              memory: 512Mi           
           env:
             - name: DB_DRIVER
               value: postgres
