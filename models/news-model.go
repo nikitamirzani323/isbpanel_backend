@@ -15,14 +15,35 @@ import (
 	"github.com/nleeper/goment"
 )
 
-func Fetch_newsHome(search string) (helpers.Response, error) {
+func Fetch_newsHome(search string, page int) (helpers.Responsemovie, error) {
 	var obj entities.Model_news
 	var arraobj []entities.Model_news
-	var res helpers.Response
+	var res helpers.Responsemovie
 	msg := "Data Not Found"
 	con := db.CreateCon()
 	ctx := context.Background()
 	start := time.Now()
+
+	perpage := 50
+	totalrecord := 0
+	offset := page
+	sql_selectcount := ""
+	sql_selectcount += ""
+	sql_selectcount += "SELECT "
+	sql_selectcount += "COUNT(idnews) as totalnews  "
+	sql_selectcount += "FROM " + configs.DB_tbl_trx_news + "  "
+	if search != "" {
+		sql_selectcount += "WHERE title_news LIKE '%" + search + "%' "
+		sql_selectcount += "OR title_news LIKE '%" + search + "%' "
+	}
+
+	row_selectcount := con.QueryRowContext(ctx, sql_selectcount)
+	switch e_selectcount := row_selectcount.Scan(&totalrecord); e_selectcount {
+	case sql.ErrNoRows:
+	case nil:
+	default:
+		helpers.ErrorCheck(e_selectcount)
+	}
 
 	sql_select := ""
 	sql_select += ""
@@ -33,11 +54,11 @@ func Fetch_newsHome(search string) (helpers.Response, error) {
 	sql_select += "FROM " + configs.DB_tbl_trx_news + " as A "
 	sql_select += "JOIN " + configs.DB_tbl_mst_category + " as B ON B.idcatenews = A.idcatenews "
 	if search == "" {
-		sql_select += "ORDER BY A.idnews DESC  LIMIT 500  "
+		sql_select += "ORDER BY A.idnews DESC  LIMIT " + strconv.Itoa(offset) + " , " + strconv.Itoa(perpage)
 	} else {
 		sql_select += "WHERE title_news LIKE '%" + search + "%' "
 		sql_select += "OR title_news LIKE '%" + search + "%' "
-		sql_select += "ORDER BY A.idnews DESC  LIMIT 500  "
+		sql_select += "ORDER BY A.idnews DESC  LIMIT " + strconv.Itoa(perpage)
 	}
 
 	row, err := con.QueryContext(ctx, sql_select)
@@ -80,6 +101,8 @@ func Fetch_newsHome(search string) (helpers.Response, error) {
 	res.Status = fiber.StatusOK
 	res.Message = msg
 	res.Record = arraobj
+	res.Perpage = perpage
+	res.Totalrecord = totalrecord
 	res.Time = time.Since(start).String()
 
 	return res, nil

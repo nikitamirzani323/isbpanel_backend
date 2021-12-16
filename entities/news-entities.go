@@ -24,6 +24,7 @@ type Model_category struct {
 
 type Controller_news struct {
 	News_search string `json:"news_search"`
+	News_page   int    `json:"news_page"`
 }
 type Controller_newssave struct {
 	Page          string `json:"page" validate:"required"`
