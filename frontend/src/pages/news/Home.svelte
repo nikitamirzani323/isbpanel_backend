@@ -393,8 +393,7 @@
                             type="text"
                             class="form-control"
                             placeholder="Search News"
-                            aria-label="Search"
-                        />
+                            aria-label="Search"/>
                     </div>
                 </slot:template>
                 <slot:template slot="card-body">

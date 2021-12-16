@@ -16,21 +16,35 @@ import (
 	"github.com/nleeper/goment"
 )
 
-func Fetch_albumHome() (helpers.Response, error) {
+func Fetch_albumHome(page int) (helpers.Responsemovie, error) {
 	var obj entities.Model_album
 	var arraobj []entities.Model_album
-	var res helpers.Response
+	var res helpers.Responsemovie
 	msg := "Data Not Found"
 	con := db.CreateCon()
 	ctx := context.Background()
 	start := time.Now()
+	perpage := 50
+	totalrecord := 0
+	offset := page
+	sql_selectcount := ""
+	sql_selectcount += ""
+	sql_selectcount += "SELECT "
+	sql_selectcount += "COUNT(idalbum) as totalalbum  "
+	sql_selectcount += "FROM " + configs.DB_tbl_trx_albumcloudflare + "  "
 
-	sql_select := `SELECT 
-			idalbum , idcloudflare, filenamecloudflare, signedurl, link1,  
-			COALESCE(createdatealbum,"") 
-			FROM ` + configs.DB_tbl_trx_albumcloudflare + `  
-			ORDER BY idalbum DESC    
-	`
+	row_selectcount := con.QueryRowContext(ctx, sql_selectcount)
+	switch e_selectcount := row_selectcount.Scan(&totalrecord); e_selectcount {
+	case sql.ErrNoRows:
+	case nil:
+	default:
+		helpers.ErrorCheck(e_selectcount)
+	}
+	sql_select := ""
+	sql_select += "SELECT "
+	sql_select += "idalbum , idcloudflare, filenamecloudflare, signedurl, link1, COALESCE(createdatealbum,'') "
+	sql_select += "FROM " + configs.DB_tbl_trx_albumcloudflare + " "
+	sql_select += "ORDER BY idalbum DESC  LIMIT " + strconv.Itoa(offset) + " , " + strconv.Itoa(perpage)
 
 	row, err := con.QueryContext(ctx, sql_select)
 	helpers.ErrorCheck(err)
@@ -74,6 +88,8 @@ func Fetch_albumHome() (helpers.Response, error) {
 	res.Status = fiber.StatusOK
 	res.Message = msg
 	res.Record = arraobj
+	res.Perpage = perpage
+	res.Totalrecord = totalrecord
 	res.Time = time.Since(start).String()
 
 	return res, nil
