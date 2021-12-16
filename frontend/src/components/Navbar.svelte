@@ -25,9 +25,7 @@
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="navbar-nav me-auto mb-2 mb-md-0">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" use:link href="/" style="font-size: 13px;"
-                        >DASHBOARD</a
-                        >
+                        <a class="nav-link active" aria-current="page" use:link href="/" style="font-size: 13px;">DASHBOARD</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a
@@ -40,7 +38,13 @@
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <li>
-                                <a class="dropdown-item" use:link href="/movie" style="font-size: 13px;">CRM</a>
+                                <a class="dropdown-item" use:link href="/crm" style="font-size: 13px;">CRM</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" use:link href="/crmisbtv" style="font-size: 13px;">ISBTV</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" use:link href="/crmduniafilm" style="font-size: 13px;">DUNIAFILM</a>
                             </li>
                         </ul>
                     </li>

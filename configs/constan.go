@@ -14,6 +14,7 @@ const (
 	DB_tbl_mst_mediatable      string = "tbl_mst_mediatable"
 	DB_tbl_mst_moviegenre      string = "tbl_mst_movie_genre"
 	DB_tbl_mst_moviesource     string = "tbl_mst_movie_source"
+	DB_tbl_mst_user            string = "tbl_mst_user"
 	DB_tbl_trx_keluaran        string = "tbl_trx_keluaran"
 	DB_tbl_trx_prediksi        string = "tbl_trx_prediksi"
 	DB_tbl_trx_news            string = "tbl_trx_news"

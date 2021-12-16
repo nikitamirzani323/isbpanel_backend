@@ -15,6 +15,7 @@
 	import Seriestrouble from "./pages/seriestrouble/Seriestrouble.svelte";
 	import Domain from "./pages/domain/Domain.svelte";
 	import Album from "./pages/album/Album.svelte";
+	import Crmisbtv from "./pages/crmisbtv/Crmisbtv.svelte";
 	import Login from "./pages/Login.svelte";
 	import NotFound from "./pages/NotFound.svelte";
 	export let table_header_font;
@@ -38,6 +39,13 @@
 					table_body_font: table_body_font,
 				},
 				component: Dashboard,
+			}),
+			"/crmisbtv": wrap({
+				component: Crmisbtv,
+				props: {
+					table_header_font: table_header_font,
+					table_body_font: table_body_font,
+				},
 			}),
 			"/album": wrap({
 				component: Album,
