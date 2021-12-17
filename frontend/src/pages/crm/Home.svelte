@@ -276,7 +276,6 @@
     function clearfield_user(){
         field_idrecord = 0;
         field_nama = "";
-        field_note = "";
         field_phone = "";
         field_status = "";
         field_phone_flag = false;
