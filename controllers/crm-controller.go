@@ -50,7 +50,7 @@ func Crmisbtvhome(c *fiber.Ctx) error {
 	var obj entities.Model_crmisbtv
 	var arraobj []entities.Model_crmisbtv
 	render_page := time.Now()
-	resultredis, flag := helpers.GetRedis(Fieldcrmisbtv_home_redis)
+	resultredis, flag := helpers.GetRedis(Fieldcrmisbtv_home_redis + "_" + strconv.Itoa(client.Crmisbtv_page) + "_" + client.Crmisbtv_search)
 	jsonredis := []byte(resultredis)
 	perpage_RD, _ := jsonparser.GetInt(jsonredis, "perpage")
 	totalrecord_RD, _ := jsonparser.GetInt(jsonredis, "totalrecord")

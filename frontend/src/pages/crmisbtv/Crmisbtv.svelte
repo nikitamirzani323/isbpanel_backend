@@ -41,15 +41,15 @@
     }
     async function initHome(e) {
         listHome = [];
-        const res = await fetch("/api/news", {
+        const res = await fetch("/api/crmisbtv", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 Authorization: "Bearer " + token,
             },
             body: JSON.stringify({
-                news_search: e,
-                news_page : parseInt(page)
+                crmisbtv_search: e,
+                crmisbtv_page : parseInt(page)
             }),
         });
         const json = await res.json();
@@ -62,24 +62,30 @@
                 totalpaging = Math.ceil(parseInt(totalrecordall) / parseInt(perpage))
                 totalrecord = totalrecordall;
                 let no = 0
+                let css_point = "";
                 if(page > 1){
                     no = parseInt(page) 
                 }
                 for (var i = 0; i < record.length; i++) {
+                    if(parseInt(record[i]["crmisbtv_point"]) > 0){
+                        css_point = "color:blue;font-weight:bold;"
+                    }else{  
+                        css_point = "color:red;font-weight:bold;"
+                    }
                     no = parseInt(no) + 1;
                     listHome = [
                         ...listHome,
                         {
                             news_no: no,
-                            news_id: record[i]["news_id"],
-                            news_idcategory: record[i]["news_idcategory"],
-                            news_category: record[i]["news_category"],
-                            news_title: record[i]["news_title"],
-                            news_descp: record[i]["news_descp"],
-                            news_url: record[i]["news_url"],
-                            news_image: record[i]["news_image"],
-                            news_create: record[i]["news_create"],
-                            news_update: record[i]["news_update"],
+                            crmisbtv_username: record[i]["crmisbtv_username"],
+                            crmisbtv_name: record[i]["crmisbtv_name"],
+                            crmisbtv_coderef: record[i]["crmisbtv_coderef"],
+                            crmisbtv_point: record[i]["crmisbtv_point"],
+                            crmisbtv_csspoint: css_point,
+                            crmisbtv_status: record[i]["crmisbtv_status"],
+                            crmisbtv_lastlogin: record[i]["crmisbtv_lastlogin"],
+                            crmisbtv_create: record[i]["crmisbtv_create"],
+                            crmisbtv_update: record[i]["crmisbtv_update"],
                         },
                     ];
                 }
