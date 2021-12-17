@@ -3,16 +3,246 @@ package models
 import (
 	"context"
 	"database/sql"
+	"log"
 	"strconv"
 	"time"
 
+	"github.com/buger/jsonparser"
 	"github.com/gofiber/fiber/v2"
 	"github.com/nikitamirzani323/isbpanel_backend/configs"
 	"github.com/nikitamirzani323/isbpanel_backend/db"
 	"github.com/nikitamirzani323/isbpanel_backend/entities"
 	"github.com/nikitamirzani323/isbpanel_backend/helpers"
+	"github.com/nleeper/goment"
 )
 
+func Fetch_crm(search string, page int) (helpers.Responsemovie, error) {
+	var obj entities.Model_crm
+	var arraobj []entities.Model_crm
+	var res helpers.Responsemovie
+	msg := "Data Not Found"
+	con := db.CreateCon()
+	ctx := context.Background()
+	start := time.Now()
+
+	perpage := 250
+	totalrecord := 0
+	offset := page
+	sql_selectcount := ""
+	sql_selectcount += ""
+	sql_selectcount += "SELECT "
+	sql_selectcount += "COUNT(idusersales) as totalmember  "
+	sql_selectcount += "FROM " + configs.DB_tbl_trx_usersales + "  "
+	if search != "" {
+		sql_selectcount += "WHERE phone LIKE '%" + search + "%' "
+		sql_selectcount += "OR nama LIKE '%" + search + "%' "
+	}
+
+	row_selectcount := con.QueryRowContext(ctx, sql_selectcount)
+	switch e_selectcount := row_selectcount.Scan(&totalrecord); e_selectcount {
+	case sql.ErrNoRows:
+	case nil:
+	default:
+		helpers.ErrorCheck(e_selectcount)
+	}
+
+	sql_select := ""
+	sql_select += ""
+	sql_select += "SELECT "
+	sql_select += "idusersales , phone, nama, "
+	sql_select += "source , statususersales,  "
+	sql_select += "createusersales, COALESCE(createdateusersales,''), updateusersales, COALESCE(updatedateusersales,'') "
+	sql_select += "FROM " + configs.DB_tbl_trx_usersales + "  "
+	if search == "" {
+		sql_select += "ORDER BY createdateusersales DESC  LIMIT " + strconv.Itoa(offset) + " , " + strconv.Itoa(perpage)
+	} else {
+		sql_select += "WHERE username LIKE '%" + search + "%' "
+		sql_select += "OR username LIKE '%" + search + "%' "
+		sql_select += "ORDER BY createdateusersales DESC  LIMIT " + strconv.Itoa(perpage)
+	}
+
+	row, err := con.QueryContext(ctx, sql_select)
+	helpers.ErrorCheck(err)
+	for row.Next() {
+		var (
+			idusersales_db                                                                         int
+			phone_db, nama_db, source_db, statususersales_db                                       string
+			createusersales_db, createdateusersales_db, updateusersales_db, updatedateusersales_db string
+		)
+
+		err = row.Scan(
+			&idusersales_db, &phone_db, &nama_db, &source_db, &statususersales_db, &createusersales_db,
+			&createdateusersales_db, &updateusersales_db, &updatedateusersales_db)
+
+		helpers.ErrorCheck(err)
+
+		create := ""
+		update := ""
+		statuscss := ""
+		if createusersales_db != "" {
+			create = createusersales_db + ", " + createdateusersales_db
+		}
+		if updateusersales_db != "" {
+			update = updateusersales_db + ", " + updatedateusersales_db
+		}
+		switch statususersales_db {
+		case "NEW":
+			statuscss = configs.STATUS_NEW
+		case "VALID":
+			statuscss = configs.STATUS_COMPLETE
+		case "INVALID":
+			statuscss = configs.STATUS_CANCEL
+		}
+		obj.Crm_id = idusersales_db
+		obj.Crm_phone = phone_db
+		obj.Crm_name = nama_db
+		obj.Crm_source = source_db
+		obj.Crm_status = statususersales_db
+		obj.Crm_statuscss = statuscss
+		obj.Crm_create = create
+		obj.Crm_update = update
+		arraobj = append(arraobj, obj)
+		msg = "Success"
+	}
+	defer row.Close()
+
+	res.Status = fiber.StatusOK
+	res.Message = msg
+	res.Record = arraobj
+	res.Perpage = perpage
+	res.Totalrecord = totalrecord
+	res.Time = time.Since(start).String()
+
+	return res, nil
+}
+func Save_crm(admin, phone, nama, status, sData string, idrecord int) (helpers.Response, error) {
+	var res helpers.Response
+	msg := "Failed"
+	tglnow, _ := goment.New()
+	render_page := time.Now()
+	flag := false
+
+	if sData == "New" {
+		flag = CheckDB(configs.DB_tbl_trx_usersales, "phone", phone)
+		if !flag {
+			sql_insert := `
+				insert into
+				` + configs.DB_tbl_trx_usersales + ` (
+					idusersales , phone, nama, source, statususersales, 
+					createusersales, createdateusersales 
+				) values (
+					?, ?, ?, ?, ?,
+					?, ?
+				)
+			`
+			field_column := configs.DB_tbl_trx_usersales + tglnow.Format("YYYY")
+			idrecord_counter := Get_counter(field_column)
+			flag_insert, msg_insert := Exec_SQL(sql_insert, configs.DB_tbl_trx_usersales, "INSERT",
+				tglnow.Format("YY")+strconv.Itoa(idrecord_counter), phone, nama, "", status,
+				admin, tglnow.Format("YYYY-MM-DD HH:mm:ss"))
+
+			if flag_insert {
+				flag = true
+				msg = "Succes"
+				log.Println(msg_insert)
+			} else {
+				log.Println(msg_insert)
+			}
+		} else {
+			msg = "Duplicate Entry"
+		}
+	} else {
+		sql_update := `
+				UPDATE 
+				` + configs.DB_tbl_trx_usersales + `  
+				SET statususersales=?, 
+				updateusersales=?, updatedateusersales=? 
+				WHERE idusersales =? 
+			`
+
+		flag_update, msg_update := Exec_SQL(sql_update, configs.DB_tbl_trx_usersales, "UPDATE",
+			status, admin, tglnow.Format("YYYY-MM-DD HH:mm:ss"), idrecord)
+
+		if flag_update {
+			flag = true
+			msg = "Succes"
+			log.Println(msg_update)
+		} else {
+			log.Println(msg_update)
+		}
+	}
+
+	if flag {
+		res.Status = fiber.StatusOK
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	} else {
+		res.Status = fiber.StatusBadRequest
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	}
+
+	return res, nil
+}
+func Save_crmsource(admin, datasource, source, sData string) (helpers.Response, error) {
+	var res helpers.Response
+	msg := "Failed"
+	tglnow, _ := goment.New()
+	render_page := time.Now()
+	flag := false
+
+	if sData == "New" {
+		json := []byte(datasource)
+		jsonparser.ArrayEach(json, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+			crmisbtv_username, _ := jsonparser.GetString(value, "crmisbtv_username")
+			crmisbtv_name, _ := jsonparser.GetString(value, "crmisbtv_name")
+
+			flag_check := CheckDB(configs.DB_tbl_trx_usersales, "phone", crmisbtv_username)
+			log.Printf("%s - %s  - %t", crmisbtv_username, crmisbtv_name, flag_check)
+			if !flag_check {
+				sql_insert := `
+					insert into
+					` + configs.DB_tbl_trx_usersales + ` (
+						idusersales , phone, nama, source, statususersales, 
+						createusersales, createdateusersales 
+					) values (
+						?, ?, ?, ?, ?,
+						?, ?
+					)
+				`
+				field_column := configs.DB_tbl_trx_usersales + tglnow.Format("YYYY")
+				idrecord_counter := Get_counter(field_column)
+				flag_insert, msg_insert := Exec_SQL(sql_insert, configs.DB_tbl_trx_usersales, "INSERT",
+					tglnow.Format("YY")+strconv.Itoa(idrecord_counter), crmisbtv_username, crmisbtv_name, source, "NEW",
+					admin, tglnow.Format("YYYY-MM-DD HH:mm:ss"))
+
+				if flag_insert {
+					flag = true
+					msg = "Succes"
+					log.Println(msg_insert)
+				} else {
+					log.Println(msg_insert)
+				}
+			}
+		})
+	}
+
+	if flag {
+		res.Status = fiber.StatusOK
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	} else {
+		res.Status = fiber.StatusBadRequest
+		res.Message = msg
+		res.Record = nil
+		res.Time = time.Since(render_page).String()
+	}
+
+	return res, nil
+}
 func Fetch_crmisbtv(search string, page int) (helpers.Responsemovie, error) {
 	var obj entities.Model_crmisbtv
 	var arraobj []entities.Model_crmisbtv
