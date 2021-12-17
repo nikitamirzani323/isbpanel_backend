@@ -131,7 +131,7 @@
                 },
                 body: JSON.stringify({
                     sdata: sData,
-                    page:"NEWS-SAVE",
+                    page:"CRM-SAVE",
                     crm_id: parseInt(field_idrecord),
                     crm_page: pagingnow,
                     crm_phone: field_phone.trim(),
@@ -235,7 +235,7 @@
                 },
                 body: JSON.stringify({
                     sdata: "New",
-                    page:"NEWS-SAVE",
+                    page:"CRM-SAVE",
                     crm_page: parseInt(paging_ibstv),
                     crm_source: "ISBTV",
                     crm_data: listisbtv,
