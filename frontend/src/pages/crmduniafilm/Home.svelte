@@ -13,7 +13,7 @@
 	export let listPage = []
 	export let totalrecord = 0
     let dispatch = createEventDispatcher();
-    let title_page = "ISBTV"
+    let title_page = "DUNIA FILM"
     let sData = "";
     let myModal = "";
     
@@ -147,11 +147,6 @@
                                     <th NOWRAP width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NO</th>
                                     <th NOWRAP width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">NAME</th>
                                     <th NOWRAP width="10%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">USERNAME</th>
-                                    <th NOWRAP width="10%" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">REF</th>
-                                    <th NOWRAP width="10%" style="text-align: right;vertical-align: top;font-weight:bold;font-size: {table_header_font};">POINT</th>
-                                    <th NOWRAP width="20%" style="text-align: center;vertical-align: top;font-weight:bold;font-size: {table_header_font};">LASTLOGIN</th>
-                                    <th NOWRAP width="20%" style="text-align: center;vertical-align: top;font-weight:bold;font-size: {table_header_font};">CREATE</th>
-                                    <th NOWRAP width="20%" style="text-align: center;vertical-align: top;font-weight:bold;font-size: {table_header_font};">UPDATE</th>
                                 </tr>
                             </thead>
                             {#if totalrecord > 0}
@@ -160,16 +155,11 @@
                                     <tr>
                                        
                                         <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.news_no}</td>
-                                        <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.crmisbtv_name}</td>
+                                        <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.crmduniafilm_name}</td>
                                         <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">
-                                            <a href="https://wa.me/{rec.crmisbtv_username}" target="_blank">WHATSAPP</a>
+                                            <a href="https://wa.me/{rec.crmduniafilm_username}" target="_blank">WHATSAPP</a>
                                             &nbsp;
                                         </td>
-                                        <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.crmisbtv_coderef}</td>
-                                        <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};{rec.crmisbtv_csspoint}">{rec.crmisbtv_point}</td>
-                                        <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.crmisbtv_lastlogin}</td>
-                                        <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.crmisbtv_create}</td>
-                                        <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.crmisbtv_update}</td>
                                     </tr>
                                 {/each}
                             </tbody>

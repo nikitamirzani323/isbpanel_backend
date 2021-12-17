@@ -100,5 +100,6 @@ func Init() *fiber.App {
 	app.Post("/api/albumsave", middleware.JWTProtected(), controllers.Albumsave)
 
 	app.Post("/api/crmisbtv", middleware.JWTProtected(), controllers.Crmisbtvhome)
+	app.Post("/api/crmduniafilm", middleware.JWTProtected(), controllers.Crmduniafilm)
 	return app
 }

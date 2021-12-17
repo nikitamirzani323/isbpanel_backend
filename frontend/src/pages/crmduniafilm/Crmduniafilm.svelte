@@ -41,7 +41,7 @@
     }
     async function initHome(e) {
         listHome = [];
-        const res = await fetch("/api/crmisbtv", {
+        const res = await fetch("/api/crmduniafilm", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -62,30 +62,17 @@
                 totalpaging = Math.ceil(parseInt(totalrecordall) / parseInt(perpage))
                 totalrecord = totalrecordall;
                 let no = 0
-                let css_point = "";
                 if(page > 1){
                     no = parseInt(page) 
                 }
                 for (var i = 0; i < record.length; i++) {
-                    if(parseInt(record[i]["crmisbtv_point"]) > 0){
-                        css_point = "color:blue;font-weight:bold;"
-                    }else{  
-                        css_point = "color:red;font-weight:bold;"
-                    }
                     no = parseInt(no) + 1;
                     listHome = [
                         ...listHome,
                         {
                             news_no: no,
-                            crmisbtv_username: record[i]["crmisbtv_username"],
-                            crmisbtv_name: record[i]["crmisbtv_name"],
-                            crmisbtv_coderef: record[i]["crmisbtv_coderef"],
-                            crmisbtv_point: record[i]["crmisbtv_point"],
-                            crmisbtv_csspoint: css_point,
-                            crmisbtv_status: record[i]["crmisbtv_status"],
-                            crmisbtv_lastlogin: record[i]["crmisbtv_lastlogin"],
-                            crmisbtv_create: record[i]["crmisbtv_create"],
-                            crmisbtv_update: record[i]["crmisbtv_update"],
+                            crmduniafilm_username: record[i]["crmduniafilm_username"],
+                            crmduniafilm_name: record[i]["crmduniafilm_name"],
                         },
                     ];
                 }

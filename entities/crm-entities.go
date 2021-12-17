@@ -10,6 +10,10 @@ type Model_crmisbtv struct {
 	Crmisbtv_create    string `json:"crmisbtv_create"`
 	Crmisbtv_update    string `json:"crmisbtv_update"`
 }
+type Model_crmduniafilm struct {
+	Crmduniafilm_username string `json:"crmduniafilm_username"`
+	Crmduniafilm_name     string `json:"crmduniafilm_name"`
+}
 
 type Controller_crmisbtv struct {
 	Crmisbtv_search string `json:"crmisbtv_search"`
