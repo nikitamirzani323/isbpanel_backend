@@ -27,7 +27,9 @@
     let pageisbtv_field = 0;
     let pagingnow = 0;
     let buttondownload_isbtv_flag = false;
-   
+    let title_modal = "";
+    let switchsource_path = "";
+    let switchsource_tipe = "";
    
     let field_idrecord = 0;
     let field_nama = "";
@@ -158,14 +160,22 @@
             alert(msg)
         }
     }
-    const ShowISBTV = (e) => {
+    const ShowSOURCE = (e) => {
+        title_modal = e
         myModal = new bootstrap.Modal(document.getElementById("modalisbtv"));
         myModal.show();
-        call_isbtv()
+        if(e == "ISBTV"){
+            switchsource_path ="/api/crmisbtv"
+            switchsource_tipe ="ISBTV"
+        }else{
+            switchsource_path ="/api/crmduniafilm"
+            switchsource_tipe ="DUNIAFILM"
+        }
+        call_isbtv(switchsource_path,switchsource_tipe)
     };
-    async function call_isbtv(){
+    async function call_isbtv(e,type){
         listisbtv = []
-        const res = await fetch("/api/crmisbtv", {
+        const res = await fetch(e, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -187,18 +197,42 @@
             }
             if (record != null) {
                 totalpaging_isbtv = Math.ceil(parseInt(totalrecord_isbtv) / parseInt(perpage_isbtv))
-                for (var i = 0; i < record.length; i++) {
-                    no = parseInt(no) + 1;
-                    listisbtv = [
-                        ...listisbtv,
-                        {
-                            crmisbtv_no: no,
-                            crmisbtv_username: record[i]["crmisbtv_username"],
-                            crmisbtv_name: record[i]["crmisbtv_name"],
-                            crmisbtv_create: record[i]["crmisbtv_create"],
-                            crmisbtv_update: record[i]["crmisbtv_update"],
-                        },
-                    ];
+                if(type=="ISBTV"){
+                    for (var i = 0; i < record.length; i++) {
+                        let temp_1 = record[i]["crmisbtv_username"];
+                        let temp2_1 = temp_1.replace(" ", "");
+                        let temp3_1 = temp2_1.replace("-", "");
+                        let temp4_1 = temp3_1.replace("(", "");
+                        let temp5_1 = temp4_1.replace(")", "");
+                        let temp6_1 = temp5_1.replace(" ", "");
+                        no = parseInt(no) + 1;
+                        listisbtv = [
+                            ...listisbtv,
+                            {
+                                crmisbtv_no: no,
+                                crmisbtv_username: temp6_1,
+                                crmisbtv_name: record[i]["crmisbtv_name"],
+                            },
+                        ];
+                    }
+                }else{
+                    for (var i = 0; i < record.length; i++) {
+                        let temp = record[i]["crmduniafilm_username"];
+                        let temp2 = temp.replace(" ", "");
+                        let temp3 = temp2.replace("-", "");
+                        let temp4 = temp3.replace("(", "");
+                        let temp5 = temp4.replace(")", "");
+                        let temp6 = temp5.replace(" ", "");
+                        no = parseInt(no) + 1;
+                        listisbtv = [
+                            ...listisbtv,
+                            {
+                                crmisbtv_no: no,
+                                crmisbtv_username: temp6,
+                                crmisbtv_name: record[i]["crmduniafilm_name"],
+                            },
+                        ];
+                    }
                 }
                 listPage_isbtv = [];
                 for(var i=1;i<totalpaging_isbtv;i++){
@@ -267,7 +301,9 @@
                 handleSave();
                 break;
             case "CALL_ISBTV":
-                ShowISBTV();break;
+                ShowSOURCE("ISBTV");break;
+            case "CALL_DUNIAFILM":
+                ShowSOURCE("DUNIAFILM");break;
             case "REFRESH":
                 RefreshHalaman();break;
         }
@@ -305,7 +341,7 @@
     };
     const handleSelectGetISBTV = (event) => {
         paging_ibstv = event.target.value
-        call_isbtv()
+        call_isbtv(switchsource_path,switchsource_tipe)
     };
 </script>
 
@@ -467,7 +503,7 @@
 <Modal
 	modal_id="modalisbtv"
 	modal_size="modal-dialog-centered"
-	modal_title="ISBTV"
+	modal_title="{title_modal}"
     modal_body_css="height:500px;overflow-y: scroll;"
     modal_footer_css="padding:5px;"
     modal_search={true}
@@ -490,7 +526,6 @@
                     <th width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NO</th>
                     <th width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NAME</th>
                     <th width="5%" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">PHONE</th>
-                    <th width="5%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">CREATE</th>
                 </tr>
             </thead>
             <tbody>
@@ -499,7 +534,6 @@
                     <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.crmisbtv_no}</td>
                     <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.crmisbtv_name}</td>
                     <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.crmisbtv_username}</td>
-                    <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.crmisbtv_create}</td>
                 </tr>
                 {/each}
                 
