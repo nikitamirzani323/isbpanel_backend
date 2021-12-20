@@ -12,6 +12,7 @@
 	export let table_body_font = ""
 	export let token = ""
 	export let listHome = []
+    export let listPage = []
 	export let totalrecord = 0
     let dispatch = createEventDispatcher();
 	let title_page = "ALBUM"
@@ -27,6 +28,7 @@
     let filterAlbum = [];
     let css_loader = "display: none;";
     let msgloader = "";
+    let pagingnow = 0;
 
     $: {
         if (searchAlbum) {
@@ -51,7 +53,14 @@
         dispatch("handleRefreshData", "call");
     };
     
-    
+    const handleSelectPaging = (event) => {
+        let page = event.target.value
+        pagingnow = page
+        const movie = {
+                page,
+        };
+        dispatch("handlePaging", movie);
+    };
     async function handleGetCloudflare(page) {
         listalbumcloudflare = []
         const res = await fetch("/api/cloudflare", {
@@ -236,6 +245,18 @@
                 card_search={true}
                 card_title="{title_page}"
                 card_footer={totalrecord}>
+                <slot:template slot="card-title">
+                    <div class="float-end">
+                        <select
+                            on:change={handleSelectPaging}
+                            style="text-align: center;" 
+                            class="form-control">
+                            {#each listPage as rec}
+                                <option value="{rec.page_value}">{rec.page_display}</option>
+                            {/each}
+                        </select>
+                    </div>
+                </slot:template>
                 <slot:template slot="card-search">
                     <div class="col-lg-12" style="padding: 5px;">
                         <input

@@ -15,6 +15,9 @@ type Model_album struct {
 	Album_createdate     string `json:"album_createdate"`
 }
 
+type Controller_album struct {
+	Album_page int `json:"album_page"`
+}
 type Controller_albumcloudflare struct {
 	Album_page      int `json:"album_page"`
 	Album_pagecloud int `json:"album_pagecloud"`

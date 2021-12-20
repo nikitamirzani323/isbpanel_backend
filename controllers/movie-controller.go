@@ -1451,7 +1451,6 @@ func Movieuploadcloud(c *fiber.Ctx) error {
 	}
 
 	file, err := c.FormFile("file")
-
 	if err != nil {
 		log.Println("image upload error --> ", err)
 		return c.JSON(fiber.Map{"status": 500, "message": "Server error", "data": nil})

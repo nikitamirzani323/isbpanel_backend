@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"log"
+	"strconv"
 	"time"
 
 	"bitbucket.org/isbtotogroup/isbpanel_backend/entities"
@@ -47,15 +48,17 @@ func Newshome(c *fiber.Ctx) error {
 		})
 	}
 	if client.News_search != "" {
-		val_tafsirmimpi := helpers.DeleteRedis(Fieldnews_home_redis + "_" + client.News_search)
-		log.Printf("Redis Delete BACKEND NEWS : %d", val_tafsirmimpi)
+		val_news := helpers.DeleteRedis(Fieldnews_home_redis + "_" + strconv.Itoa(client.News_page) + "_" + client.News_search)
+		log.Printf("Redis Delete BACKEND NEWS : %d", val_news)
 	}
 	var obj entities.Model_news
 	var arraobj []entities.Model_news
 	render_page := time.Now()
-	resultredis, flag := helpers.GetRedis(Fieldnews_home_redis + "_" + client.News_search)
+	resultredis, flag := helpers.GetRedis(Fieldnews_home_redis + "_" + strconv.Itoa(client.News_page) + "_" + client.News_search)
 	jsonredis := []byte(resultredis)
 	message_RD, _ := jsonparser.GetString(jsonredis, "message")
+	perpage_RD, _ := jsonparser.GetInt(jsonredis, "perpage")
+	totalrecord_RD, _ := jsonparser.GetInt(jsonredis, "totalrecord")
 	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
 	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		news_id, _ := jsonparser.GetInt(value, "news_id")
@@ -80,7 +83,7 @@ func Newshome(c *fiber.Ctx) error {
 		arraobj = append(arraobj, obj)
 	})
 	if !flag {
-		result, err := models.Fetch_newsHome(client.News_search)
+		result, err := models.Fetch_newsHome(client.News_search, client.News_page)
 		if err != nil {
 			c.Status(fiber.StatusBadRequest)
 			return c.JSON(fiber.Map{
@@ -89,16 +92,18 @@ func Newshome(c *fiber.Ctx) error {
 				"record":  nil,
 			})
 		}
-		helpers.SetRedis(Fieldnews_home_redis+"_"+client.News_search, result, 5*time.Minute)
+		helpers.SetRedis(Fieldnews_home_redis+"_"+strconv.Itoa(client.News_page)+"_"+client.News_search, result, 10*time.Minute)
 		log.Println("NEWS MYSQL")
 		return c.JSON(result)
 	} else {
 		log.Println("NEWS CACHE")
 		return c.JSON(fiber.Map{
-			"status":  fiber.StatusOK,
-			"message": message_RD,
-			"record":  arraobj,
-			"time":    time.Since(render_page).String(),
+			"status":      fiber.StatusOK,
+			"message":     message_RD,
+			"record":      arraobj,
+			"perpage":     perpage_RD,
+			"totalrecord": totalrecord_RD,
+			"time":        time.Since(render_page).String(),
 		})
 	}
 }
@@ -244,7 +249,7 @@ func Categoryhome(c *fiber.Ctx) error {
 				"record":  nil,
 			})
 		}
-		helpers.SetRedis(Fieldcategory_home_redis, result, 0)
+		helpers.SetRedis(Fieldcategory_home_redis, result, 60*time.Minute)
 		log.Println("CATEGORY NEWS MYSQL")
 		return c.JSON(result)
 	} else {
