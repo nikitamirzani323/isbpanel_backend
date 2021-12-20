@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	"bitbucket.org/isbtotogroup/isbpanel_backend/configs"
@@ -36,7 +37,7 @@ func Fetch_movieHome(search string, page, enable int) (helpers.Responsemovie, er
 	sql_selectcount += "FROM " + configs.DB_VIEW_MOVIE + "  "
 	sql_selectcount += "WHERE enabled = '" + strconv.Itoa(enable) + "' "
 	if search != "" {
-		sql_selectcount += "AND movietitle LIKE '%" + search + "%' "
+		sql_selectcount += "AND LOWER(movietitle) LIKE '%" + strings.ToLower(search) + "%' "
 	}
 
 	row_selectcount := con.QueryRowContext(ctx, sql_selectcount)
@@ -58,7 +59,7 @@ func Fetch_movieHome(search string, page, enable int) (helpers.Responsemovie, er
 		sql_select += "ORDER BY createdatemovie DESC  OFFSET " + strconv.Itoa(offset) + " LIMIT " + strconv.Itoa(perpage)
 	} else {
 		sql_select += "WHERE enabled = '" + strconv.Itoa(enable) + "' "
-		sql_select += "AND movietitle LIKE '%" + search + "%' "
+		sql_select += "AND LOWER(movietitle) LIKE '%" + strings.ToLower(search) + "%' "
 		sql_select += "ORDER BY createdatemovie DESC LIMIT " + strconv.Itoa(perpage)
 	}
 	row, err := con.QueryContext(ctx, sql_select)
@@ -552,7 +553,7 @@ func Fetch_movieseriesHome(search string, page, enable int) (helpers.Responsemov
 	sql_selectcount += "FROM " + configs.DB_VIEW_MOVIESERIES + "  "
 	sql_selectcount += "WHERE enabled = '" + strconv.Itoa(enable) + "' "
 	if search != "" {
-		sql_selectcount += "AND movietitle LIKE '%" + search + "%' "
+		sql_selectcount += "AND LOWER(movietitle) LIKE '%" + strings.ToLower(search) + "%' "
 	}
 
 	row_selectcount := con.QueryRowContext(ctx, sql_selectcount)
@@ -574,7 +575,7 @@ func Fetch_movieseriesHome(search string, page, enable int) (helpers.Responsemov
 		sql_select += "ORDER BY createdatemovie DESC  OFFSET " + strconv.Itoa(offset) + " LIMIT " + strconv.Itoa(perpage)
 	} else {
 		sql_select += "WHERE enabled = '" + strconv.Itoa(enable) + "' "
-		sql_select += "AND movietitle LIKE '%" + search + "%' "
+		sql_select += "AND LOWER(movietitle) LIKE '%" + strings.ToLower(search) + "%' "
 		sql_select += "ORDER BY createdatemovie DESC LIMIT " + strconv.Itoa(perpage)
 	}
 	row, err := con.QueryContext(ctx, sql_select)
@@ -1232,7 +1233,7 @@ func Fetch_movieminiHome(search string) (helpers.Response, error) {
 	if search == "" {
 		sql_select += "ORDER BY createdatemovie DESC  LIMIT 100 "
 	} else {
-		sql_select += "WHERE movietitle LIKE '%" + search + "%' "
+		sql_select += "WHERE LOWER(movietitle) LIKE '%" + strings.ToLower(search) + "%' "
 		sql_select += "ORDER BY createdatemovie DESC LIMIT 100 "
 	}
 	log.Println(sql_select)

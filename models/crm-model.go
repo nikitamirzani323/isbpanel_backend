@@ -4,13 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"strconv"
+	"strings"
 	"time"
 
+	"bitbucket.org/isbtotogroup/isbpanel_backend/configs"
+	"bitbucket.org/isbtotogroup/isbpanel_backend/db"
+	"bitbucket.org/isbtotogroup/isbpanel_backend/entities"
+	"bitbucket.org/isbtotogroup/isbpanel_backend/helpers"
 	"github.com/gofiber/fiber/v2"
-	"github.com/nikitamirzani323/isbpanel_backend/configs"
-	"github.com/nikitamirzani323/isbpanel_backend/db"
-	"github.com/nikitamirzani323/isbpanel_backend/entities"
-	"github.com/nikitamirzani323/isbpanel_backend/helpers"
 )
 
 func Fetch_crmisbtv(search string, page int) (helpers.Responsemovie, error) {
@@ -31,8 +32,8 @@ func Fetch_crmisbtv(search string, page int) (helpers.Responsemovie, error) {
 	sql_selectcount += "COUNT(username) as totalmember  "
 	sql_selectcount += "FROM " + configs.DB_tbl_mst_user + "  "
 	if search != "" {
-		sql_selectcount += "WHERE username LIKE '%" + search + "%' "
-		sql_selectcount += "OR username LIKE '%" + search + "%' "
+		sql_selectcount += "WHERE LOWER(username) LIKE '%" + strings.ToLower(search) + "%' "
+		sql_selectcount += "OR LOWER(username) LIKE '%" + strings.ToLower(search) + "%' "
 	}
 
 	row_selectcount := con.QueryRowContext(ctx, sql_selectcount)
@@ -48,13 +49,13 @@ func Fetch_crmisbtv(search string, page int) (helpers.Responsemovie, error) {
 	sql_select += "SELECT "
 	sql_select += "username , nmuser, coderef, "
 	sql_select += "point_in , point_out, statususer,  "
-	sql_select += "COALESCE(lastlogin,''), createdateuser, COALESCE(updatedateuser,'') "
+	sql_select += "COALESCE(lastlogin,CURRENT_TIMESTAMP), createdateuser, COALESCE(updatedateuser,CURRENT_TIMESTAMP) "
 	sql_select += "FROM " + configs.DB_tbl_mst_user + "  "
 	if search == "" {
-		sql_select += "ORDER BY createdateuser DESC  LIMIT " + strconv.Itoa(offset) + " , " + strconv.Itoa(perpage)
+		sql_select += "ORDER BY createdateuser DESC  OFFSET " + strconv.Itoa(offset) + " LIMIT " + strconv.Itoa(perpage)
 	} else {
-		sql_select += "WHERE username LIKE '%" + search + "%' "
-		sql_select += "OR username LIKE '%" + search + "%' "
+		sql_select += "WHERE LOWER(username) LIKE '%" + strings.ToLower(search) + "%' "
+		sql_select += "OR LOWER(username) LIKE '%" + strings.ToLower(search) + "%' "
 		sql_select += "ORDER BY createdateuser DESC  LIMIT " + strconv.Itoa(perpage)
 	}
 
@@ -113,8 +114,8 @@ func Fetch_crmduniafilm(search string, page int) (helpers.Responsemovie, error) 
 	sql_selectcount += "COUNT(username) as totalmember  "
 	sql_selectcount += "FROM " + configs.DB_VIEW_MEMBER_DUNIAFILM + "  "
 	if search != "" {
-		sql_selectcount += "WHERE username LIKE '%" + search + "%' "
-		sql_selectcount += "OR name LIKE '%" + search + "%' "
+		sql_selectcount += "WHERE LOWER(username) LIKE '%" + strings.ToLower(search) + "%' "
+		sql_selectcount += "OR LOWER(name) LIKE '%" + strings.ToLower(search) + "%' "
 	}
 
 	row_selectcount := con.QueryRowContext(ctx, sql_selectcount)
@@ -131,10 +132,10 @@ func Fetch_crmduniafilm(search string, page int) (helpers.Responsemovie, error) 
 	sql_select += "username , name "
 	sql_select += "FROM " + configs.DB_VIEW_MEMBER_DUNIAFILM + "  "
 	if search == "" {
-		sql_select += "ORDER BY username ASC  LIMIT " + strconv.Itoa(offset) + " , " + strconv.Itoa(perpage)
+		sql_select += "ORDER BY username ASC  OFFSET " + strconv.Itoa(offset) + " LIMIT " + strconv.Itoa(perpage)
 	} else {
-		sql_select += "WHERE username LIKE '%" + search + "%' "
-		sql_select += "OR name LIKE '%" + search + "%' "
+		sql_select += "WHERE LOWER(username) LIKE '%" + strings.ToLower(search) + "%' "
+		sql_select += "OR LOWER(name) LIKE '%" + strings.ToLower(search) + "%' "
 		sql_select += "ORDER BY username ASC  LIMIT " + strconv.Itoa(perpage)
 	}
 

@@ -5,12 +5,12 @@ import (
 	"strconv"
 	"time"
 
+	"bitbucket.org/isbtotogroup/isbpanel_backend/entities"
+	"bitbucket.org/isbtotogroup/isbpanel_backend/helpers"
+	"bitbucket.org/isbtotogroup/isbpanel_backend/models"
 	"github.com/buger/jsonparser"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
-	"github.com/nikitamirzani323/isbpanel_backend/entities"
-	"github.com/nikitamirzani323/isbpanel_backend/helpers"
-	"github.com/nikitamirzani323/isbpanel_backend/models"
 )
 
 const Fieldcrmisbtv_home_redis = "LISTCRMISBTV_BACKEND_ISBPANEL"

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	"bitbucket.org/isbtotogroup/isbpanel_backend/configs"
@@ -33,8 +34,8 @@ func Fetch_newsHome(search string, page int) (helpers.Responsemovie, error) {
 	sql_selectcount += "COUNT(idnews) as totalnews  "
 	sql_selectcount += "FROM " + configs.DB_tbl_trx_news + "  "
 	if search != "" {
-		sql_selectcount += "WHERE title_news LIKE '%" + search + "%' "
-		sql_selectcount += "OR title_news LIKE '%" + search + "%' "
+		sql_selectcount += "WHERE LOWER(title_news) LIKE '%" + strings.ToLower(search) + "%' "
+		sql_selectcount += "OR LOWER(title_news) LIKE '%" + strings.ToLower(search) + "%' "
 	}
 
 	row_selectcount := con.QueryRowContext(ctx, sql_selectcount)
@@ -54,10 +55,10 @@ func Fetch_newsHome(search string, page int) (helpers.Responsemovie, error) {
 	sql_select += "FROM " + configs.DB_tbl_trx_news + " as A "
 	sql_select += "JOIN " + configs.DB_tbl_mst_category + " as B ON B.idcatenews = A.idcatenews "
 	if search == "" {
-		sql_select += "ORDER BY A.idnews DESC  LIMIT " + strconv.Itoa(offset) + " , " + strconv.Itoa(perpage)
+		sql_select += "ORDER BY A.idnews DESC  OFFSET " + strconv.Itoa(offset) + " LIMIT " + strconv.Itoa(perpage)
 	} else {
-		sql_select += "WHERE title_news LIKE '%" + search + "%' "
-		sql_select += "OR title_news LIKE '%" + search + "%' "
+		sql_select += "WHERE LOWER(title_news) LIKE '%" + strings.ToLower(search) + "%' "
+		sql_select += "OR LOWER(title_news) LIKE '%" + strings.ToLower(search) + "%' "
 		sql_select += "ORDER BY A.idnews DESC  LIMIT " + strconv.Itoa(perpage)
 	}
 

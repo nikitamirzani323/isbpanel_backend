@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	"bitbucket.org/isbtotogroup/isbpanel_backend/configs"
@@ -32,8 +33,8 @@ func Fetch_tafsirmimpiHome(search string) (helpers.Response, error) {
 	if search == "" {
 		sql_select += "ORDER BY random() LIMIT 500  "
 	} else {
-		sql_select += "WHERE mimpi LIKE '%" + search + "%' "
-		sql_select += "OR artimimpi LIKE '%" + search + "%' "
+		sql_select += "WHERE LOWER(mimpi) LIKE '%" + strings.ToLower(search) + "%' "
+		sql_select += "OR LOWER(artimimpi) LIKE '%" + strings.ToLower(search) + "%' "
 		sql_select += "ORDER BY mimpi ASC LIMIT 500  "
 	}
 
