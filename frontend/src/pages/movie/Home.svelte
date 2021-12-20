@@ -22,8 +22,9 @@
     let listslide = []
     let listalbum = []
     let listgenre = []
+    let listmovienotcdn = []
     let record = ""
-    let totalrecordcategory = 0
+    let totalmovienotcdn = 0
     
     
     let genre_field_idrecord = 0;
@@ -105,6 +106,11 @@
         moviemini_field_idmovie = e
         moviemini_field_name = title
         myModal.hide()
+    };
+    const ShowMovieNotCDN = () => {
+        myModal = new bootstrap.Modal(document.getElementById("modalmovienotcdn"));
+        myModal.show();
+        call_movienotcdn()
     };
     const ShowSlider = () => {
         myModal = new bootstrap.Modal(document.getElementById("modalslider"));
@@ -251,6 +257,37 @@
                         },
                     ];
                 }
+            }
+        } 
+    }
+    async function call_movienotcdn() {
+        listmovienotcdn = [];
+        const res = await fetch("/api/movienotcdn", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token,
+            },
+            body: JSON.stringify({
+            }),
+        });
+        const json = await res.json();
+        if (json.status == 200) {
+            record = json.record;
+            if (record != null) {
+                let no = 0
+                for (var i = 0; i < record.length; i++) {
+                    no = no + 1;
+                    listmovienotcdn = [
+                        ...listmovienotcdn,
+                        {
+                            movie_no: no,
+                            movie_id: record[i]["movie_id"],
+                            movie_title: record[i]["movie_title"],
+                        },
+                    ];
+                }
+                totalmovienotcdn = no
             }
         } 
     }
@@ -705,6 +742,8 @@
     }
     function callFunction(event){
         switch(event.detail){
+            case "MOVIE_NOT_CDN":
+                ShowMovieNotCDN();break;
             case "CALL_SLIDER":
                 ShowSlider();break;
             case "FORMNEW_SLIDER":
@@ -822,6 +861,11 @@
                 on:click={callFunction}
                 button_function="CALL_SLIDER"
                 button_title="Slider"
+                button_css="btn-primary"/>
+            <Button
+                on:click={callFunction}
+                button_function="MOVIE_NOT_CDN"
+                button_title="MOVIE NOT CDN"
                 button_css="btn-primary"/>
             <Button
                 on:click={callFunction}
@@ -1446,5 +1490,36 @@
                 
             </tbody>
         </table>
+	</slot:template>
+</Modal>
+
+<Modal
+	modal_id="modalmovienotcdn"
+	modal_size="modal-dialog-centered"
+	modal_title="MOVIE NOT CDN"
+    modal_body_css="height:500px; overflow-y: scroll;"
+    modal_footer_css="padding:5px;"
+	modal_footer={true}>
+	<slot:template slot="body">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NO</th>
+                    <th width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">TITLE</th>
+                </tr>
+            </thead>
+            <tbody>
+                {#each listmovienotcdn as rec }
+                <tr>
+                    <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.movie_no}</td>
+                    <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};{genre_css}">{rec.movie_title}</td>
+                </tr>
+                {/each}
+                
+            </tbody>
+        </table>
+	</slot:template>
+	<slot:template slot="footer">
+        Record : {totalmovienotcdn}
 	</slot:template>
 </Modal>

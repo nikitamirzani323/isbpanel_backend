@@ -22,16 +22,7 @@
 
     let pagingnow = 0;
    
-    let category_field_idrecord = 0;
-    let category_field_name = "";
-    let category_field_display = 0;
-    let category_field_status = "";
-    let news_field_idrecord = 0;
-    let news_field_title = "";
-    let news_field_descp = "";
-    let news_field_category = "";
-    let news_field_url = "";
-    let news_field_image = "";
+  
     let searchIsbtv = "";
     let filterIsbtv = "";
 
@@ -42,10 +33,10 @@
         if (searchIsbtv) {
             filterIsbtv = listHome.filter(
                 (item) =>
-                    item.crmisbtv_name
+                    item.crmduniafilm_name
                         .toLowerCase()
                         .includes(searchIsbtv.toLowerCase()) || 
-                    item.crmisbtv_username
+                    item.crmduniafilm_username
                         .toLowerCase()
                         .includes(searchIsbtv.toLowerCase())
             );
@@ -167,160 +158,3 @@
         </div>
     </div>
 </div>
-
-<Modal
-	modal_id="modalcrudnews"
-	modal_size="modal-dialog-centered"
-	modal_title="NEWS/{sData}"
-    modal_body_css=""
-    modal_footer_css="padding:5px;"
-	modal_footer={true}>
-	<slot:template slot="body">
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">Category</label>
-            <select 
-                bind:value={news_field_category}
-                class="form-control required">
-                {#each listcategory as rec}
-                <option value="{rec.category_id}">{rec.category_name}</option>
-                {/each}
-            </select>
-		</div>
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">Title</label>
-			<Input
-                bind:value={news_field_title}
-                class="required"
-                type="text"
-                placeholder="News Title"/>
-		</div>
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">Deskripsi</label>
-            <textarea
-                style="height: 100px;resize: none;" 
-                bind:value={news_field_descp} class="form-control required"></textarea>
-        </div>
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">Url Image</label>
-			<Input
-                bind:value={news_field_image}
-                class="required"
-                type="text"
-                placeholder="News Image"/>
-		</div>
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">Url</label>
-			<Input
-                bind:value={news_field_url}
-                class="required"
-                type="text"
-                placeholder="News URL"/>
-		</div>
-	</slot:template>
-	<slot:template slot="footer">
-        <Button
-            on:click={callFunction}
-            button_function="SAVE_NEWS"
-            button_title="Save"
-            button_css="btn-warning"/>
-	</slot:template>
-</Modal>
-<Modal
-	modal_id="modalcategory"
-	modal_size="modal-dialog-centered"
-	modal_title="CATEGORY"
-    modal_body_css="height:500px;"
-    modal_footer_css="padding:5px;"
-	modal_footer={true}>
-	<slot:template slot="body">
-        <table class="table table-sm">
-            <thead>
-                <tr>
-                    <th width="1%" colspan="2">&nbsp;</th>
-                    <th width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NO</th>
-                    <th width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">STATUS</th>
-                    <th width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size:{table_header_font};">CATEGORY</th>
-                    <th width="5%" style="text-align: right;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NEWS</th>
-                    <th width="5%" style="text-align: right;vertical-align: top;font-weight:bold;font-size:{table_header_font};">DISPLAY</th>
-                </tr>
-            </thead>
-            <tbody>
-                {#each listcategory as rec }
-                <tr>
-                    <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
-                        <i 
-                            on:click={() => {
-                                ShowFormCategory("Edit",rec.category_id,rec.category_name,rec.category_display,rec.category_status);
-                            }} 
-                            class="bi bi-pencil"></i>
-                    </td>
-                    <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
-                        <i 
-                            on:click={() => {
-                                handleDeleteCategoryNews(rec.category_id);
-                            }} 
-                            class="bi bi-trash"></i>
-                    </td>
-                    <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.category_no}</td>
-                    <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};{rec.category_statuscss}">{rec.category_status}</td>
-                    <td NOWRAP style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.category_name}</td>
-                    <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.category_totalnews}</td>
-                    <td NOWRAP style="text-align: right;vertical-align: top;font-size: {table_body_font};">{rec.category_display}</td>
-                </tr>
-                {/each}
-                
-            </tbody>
-        </table>
-	</slot:template>
-	<slot:template slot="footer">
-        <Button
-            on:click={callFunction}
-            button_function="FORMNEW_CATEGORY"
-            button_title="New"
-            button_css="btn-warning"/>
-	</slot:template>
-</Modal>
-<Modal
-	modal_id="modalcrudcategory"
-	modal_size="modal-dialog-centered"
-	modal_title="CATEGORY/{sData}"
-    modal_body_css=""
-    modal_footer_css="padding:5px;"
-	modal_footer={true}>
-	<slot:template slot="body">
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">Name</label>
-			<Input
-                bind:value={category_field_name}
-                class="required"
-                type="text"
-                placeholder="Category Name"/>
-		</div>
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">Display</label>
-			<Input
-                bind:value={category_field_display}
-                class="required"
-                maxlength=3
-                type="text"
-                style="text-align:right;"
-                placeholder="Category Display"/>
-		</div>
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">Status</label>
-            <select
-                bind:value={category_field_status} 
-                class="form-control required">
-                <option value="Y">ACTIVE</option>
-                <option value="">DEACTIVE</option>
-            </select>
-		</div>
-	</slot:template>
-	<slot:template slot="footer">
-        <Button
-            on:click={callFunction}
-            button_function="SAVE_CATEGORY"
-            button_title="Save"
-            button_css="btn-warning"/>
-	</slot:template>
-</Modal>

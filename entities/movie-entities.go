@@ -24,6 +24,10 @@ type Model_movie struct {
 	Movie_create    string      `json:"movie_create"`
 	Movie_update    string      `json:"movie_update"`
 }
+type Model_movienotcdn struct {
+	Movie_id    int    `json:"movie_id"`
+	Movie_title string `json:"movie_title"`
+}
 type Model_moviegenre struct {
 	Moviegenre_id   int    `json:"moviegenre_id"`
 	Moviegenre_name string `json:"moviegenre_name"`
