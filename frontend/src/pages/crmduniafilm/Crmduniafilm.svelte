@@ -1,6 +1,5 @@
 <script>
   import Home from "./Home.svelte";
-  import dayjs from "dayjs";
 
   export let table_header_font = "";
   export let table_body_font = "";

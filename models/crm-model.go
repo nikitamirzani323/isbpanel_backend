@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"database/sql"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -33,7 +34,7 @@ func Fetch_crmisbtv(search string, page int) (helpers.Responsemovie, error) {
 	sql_selectcount += "FROM " + configs.DB_tbl_mst_user + "  "
 	if search != "" {
 		sql_selectcount += "WHERE LOWER(username) LIKE '%" + strings.ToLower(search) + "%' "
-		sql_selectcount += "OR LOWER(username) LIKE '%" + strings.ToLower(search) + "%' "
+		sql_selectcount += "OR LOWER(nmuser) LIKE '%" + strings.ToLower(search) + "%' "
 	}
 
 	row_selectcount := con.QueryRowContext(ctx, sql_selectcount)
@@ -49,13 +50,13 @@ func Fetch_crmisbtv(search string, page int) (helpers.Responsemovie, error) {
 	sql_select += "SELECT "
 	sql_select += "username , nmuser, coderef, "
 	sql_select += "point_in , point_out, statususer,  "
-	sql_select += "COALESCE(lastlogin,CURRENT_TIMESTAMP), createdateuser, COALESCE(updatedateuser,CURRENT_TIMESTAMP) "
+	sql_select += "COALESCE(lastlogin,NOW()), createdateuser, COALESCE(updatedateuser,NOW()) "
 	sql_select += "FROM " + configs.DB_tbl_mst_user + "  "
 	if search == "" {
 		sql_select += "ORDER BY createdateuser DESC  OFFSET " + strconv.Itoa(offset) + " LIMIT " + strconv.Itoa(perpage)
 	} else {
 		sql_select += "WHERE LOWER(username) LIKE '%" + strings.ToLower(search) + "%' "
-		sql_select += "OR LOWER(username) LIKE '%" + strings.ToLower(search) + "%' "
+		sql_select += "OR LOWER(nmuser) LIKE '%" + strings.ToLower(search) + "%' "
 		sql_select += "ORDER BY createdateuser DESC  LIMIT " + strconv.Itoa(perpage)
 	}
 
@@ -138,6 +139,8 @@ func Fetch_crmduniafilm(search string, page int) (helpers.Responsemovie, error) 
 		sql_select += "OR LOWER(name) LIKE '%" + strings.ToLower(search) + "%' "
 		sql_select += "ORDER BY username ASC  LIMIT " + strconv.Itoa(perpage)
 	}
+
+	log.Println(sql_select)
 
 	row, err := con.QueryContext(ctx, sql_select)
 	helpers.ErrorCheck(err)
