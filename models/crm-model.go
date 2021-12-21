@@ -35,8 +35,8 @@ func Fetch_crm(search string, page int) (helpers.Responsemovie, error) {
 	sql_selectcount += "COUNT(idusersales) as totalmember  "
 	sql_selectcount += "FROM " + configs.DB_tbl_trx_usersales + "  "
 	if search != "" {
-		sql_selectcount += "WHERE phone LIKE '%" + search + "%' "
-		sql_selectcount += "OR nama LIKE '%" + search + "%' "
+		sql_selectcount += "WHERE LOWER(phone) LIKE '%" + strings.ToLower(search) + "%' "
+		sql_selectcount += "OR LOWER(nama) LIKE '%" + strings.ToLower(search) + "%' "
 	}
 
 	row_selectcount := con.QueryRowContext(ctx, sql_selectcount)
@@ -52,13 +52,13 @@ func Fetch_crm(search string, page int) (helpers.Responsemovie, error) {
 	sql_select += "SELECT "
 	sql_select += "idusersales , phone, nama, "
 	sql_select += "source , statususersales,  "
-	sql_select += "createusersales, COALESCE(createdateusersales,''), updateusersales, COALESCE(updatedateusersales,'') "
+	sql_select += "createusersales, COALESCE(createdateusersales,NOW()), updateusersales, COALESCE(updatedateusersales,NOW()) "
 	sql_select += "FROM " + configs.DB_tbl_trx_usersales + "  "
 	if search == "" {
-		sql_select += "ORDER BY createdateusersales DESC  LIMIT " + strconv.Itoa(offset) + " , " + strconv.Itoa(perpage)
+		sql_select += "ORDER BY createdateusersales DESC  OFFSET " + strconv.Itoa(offset) + " LIMIT " + strconv.Itoa(perpage)
 	} else {
-		sql_select += "WHERE username LIKE '%" + search + "%' "
-		sql_select += "OR username LIKE '%" + search + "%' "
+		sql_select += "WHERE LOWER(name) LIKE '%" + strings.ToLower(search) + "%' "
+		sql_select += "OR LOWER(phone) LIKE '%" + strings.ToLower(search) + "%' "
 		sql_select += "ORDER BY createdateusersales DESC  LIMIT " + strconv.Itoa(perpage)
 	}
 
@@ -132,8 +132,8 @@ func Save_crm(admin, phone, nama, status, sData string, idrecord int) (helpers.R
 					idusersales , phone, nama, source, statususersales, 
 					createusersales, createdateusersales 
 				) values (
-					?, ?, ?, ?, ?,
-					?, ?
+					$1, $2, $3, $4, $5,
+					$6, $7
 				)
 			`
 			field_column := configs.DB_tbl_trx_usersales + tglnow.Format("YYYY")
@@ -156,9 +156,9 @@ func Save_crm(admin, phone, nama, status, sData string, idrecord int) (helpers.R
 		sql_update := `
 				UPDATE 
 				` + configs.DB_tbl_trx_usersales + `  
-				SET statususersales=?, 
-				updateusersales=?, updatedateusersales=? 
-				WHERE idusersales =? 
+				SET statususersales=$1, 
+				updateusersales=$2, updatedateusersales=$3 
+				WHERE idusersales =$4 
 			`
 
 		flag_update, msg_update := Exec_SQL(sql_update, configs.DB_tbl_trx_usersales, "UPDATE",
@@ -209,8 +209,8 @@ func Save_crmsource(admin, datasource, source, sData string) (helpers.Response, 
 						idusersales , phone, nama, source, statususersales, 
 						createusersales, createdateusersales 
 					) values (
-						?, ?, ?, ?, ?,
-						?, ?
+						$1, $2, $3, $4, $5,
+						$6, $7
 					)
 				`
 				field_column := configs.DB_tbl_trx_usersales + tglnow.Format("YYYY")
