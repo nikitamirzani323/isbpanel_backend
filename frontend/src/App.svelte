@@ -15,6 +15,7 @@
 	import Seriestrouble from "./pages/seriestrouble/Seriestrouble.svelte";
 	import Domain from "./pages/domain/Domain.svelte";
 	import Album from "./pages/album/Album.svelte";
+	import Crm from "./pages/crm/Crm.svelte";
 	import Crmisbtv from "./pages/crmisbtv/Crmisbtv.svelte";
 	import Crmduniafilm from "./pages/crmduniafilm/Crmduniafilm.svelte";
 	import Login from "./pages/Login.svelte";
@@ -40,6 +41,13 @@
 					table_body_font: table_body_font,
 				},
 				component: Dashboard,
+			}),
+			"/crm": wrap({
+				component: Crm,
+				props: {
+					table_header_font: table_header_font,
+					table_body_font: table_body_font,
+				},
 			}),
 			"/crmduniafilm": wrap({
 				component: Crmduniafilm,

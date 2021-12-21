@@ -170,7 +170,7 @@
         <div class="col-sm-9">
             <div class="card" style="border-radius: 0px;margin-top:10px;">
                 <div class="card-header" style="">
-                    Setting Pasaran Online
+                    Setting RULE
                     <div class="float-end">
                         <button
                             on:click={() => {
@@ -199,6 +199,63 @@
                                     />
                                 </td>
                                 <td width="*">VIEW</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th colspan="2" NOWRAP>CRM</th>
+                                <th colspan="2" NOWRAP>CRM ISBTV</th>
+                                <th colspan="2" NOWRAP>CRM DUNIAFILM</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="CRM-VIEW">
+                                </td>
+                                <td width="*">VIEW</td>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="CRMISBTV-VIEW"/>
+                                </td>
+                                <td width="*">VIEW</td>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="CRMDUNIAFILM-VIEW"/>
+                                </td>
+                                <td width="*">VIEW</td>
+                            </tr>
+                            <tr>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="CRM-SAVE"/>
+                                </td>
+                                <td width="*">SAVE</td>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="CRMISBTV-SAVE"/>
+                                </td>
+                                <td width="*">SAVE</td>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="CRMDUNIAFILM-SAVE"/>
+                                </td>
+                                <td width="*">SAVE</td>
                             </tr>
                         </tbody>
                     </table>

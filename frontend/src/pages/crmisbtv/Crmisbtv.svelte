@@ -27,7 +27,7 @@
         Authorization: "Bearer " + token,
       },
       body: JSON.stringify({
-        page: "NEWS-VIEW",
+        page: "CRMISBTV-VIEW",
       }),
     });
     const json = await res.json();

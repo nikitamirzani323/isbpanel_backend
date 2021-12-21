@@ -71,20 +71,7 @@
         break;
     }
   }
-  function clearfield_category() {
-    category_field_idrecord = 0;
-    category_field_name = "";
-    category_field_display = 0;
-    category_field_status = "";
-  }
-  function clearfield_news() {
-    news_field_idrecord = 0;
-    news_field_title = "";
-    news_field_descp = "";
-    news_field_category = "";
-    news_field_url = "";
-    news_field_image = "";
-  }
+
   const handleKeyboard_checkenter = (e) => {
     let keyCode = e.which || e.keyCode;
     if (keyCode === 13) {
