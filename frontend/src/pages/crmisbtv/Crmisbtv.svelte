@@ -68,6 +68,8 @@
           no = parseInt(page);
         }
         for (var i = 0; i < record.length; i++) {
+          if (record[i]["crmisbtv_name"] === "Viandra Natari")
+            console.log(record[i]["crmisbtv_lastlogin"]);
           if (parseInt(record[i]["crmisbtv_point"]) > 0) {
             css_point = "color:blue;font-weight:bold;";
           } else {
@@ -84,12 +86,12 @@
               crmisbtv_point: record[i]["crmisbtv_point"],
               crmisbtv_csspoint: css_point,
               crmisbtv_status: record[i]["crmisbtv_status"],
-              crmisbtv_lastlogin: dayjs(record[i]["crmisbtv_lastlogin"]).format(
-                "YYYY-MM-DD HH:mm:ss"
-              ),
-              crmisbtv_create: dayjs(record[i]["crmisbtv_create"]).format(
-                "YYYY-MM-DD HH:mm:ss"
-              ),
+              crmisbtv_lastlogin: dayjs(record[i]["crmisbtv_lastlogin"])
+                .subtract(7, "hour")
+                .format("YYYY-MM-DD HH:mm:ss"),
+              crmisbtv_create: dayjs(record[i]["crmisbtv_create"])
+                .subtract(7, "hour")
+                .format("YYYY-MM-DD HH:mm:ss"),
               crmisbtv_update: dayjs(record[i]["crmisbtv_update"]).format(
                 "YYYY-MM-DD HH:mm:ss"
               ),
