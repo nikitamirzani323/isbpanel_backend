@@ -23,7 +23,7 @@ spec:
       serviceAccountName: default
       containers:
         - name: isbpanel-backend-mono
-          image: asia.gcr.io/dazzling-pillar-328210/bitbucket.org/isbtotogroup/isbpanel_backend:d093c37
+          image: asia.gcr.io/dazzling-pillar-328210/bitbucket.org/isbtotogroup/isbpanel_backend:44a8a49
           resources:
             limits:
               cpu: 100m

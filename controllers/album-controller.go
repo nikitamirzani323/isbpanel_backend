@@ -158,7 +158,7 @@ func Albumsave(c *fiber.Ctx) error {
 				"record":  nil,
 			})
 		}
-		val_album := helpers.DeleteRedis(Fieldalbum_home_redis)
+		val_album := helpers.DeleteRedis(Fieldalbum_home_redis + "_" + strconv.Itoa(client.Album_page))
 		log.Printf("Redis Delete BACKEND ALBUM : %d", val_album)
 		return c.JSON(result)
 	}

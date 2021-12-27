@@ -52,7 +52,7 @@ func Fetch_crm(search string, page int) (helpers.Responsemovie, error) {
 	sql_select += "SELECT "
 	sql_select += "idusersales , phone, nama, "
 	sql_select += "source , statususersales,  "
-	sql_select += "createusersales, COALESCE(createdateusersales,NOW()), updateusersales, COALESCE(updatedateusersales,NOW()) "
+	sql_select += "createusersales, to_char(COALESCE(createdateusersales,NOW()), 'YYYY-MM-DD HH24:MI:SS'), updateusersales, to_char(COALESCE(updatedateusersales,NOW()) , 'YYYY-MM-DD HH24:MI:SS')"
 	sql_select += "FROM " + configs.DB_tbl_trx_usersales + "  "
 	if search == "" {
 		sql_select += "ORDER BY createdateusersales DESC  OFFSET " + strconv.Itoa(offset) + " LIMIT " + strconv.Itoa(perpage)
@@ -279,7 +279,7 @@ func Fetch_crmisbtv(search string, page int) (helpers.Responsemovie, error) {
 	sql_select += "SELECT "
 	sql_select += "username , nmuser, coderef, "
 	sql_select += "point_in , point_out, statususer,  "
-	sql_select += "COALESCE(lastlogin,NOW()), createdateuser, COALESCE(updatedateuser,NOW()) "
+	sql_select += "to_char(COALESCE(lastlogin,NOW()), 'YYYY-MM-DD HH24:MI:SS'), to_char(COALESCE(createdateuser,NOW()), 'YYYY-MM-DD HH24:MI:SS'),  to_char(COALESCE(updatedateuser,NOW()), 'YYYY-MM-DD HH24:MI:SS') "
 	sql_select += "FROM " + configs.DB_tbl_mst_user + "  "
 	if search == "" {
 		sql_select += "ORDER BY createdateuser DESC  OFFSET " + strconv.Itoa(offset) + " LIMIT " + strconv.Itoa(perpage)
