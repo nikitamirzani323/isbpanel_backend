@@ -51,15 +51,15 @@ func Fetch_newsHome(search string, page int) (helpers.Responsemovie, error) {
 	sql_select += "SELECT "
 	sql_select += "A.idnews , A.title_news, A.descp_news, "
 	sql_select += "A.url_news , A.img_news, B.nmcatenews, A.idcatenews, "
-	sql_select += "A.createnews, COALESCE(A.createdatenews,now()), A.updatenews, COALESCE(A.updatedatenews,now()) "
+	sql_select += "A.createnews, to_char(COALESCE(A.createdatenews,now()), 'YYYY-MM-DD HH24:ii:ss') as creatednews, A.updatenews, to_char(COALESCE(A.updatedatenews,now()), 'YYYY-MM-DD HH24:ii:ss') as updatednews "
 	sql_select += "FROM " + configs.DB_tbl_trx_news + " as A "
 	sql_select += "JOIN " + configs.DB_tbl_mst_category + " as B ON B.idcatenews = A.idcatenews "
 	if search == "" {
-		sql_select += "ORDER BY A.idnews DESC  OFFSET " + strconv.Itoa(offset) + " LIMIT " + strconv.Itoa(perpage)
+		sql_select += "ORDER BY creatednews DESC  OFFSET " + strconv.Itoa(offset) + " LIMIT " + strconv.Itoa(perpage)
 	} else {
 		sql_select += "WHERE LOWER(title_news) LIKE '%" + strings.ToLower(search) + "%' "
 		sql_select += "OR LOWER(title_news) LIKE '%" + strings.ToLower(search) + "%' "
-		sql_select += "ORDER BY A.idnews DESC  LIMIT " + strconv.Itoa(perpage)
+		sql_select += "ORDER BY creatednews DESC  LIMIT " + strconv.Itoa(perpage)
 	}
 
 	row, err := con.QueryContext(ctx, sql_select)
