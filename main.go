@@ -23,5 +23,5 @@ func main() {
 
 	db.Init()
 	app := routers.Init()
-	log.Fatal(app.Listen(":7072"))
+	log.Fatal(app.Listen(":5052"))
 }

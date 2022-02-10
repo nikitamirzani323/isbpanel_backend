@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -23,6 +24,7 @@ func Init() {
 	dbHost := os.Getenv("DB_HOST")
 	dbPort := os.Getenv("DB_PORT")
 	dbName := os.Getenv("DB_NAME")
+	dbSchema := os.Getenv("DB_SCHEMA")
 
 	switch dbDriver {
 	case "cloudsql":
@@ -55,14 +57,15 @@ func Init() {
 		db, err = sql.Open("postgres", conString)
 
 	case "postgres":
-		DBURL := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s", dbHost, dbPort, dbUser, dbName, dbPass)
+		log.Printf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s search_path=%s", dbHost, dbPort, dbUser, dbName, dbPass, dbSchema)
+		DBURL := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s search_path=%s", dbHost, dbPort, dbUser, dbName, dbPass, dbSchema)
+		// DBURL := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s", dbHost, dbPort, dbUser, dbName, dbPass)
 		db, err = sql.Open(dbDriver, DBURL)
-
 	default:
 		DBURL := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", dbUser, dbPass, dbHost, dbPort, dbName)
 		db, err = sql.Open(dbDriver, DBURL)
 	}
-
+	log.Printf(dbDriver)
 	helpers.ErrorCheck(err)
 
 	db.SetMaxIdleConns(10)
