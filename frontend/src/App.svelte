@@ -18,6 +18,7 @@
 	import Crm from "./pages/crm/Crm.svelte";
 	import Crmisbtv from "./pages/crmisbtv/Crmisbtv.svelte";
 	import Crmduniafilm from "./pages/crmduniafilm/Crmduniafilm.svelte";
+	import Websiteagen from "./pages/websiteagen/Websiteagen.svelte";
 	import Login from "./pages/Login.svelte";
 	import NotFound from "./pages/NotFound.svelte";
 	export let table_header_font;
@@ -41,6 +42,13 @@
 					table_body_font: table_body_font,
 				},
 				component: Dashboard,
+			}),
+			"/webagen": wrap({
+				component: Websiteagen,
+				props: {
+					table_header_font: table_header_font,
+					table_body_font: table_body_font,
+				},
 			}),
 			"/crm": wrap({
 				component: Crm,

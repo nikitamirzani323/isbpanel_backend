@@ -183,8 +183,7 @@
     slug,
     status,
     genre,
-    source
-  ) => {
+    source) => {
     sDataRoot = e;
     if (tipe == "MOVIE") {
       if (e == "Edit") {
@@ -896,15 +895,13 @@
       <Panel
         card_search={true}
         card_title={title_page}
-        card_footer={totalrecord}
-      >
+        card_footer={totalrecord}>
         <slot:template slot="card-title">
           <div class="float-end">
             <select
               on:change={handleSelectPaging}
               style="text-align: center;"
-              class="form-control"
-            >
+              class="form-control">
               {#each listPage as rec}
                 <option value={rec.page_value}>{rec.page_display}</option>
               {/each}
@@ -1162,8 +1159,7 @@
   modal_title="Movie/{sData}"
   modal_body_css="height:500px;overflow-y: scroll;"
   modal_footer_css="padding:5px;"
-  modal_footer={true}
->
+  modal_footer={true}>
   <slot:template slot="body">
     <div class="row">
       <div class="col-sm-6">
@@ -1350,8 +1346,7 @@
   modal_title="Album"
   modal_body_css="height:500px; overflow-y: scroll;"
   modal_footer_css="padding:5px;"
-  modal_footer={true}
->
+  modal_footer={true}>
   <slot:template slot="body">
     <table class="table table-sm">
       <thead>
@@ -1431,8 +1426,7 @@
   modal_title="ALBUM/{sData}"
   modal_body_css=""
   modal_footer_css="padding:5px;"
-  modal_footer={true}
->
+  modal_footer={true}>
   <slot:template slot="body">
     <div class="mb-3">
       <input id="fileUpload" type="file" bind:files />
@@ -1453,8 +1447,7 @@
   modal_title="Source"
   modal_body_css=""
   modal_footer_css="padding:5px;"
-  modal_footer={true}
->
+  modal_footer={true}>
   <slot:template slot="body">
     <div class="mb-3">
       <label for="exampleForm" class="form-label">URL Video</label>
@@ -1481,8 +1474,7 @@
   modal_title="GENRE"
   modal_body_css="height:500px; overflow-y: scroll;"
   modal_footer_css="padding:5px;"
-  modal_footer={true}
->
+  modal_footer={true}>
   <slot:template slot="body">
     <table class="table table-sm">
       <thead>
@@ -1581,8 +1573,7 @@
   modal_title="GENRE/{sData}"
   modal_body_css=""
   modal_footer_css="padding:5px;"
-  modal_footer={true}
->
+  modal_footer={true}>
   <slot:template slot="body">
     <div class="mb-3">
       <label for="exampleForm" class="form-label">Name</label>
@@ -1621,8 +1612,7 @@
   modal_title="SLIDER"
   modal_body_css="height:500px; overflow-y: scroll;"
   modal_footer_css="padding:5px;"
-  modal_footer={true}
->
+  modal_footer={true}>
   <slot:template slot="body">
     <table class="table table-sm">
       <thead>
@@ -1694,8 +1684,7 @@
   modal_title="Slider/New"
   modal_body_css=""
   modal_footer_css="padding:5px;"
-  modal_footer={true}
->
+  modal_footer={true}>
   <slot:template slot="body">
     <div class="mb-3">
       <label for="exampleForm" class="form-label">Movie</label>
@@ -1756,8 +1745,7 @@
   modal_body_css="height:500px; overflow-y: scroll;"
   modal_footer_css="padding:5px;"
   modal_footer={false}
-  modal_search={true}
->
+  modal_search={true}>
   <slot:template slot="search">
     <div class="col-lg-12" style="padding: 5px;">
       <input
@@ -1817,8 +1805,7 @@
   modal_title="MOVIE NOT CDN"
   modal_body_css="height:500px; overflow-y: scroll;"
   modal_footer_css="padding:5px;"
-  modal_footer={true}
->
+  modal_footer={true}>
   <slot:template slot="body">
     <table class="table table-sm">
       <thead>

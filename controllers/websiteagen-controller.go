@@ -141,7 +141,7 @@ func Websiteagensave(c *fiber.Ctx) error {
 			"record":  nil,
 		})
 	}
-	val_WEBSITEAGEN := helpers.DeleteRedis(Fieldwebsiteagen_home_redis + "_")
+	val_WEBSITEAGEN := helpers.DeleteRedis(Fieldwebsiteagen_home_redis + "_" + strconv.Itoa(client.Websiteagen_page) + "_" + client.Websiteagen_search)
 	log.Printf("Redis Delete BACKEND WEBSITEAGEN : %d", val_WEBSITEAGEN)
 	return c.JSON(result)
 }

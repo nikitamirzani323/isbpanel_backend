@@ -9,13 +9,14 @@ type Model_websiteagen struct {
 }
 
 type Controller_websiteagen struct {
-	Websiteagen_search string `json:"news_search"`
-	Websiteagen_page   int    `json:"news_page"`
+	Websiteagen_search string `json:"websiteagen_search"`
+	Websiteagen_page   int    `json:"websiteagen_page"`
 }
 type Controller_websiteagensave struct {
 	Page                 string `json:"page" validate:"required"`
 	Sdata                string `json:"sdata" validate:"required"`
-	Client               string `json:"client" validate:"required"`
+	Websiteagen_search   string `json:"websiteagen_search"`
+	Websiteagen_page     int    `json:"websiteagen_page"`
 	Websiteagen_idrecord int    `json:"websiteagen_id"`
 	Websiteagen_name     string `json:"websiteagen_name" validate:"required"`
 	Websiteagen_status   string `json:"websiteagen_status" validate:"required"`

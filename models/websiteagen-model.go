@@ -59,7 +59,7 @@ func Fetch_websiteagenHome(search string, page int) (helpers.Responsemovie, erro
 		sql_select += "OR LOWER(nmwebagen) LIKE '%" + strings.ToLower(search) + "%' "
 		sql_select += "ORDER BY createwebagen DESC  LIMIT " + strconv.Itoa(perpage)
 	}
-
+	log.Println(sql_select)
 	row, err := con.QueryContext(ctx, sql_select)
 	helpers.ErrorCheck(err)
 	for row.Next() {
