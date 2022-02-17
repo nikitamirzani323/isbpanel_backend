@@ -15,11 +15,10 @@
     export let listPage = [];
 	export let totalrecord = 0
     let dispatch = createEventDispatcher();
-	let title_page = "WEBSITE AGEN"
+	let title_page = "GAME"
     let sData = "";
     let myModal_newentry = "";
     let name_field = "";
-    let status_field = "";
     let idrecord = "";
     let searchHome = "";
     let filterHome = [];
@@ -40,16 +39,11 @@
         }
     }
     
-    const NewData = (e,id,name,status) => {
+    const NewData = (e,id,name) => {
         sData = e
         if(sData == "New"){
             clearField()
         }else{
-            if(status=="RUNNING"){
-                status_field = "Y";
-            }else{
-                status_field = "N";
-            }
             idrecord = parseInt(id)
             name_field = name;
         }
@@ -70,10 +64,6 @@
                 flag = false
                 msg += "The Name is required\n"
             }
-            if(status_field == ""){
-                flag = false
-                msg += "The Status is required\n"
-            }
         }else{
             if(idrecord == ""){
                 flag = false
@@ -83,16 +73,12 @@
                 flag = false
                 msg += "The Name is required\n"
             }
-            if(status_field == ""){
-                flag = false
-                msg += "The Status is required\n"
-            }
         }
         
         if(flag){
             css_loader = "display: inline-block;";
             msgloader = "Sending...";
-            const res = await fetch("/api/webagensave", {
+            const res = await fetch("/api/gamesave", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -100,12 +86,11 @@
                 },
                 body: JSON.stringify({
                     sdata: sData,
-                    page:"WEBSITEAGEN-SAVE",
-                    websiteagen_search: searchHome,
-                    websiteagen_page: pagingnow,
-                    websiteagen_id: parseInt(idrecord),
-                    websiteagen_name: name_field,
-                    websiteagen_status: status_field,
+                    page:"GAME-SAVE",
+                    game_search: searchHome,
+                    game_page: pagingnow,
+                    game_id: parseInt(idrecord),
+                    game_name: name_field,
                 }),
             });
             const json = await res.json();
@@ -131,7 +116,6 @@
     function clearField(){
         idrecord = "";
         name_field = "";
-        status_field = "";
     }
     function callFunction(event){
         switch(event.detail){
@@ -224,8 +208,7 @@
                             <tr>
                                 <th NOWRAP width="1%" style="text-align: center;vertical-align: top;" >&nbsp;</th>
                                 <th NOWRAP width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">NO</th>
-                                <th NOWRAP width="1%" style="text-align: center;vertical-align: top;font-weight:bold;font-size:{table_header_font};">STATUS</th>
-                                <th NOWRAP width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">WEBSITE AGEN</th>
+                                <th NOWRAP width="*" style="text-align: left;vertical-align: top;font-weight:bold;font-size: {table_header_font};">GAME</th>
                             </tr>
                         </thead>
                         {#if totalrecord > 0}
@@ -235,12 +218,11 @@
                                     <td NOWRAP style="text-align: center;vertical-align: top;cursor:pointer;">
                                         <i 
                                             on:click={() => {
-                                                NewData("Edit",rec.home_id,rec.home_name, rec.home_status);
+                                                NewData("Edit",rec.home_id,rec.home_name);
                                             }} 
                                             class="bi bi-pencil"></i>
                                     </td>
                                     <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.home_no}</td>
-                                    <td NOWRAP style="text-align: center;vertical-align: top;font-size: {table_body_font};">{rec.home_status}</td>
                                     <td  style="text-align: left;vertical-align: top;font-size: {table_body_font};">{rec.home_name}</td>
                                 </tr>
                             {/each}
@@ -271,20 +253,13 @@
 	modal_footer={true}>
 	<slot:template slot="body">
         <div class="mb-3">
-            <label for="exampleForm" class="form-label">Website Agen</label>
+            <label for="exampleForm" class="form-label">Game</label>
             <input
                 use:uppercase
                 bind:value={name_field}
                 class="required form-control"
                 type="text"
-                placeholder="Website Agen"/>
-        </div>
-        <div class="mb-3">
-            <label for="exampleForm" class="form-label">Status</label>
-            <select class="form-control required" bind:value="{status_field}">
-                <option value="Y">RUNNING</option>
-                <option value="N">BANNED</option>
-            </select>
+                placeholder="Game"/>
         </div>
 	</slot:template>
 	<slot:template slot="footer">

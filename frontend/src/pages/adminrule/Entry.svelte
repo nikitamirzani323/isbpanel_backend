@@ -438,6 +438,7 @@
                             <tr>
                                 <th colspan="2">DOMAIN MANAGEMENT</th>
                                 <th colspan="2">WEBSITEAGEN MANAGEMENT</th>
+                                <th colspan="2">GAME MANAGEMENT</th>
                                 <th colspan="2">ALBUM MANAGEMENT</th>
                                 <th colspan="2">ADMIN MANAGEMENT</th>
                                 <th colspan="2">ADMIN RULE</th>
@@ -457,6 +458,13 @@
                                         bind:group={adminrule_rule_field}
                                         type="checkbox"
                                         value="WEBSITEAGEN-VIEW"/>
+                                </td>
+                                <td width="*">VIEW</td>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="GAME-VIEW"/>
                                 </td>
                                 <td width="*">VIEW</td>
                                 <td width="1%">
@@ -494,6 +502,13 @@
                                         bind:group={adminrule_rule_field}
                                         type="checkbox"
                                         value="WEBSITEAGEN-SAVE"/>
+                                </td>
+                                <td width="*">SAVE</td>
+                                <td width="1%">
+                                    <input
+                                        bind:group={adminrule_rule_field}
+                                        type="checkbox"
+                                        value="GAME-SAVE"/>
                                 </td>
                                 <td width="*">SAVE</td>
                                 <td width="1%">

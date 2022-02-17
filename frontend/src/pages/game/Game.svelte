@@ -31,7 +31,7 @@ import Login from "../Login.svelte";
                 Authorization: "Bearer " + token,
             },
             body: JSON.stringify({
-                page: "WEBSITEAGEN-VIEW",
+                page: "GAME-VIEW",
             }),
         });
         const json = await res.json();
@@ -45,7 +45,7 @@ import Login from "../Login.svelte";
         }
     }
     async function initHome(e) {
-        const res = await fetch("/api/webagen", {
+        const res = await fetch("/api/game", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -70,20 +70,15 @@ import Login from "../Login.svelte";
                     no = parseInt(page) 
                 }
                 for (var i = 0; i < record.length; i++) {
-                    let status_home = "BANNED"
-                    if(record[i]["websiteagen_status"] == "Y"){
-                        status_home = "RUNNING"
-                    }
                     no = no + 1;
                     listHome = [
                         ...listHome,
                         {
                             home_no: no,
-                            home_id: record[i]["websiteagen_id"],
-                            home_name: record[i]["websiteagen_name"],
-                            home_status: status_home,
-                            home_create: record[i]["websiteagen_create"],
-                            home_update: record[i]["websiteagen_update"],
+                            home_id: record[i]["game_id"],
+                            home_name: record[i]["game_name"],
+                            home_create: record[i]["game_create"],
+                            home_update: record[i]["game_update"],
                         },
                     ];
                 }

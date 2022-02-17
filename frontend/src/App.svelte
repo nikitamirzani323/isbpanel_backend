@@ -19,6 +19,7 @@
 	import Crmisbtv from "./pages/crmisbtv/Crmisbtv.svelte";
 	import Crmduniafilm from "./pages/crmduniafilm/Crmduniafilm.svelte";
 	import Websiteagen from "./pages/websiteagen/Websiteagen.svelte";
+	import Game from "./pages/game/Game.svelte";
 	import Login from "./pages/Login.svelte";
 	import NotFound from "./pages/NotFound.svelte";
 	export let table_header_font;
@@ -45,6 +46,13 @@
 			}),
 			"/webagen": wrap({
 				component: Websiteagen,
+				props: {
+					table_header_font: table_header_font,
+					table_body_font: table_body_font,
+				},
+			}),
+			"/game": wrap({
+				component: Game,
 				props: {
 					table_header_font: table_header_font,
 					table_body_font: table_body_font,
