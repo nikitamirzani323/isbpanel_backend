@@ -5,11 +5,13 @@
   import Button from "../../components/Button.svelte";
   import Modal from "../../components/Modal.svelte";
   import { createEventDispatcher } from "svelte";
+  import { csvGenerator } from "../../csvGenerator";
 
   export let table_header_font = "";
   export let table_body_font = "";
   export let token = "";
   export let listHome = [];
+  export let listHomeCSV = [];
   export let listPage = [];
   export let totalrecord = 0;
   let dispatch = createEventDispatcher();
@@ -20,6 +22,7 @@
   let listcategory = [];
 
   let pagingnow = 0;
+  let pageFile = 1;
 
   let searchIsbtv = "";
   let filterIsbtv = "";
@@ -46,7 +49,10 @@
     dispatch("handleRefreshData", "call");
   };
   const handleSelectPaging = (event) => {
-    let page = event.target.value;
+    let data = event.target.value;
+    const pageArr = data.split("-");
+    let page = pageArr[0]
+    pageFile = pageArr[1]
     pagingnow = page;
     const movie = {
       page,
@@ -59,6 +65,9 @@
       case "REFRESH":
         RefreshHalaman();
         break;
+      case "DOWNLOAD":
+        downloadHandler();
+        break;
     }
   }
 
@@ -67,12 +76,20 @@
     if (keyCode === 13) {
       filterIsbtv = [];
       listHome = [];
+      listHomeCSV = [];
       const news = {
         searchIsbtv,
       };
       dispatch("handleNews", news);
     }
   };
+
+  let tableHeader = ["NO", "HP", "NAMA"];
+  function downloadHandler() {
+  	  let tableKeys = Object.keys(listHomeCSV[0]);
+      let filedownload = "duniafilm_"+pageFile+".csv" 
+		  csvGenerator(listHomeCSV, tableKeys, tableHeader, filedownload);
+  }
 </script>
 
 <div id="loader" style="margin-left:50%;{css_loader}">
@@ -85,23 +102,24 @@
         on:click={callFunction}
         button_function="REFRESH"
         button_title="Refresh"
-        button_css="btn-primary"
-      />
-
+        button_css="btn-primary"/>
+      <Button
+        on:click={callFunction}
+        button_function="DOWNLOAD"
+        button_title="Download Excel"
+        button_css="btn-primary"/>
       <Panel
         card_search={true}
         card_title={title_page}
-        card_footer={totalrecord}
-      >
+        card_footer={totalrecord}>
         <slot:template slot="card-title">
           <div class="float-end">
             <select
               on:change={handleSelectPaging}
               style="text-align: center;"
-              class="form-control"
-            >
-              {#each listPage as rec}
-                <option value={rec.page_value}>{rec.page_display}</option>
+              class="form-control">
+              {#each listPage as rec,i}
+                <option value={rec.page_value}-{i+1}>{rec.page_display}</option>
               {/each}
             </select>
           </div>

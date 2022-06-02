@@ -8,6 +8,7 @@
   let token = localStorage.getItem("token");
   let akses_page = false;
   let listHome = [];
+  let listHomeCSV = [];
   let listPage = [];
   let sData = "";
   let search = "";
@@ -42,6 +43,7 @@
   }
   async function initHome(e) {
     listHome = [];
+    listHomeCSV = [];
     const res = await fetch("/api/crmisbtv", {
       method: "POST",
       headers: {
@@ -86,15 +88,17 @@
               crmisbtv_point: record[i]["crmisbtv_point"],
               crmisbtv_csspoint: css_point,
               crmisbtv_status: record[i]["crmisbtv_status"],
-              crmisbtv_lastlogin: dayjs(record[i]["crmisbtv_lastlogin"]).format(
-                "YYYY-MM-DD HH:mm:ss"
-              ),
-              crmisbtv_create: dayjs(record[i]["crmisbtv_create"]).format(
-                "YYYY-MM-DD HH:mm:ss"
-              ),
-              crmisbtv_update: dayjs(record[i]["crmisbtv_update"]).format(
-                "YYYY-MM-DD HH:mm:ss"
-              ),
+              crmisbtv_lastlogin: dayjs(record[i]["crmisbtv_lastlogin"]).format("YYYY-MM-DD HH:mm:ss"),
+              crmisbtv_create: dayjs(record[i]["crmisbtv_create"]).format("YYYY-MM-DD HH:mm:ss"),
+              crmisbtv_update: dayjs(record[i]["crmisbtv_update"]).format("YYYY-MM-DD HH:mm:ss"),
+            },
+          ];
+          listHomeCSV = [
+            ...listHomeCSV,
+            {
+              crmisbtv_no: no,
+              crmisbtv_username: "'"+record[i]["crmisbtv_username"],
+              crmisbtv_name: record[i]["crmisbtv_name"],
             },
           ];
         }
@@ -120,6 +124,7 @@
   }
   const handleRefreshData = (e) => {
     listHome = [];
+    listHomeCSV = [];
     totalrecord = 0;
     setTimeout(function () {
       initHome();
@@ -147,6 +152,7 @@
     {table_body_font}
     {listPage}
     {listHome}
+    {listHomeCSV}
     {totalrecord}
   />
 {/if}

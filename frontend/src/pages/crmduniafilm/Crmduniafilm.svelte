@@ -7,6 +7,7 @@
   let token = localStorage.getItem("token");
   let akses_page = false;
   let listHome = [];
+  let listHomeCSV = [];
   let listPage = [];
   let sData = "";
   let search = "";
@@ -41,6 +42,7 @@
   }
   async function initHome(e) {
     listHome = [];
+    listHomeCSV = [];
     const res = await fetch("/api/crmduniafilm", {
       method: "POST",
       headers: {
@@ -75,6 +77,14 @@
               crmduniafilm_name: record[i]["crmduniafilm_name"],
             },
           ];
+          listHomeCSV = [
+            ...listHomeCSV,
+            {
+              crmduniafilm_no: no,
+              crmduniafilm_username: "'"+record[i]["crmduniafilm_username"],
+              crmduniafilm_name: record[i]["crmduniafilm_name"],
+            },
+          ];
         }
         listPage = [];
         for (var i = 1; i < totalpaging; i++) {
@@ -98,6 +108,7 @@
   }
   const handleRefreshData = (e) => {
     listHome = [];
+    listHomeCSV = [];
     totalrecord = 0;
     setTimeout(function () {
       initHome();
@@ -125,6 +136,6 @@
     {table_body_font}
     {listPage}
     {listHome}
-    {totalrecord}
-  />
+    {listHomeCSV}
+    {totalrecord} />
 {/if}
